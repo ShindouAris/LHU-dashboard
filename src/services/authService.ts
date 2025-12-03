@@ -25,20 +25,10 @@ export const authService = {
       body: JSON.stringify(body),
     });
     if (!response.ok) {
-      let msg = `Đăng nhập thất bại (${response.status})`;
+      let msg = await response.text() || "Đăng nhập thất bại";
       if ("reset" in turnstile_instance) {
         turnstile_instance.reset()
       }
-      try {
-        const ct = response.headers.get('content-type') || '';
-        if (ct.includes('application/json')) {
-          const data = await response.json();
-          msg = data?.Message || data?.message || msg;
-        } else {
-          const text = await response.text();
-          if (text) msg = text;
-        }
-      } catch {}
       throw new Error(msg);
     }
     const data = await response.json();
@@ -60,19 +50,7 @@ export const authService = {
       if (response.status === 401 ) {
         throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
       }
-      let msg = `Không lấy được thông tin người dùng (${response.status})`;
-      try {
-        const ct = response.headers.get('content-type') || '';
-        if (ct.includes('application/json')) {
-          const data = await response.json();
-          msg = data?.Message || data?.message || msg;
-        } else {
-          const text = await response.text();
-          if (text) msg = text;
-        }
-      } catch {
-
-      }
+      let msg = await response.text() || "Không lấy được thông tin người dùng";
       throw new Error(msg);
     }
     return (await response.json()) as UserResponse;
