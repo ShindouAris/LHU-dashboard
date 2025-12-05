@@ -46,11 +46,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   title = "LHU Dashboard",
   page = "home",
   onPageChange,
-  onThemeToggle,
-  isDark = false,
   isOpen = false,
   isAuth = false,
-  onLogout,
   onToggle
 }) => {
   const [expandedItems, setExpandedItems] = useState<string[]>(['navigation']);
@@ -131,13 +128,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: Settings,
       description: "Cài đặt và tùy chọn ứng dụng"
     },
-    {
-      id: 'GitHub',
-      url: "https://github.com/ShindouAris/Calendar-LHU.git",
-      label: "Ghé thăm repo",
-      icon: GitHub,
-      description: 'Xem mã nguồn của trang này'
-    }
   ];
 
   const actionItems = [
@@ -154,20 +144,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: RefreshCw,
       action: onRefresh,
       description: 'Tải lại dữ liệu'
-    }] : []),
-    ...(onThemeToggle ? [{
-      id: 'theme',
-      label: isDark ? 'Sáng' : 'Tối',
-      icon: isDark ? Sun : Moon,
-      action: onThemeToggle,
-      description: 'Chuyển đổi chế độ sáng/tối'
-    }] : []),
-    ...(isAuth && onLogout ? [{
-      id: 'logout',
-      label: "Đăng xuất tài khoản ME",
-      icon: LogOut,
-      action: onLogout,
-      description: "Đăng xuất tài khoản sinh viên khỏi web"
     }] : [])
   ];
 
@@ -260,7 +236,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           "flex items-center gap-3 w-full p-3 text-left rounded-lg transition-colors group",
                           isActive 
                             ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800" 
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300"
+                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                            !isAuth && item.authrequired && "hidden"
                         )}
                       >
                         <Icon className={cn(
