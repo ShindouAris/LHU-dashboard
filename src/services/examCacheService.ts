@@ -107,6 +107,17 @@ class ExamCacheService {
       transaction.oncomplete = () => resolve();
     });
   }
+
+  async clearCache(): Promise<void> {
+    if (!this.db) await this.init();
+
+    return new Promise((resolve) => {
+      const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      store.clear();
+      transaction.oncomplete = () => resolve();
+    });
+  }
 }
 
 export const examCacheService = new ExamCacheService();

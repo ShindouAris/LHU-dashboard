@@ -32,6 +32,7 @@ import { LmsDiemDanhPage } from './LmsDiemDanhPage';
 import { authService } from '@/services/authService';
 import { QRScanner } from './LmsQr';
 import ParkingLHUPage from './ParkingLHU'
+import SettingsPage from './Setting';
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -99,6 +100,8 @@ export const StudentSchedule: React.FC = () => {
       setPage("qrscan")
     } else if (path.startsWith("/parking")) {
       setPage("parkinglhu")
+    } else if (path.startsWith("/settings")) {
+      setPage("settings")
     }
     else {
       setPage("home");
@@ -410,6 +413,21 @@ export const StudentSchedule: React.FC = () => {
       >
         <div className="flex justify-center items-start w-full">
           <ParkingLHUPage />
+        </div>
+      </Layout>
+    )
+  }
+
+  if (page === "settings") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={handleBackToInput}
+        page={page}
+        onPageChange={handleChangeView}
+      >
+        <div className="min-h-screen py-8 px-4">
+          <SettingsPage />
         </div>
       </Layout>
     )

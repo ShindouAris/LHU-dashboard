@@ -12,7 +12,8 @@ import {
   ChevronRight,
   ChevronDown,
   LogOut,
-  QrCode
+  QrCode,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
@@ -26,7 +27,7 @@ interface SidebarProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh" | "qrscan") => void;
+  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh" | "qrscan" | "settings") => void;
   title?: string;
   showThemeToggle?: boolean;
   onThemeToggle?: () => void;
@@ -123,6 +124,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: FaParking,
       description: "Quản lý xe của tôi",
       authrequired: true
+    },
+    {
+      id: "settings",
+      label: "Cài đặt",
+      icon: Settings,
+      description: "Cài đặt và tùy chọn ứng dụng"
     },
     {
       id: 'GitHub',
@@ -237,6 +244,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           }
                           if (item.authrequired && !isAuth) {
                             toast.error("Vui lòng đăng nhập để truy cập trang này")
+                            return;
+                          }
+                          if (item.id === "settings") {
+                            window.location.href = "/settings";
                             return;
                           }
                           onPageChange?.(item.id as any);

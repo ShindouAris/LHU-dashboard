@@ -1,0 +1,355 @@
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import {
+  Moon, 
+  Sun, 
+  Trash2, 
+  User, 
+  Database,
+  Info,
+  RefreshCw,
+  LogOut,
+  Shield,
+  Globe
+} from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { cacheService } from '@/services/cacheService';
+import { examCacheService } from '@/services/examCacheService';
+import { AuthStorage } from '@/types/user';
+import { authService } from '@/services/authService';
+import { GitHub } from './icons/github';
+
+const SettingsPage: React.FC = () => {
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [cacheSize, setCacheSize] = useState<string>('0 KB');
+  const [isClearingCache, setIsClearingCache] = useState(false);
+  const user = AuthStorage.getUser();
+  const isLoggedIn = AuthStorage.isLoggedIn();
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    setIsDarkMode(savedTheme === 'dark');
+    checkCacheSize();
+  }, []);
+
+  const checkCacheSize = async () => {
+    try {
+      // Estimate cache size from localStorage and IndexedDB
+      let size = 0;
+      for (let key in localStorage) {
+        if (localStorage.hasOwnProperty(key)) {
+          size += localStorage[key].length + key.length;
+        }
+      }
+      // Convert to readable format
+      const sizeInKB = (size / 1024).toFixed(2);
+      setCacheSize(`${sizeInKB} KB`);
+    } catch (error) {
+      setCacheSize('Không xác định');
+    }
+  };
+
+  const toggleTheme = () => {
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+    toast.success(newTheme ? 'Đã chuyển sang chế độ tối' : 'Đã chuyển sang chế độ sáng');
+  };
+
+  const handleClearCache = async () => {
+    if (!confirm('Bạn có chắc chắn muốn xóa bộ nhớ đệm? Dữ liệu đã lưu sẽ bị xóa.')) {
+      return;
+    }
+
+    setIsClearingCache(true);
+    try {
+      // Clear IndexedDB cache
+      if (user?.UserID) {
+        await cacheService.delete(user.UserID);
+        await examCacheService.clearCache();
+      }
+      
+      // Clear localStorage (except theme and auth)
+      const theme = localStorage.getItem('theme');
+      const accessToken = localStorage.getItem('access_token');
+      localStorage.clear();
+      if (theme) localStorage.setItem('theme', theme);
+      if (accessToken) localStorage.setItem('access_token', accessToken);
+      
+      await checkCacheSize();
+      toast.success('Đã xóa bộ nhớ đệm thành công');
+    } catch (error) {
+      toast.error('Có lỗi xảy ra khi xóa bộ nhớ đệm');
+      console.error(error);
+    } finally {
+      setIsClearingCache(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (!confirm('Bạn có chắc chắn muốn đăng xuất?')) {
+      return;
+    }
+
+    try {
+      const logoutmsg: string | null = await authService.logOut();
+      if (logoutmsg) {
+        toast.success(logoutmsg);
+        window.location.reload();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  const SettingItem: React.FC<{
+    icon: React.ElementType;
+    title: string;
+    description: string;
+    action: React.ReactNode;
+  }> = ({ icon: Icon, title, description, action }) => (
+    <div className="flex items-center justify-between py-4">
+      <div className="flex items-center gap-4 flex-1">
+        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+          <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        </div>
+        <div className="flex-1">
+          <Label className="text-base font-medium cursor-pointer">{title}</Label>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+        </div>
+      </div>
+      <div className="ml-4">
+        {action}
+      </div>
+    </div>
+  );
+
+  return (
+      <div className="container mx-auto px-4 py-8 max-w-4xl">
+        <div className="mb-8">
+          <div className="flex flex-col items-center gap-3 mb-2">
+            <div className="text-center">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cài đặt</h1>
+              <p className="text-gray-500 dark:text-gray-400">Quản lý tùy chọn và cấu hình ứng dụng</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* Appearance Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sun className="h-5 w-5" />
+                Giao diện
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SettingItem
+                icon={isDarkMode ? Moon : Sun}
+                title="Chế độ tối"
+                description="Chuyển đổi giữa chế độ sáng và tối"
+                action={
+                  <Switch
+                    checked={isDarkMode}
+                    onCheckedChange={toggleTheme}
+                  />
+                }
+              />
+            </CardContent>
+          </Card>
+
+          {/* Data & Storage */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Dữ liệu & Lưu trữ
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-base font-medium">Dung lượng bộ nhớ đệm</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{cacheSize}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={checkCacheSize}
+                  className="ml-4"
+                >
+                  <RefreshCw className="h-4 w-4 mr-2" />
+                  Làm mới
+                </Button>
+              </div>
+              <Separator />
+              <SettingItem
+                icon={Trash2}
+                title="Xóa bộ nhớ đệm"
+                description="Xóa tất cả dữ liệu đã lưu trong bộ nhớ đệm"
+                action={
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleClearCache}
+                    disabled={isClearingCache}
+                  >
+                    {isClearingCache ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                        Đang xóa...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Xóa
+                      </>
+                    )}
+                  </Button>
+                }
+              />
+            </CardContent>
+          </Card>
+
+          {/* Account Settings */}
+          {isLoggedIn && user && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Tài khoản
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex items-center justify-between py-4">
+                  <div className="flex items-center gap-4 flex-1">
+                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                      <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div className="flex-1">
+                      <Label className="text-base font-medium">Mã sinh viên</Label>
+                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{user.UserID || 'N/A'}</p>
+                    </div>
+                  </div>
+                </div>
+                {user.FullName && (
+                  <>
+                    <Separator />
+                    <div className="flex items-center justify-between py-4">
+                      <div className="flex items-center gap-4 flex-1">
+                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                          <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div className="flex-1">
+                          <Label className="text-base font-medium">Họ và tên</Label>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{user.FullName}</p>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
+                <Separator />
+                <SettingItem
+                  icon={LogOut}
+                  title="Đăng xuất"
+                  description="Đăng xuất khỏi tài khoản của bạn"
+                  action={
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Đăng xuất
+                    </Button>
+                  }
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* About */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Info className="h-5 w-5" />
+                Thông tin ứng dụng
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-base font-medium">Tên ứng dụng</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">LHU Calendar</p>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-base font-medium">Phiên bản</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">1.0.0</p>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between py-4">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Globe className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-base font-medium">Ngôn ngữ</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Tiếng Việt</p>
+                  </div>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex items-center justify-between py-4 overflow-hidden">
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <GitHub />
+                  </div>
+                  <div className="flex-1">
+                    <Label className="text-base font-medium">Mã nguồn trang web</Label>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 cursor-pointer overflow-hidden"
+                    onClick={() => window.open('https://github.com/ShindouAris/Calendar-LHU.git', '_blank')}
+                    >https://github.com/ShindouAris/Calendar-LHU.git</p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+  );
+};
+
+export default SettingsPage;
+
