@@ -10,11 +10,13 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs"
 import { FaRegQuestionCircle } from "react-icons/fa";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
+import { authService } from "@/services/authService";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null)
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
+  const [isLoginQR, setIsLoginQR] = useState(false)
   const [scanned, setScanned] = useState<string>("");
   const [scale, setScale] = useState<number>(1);
   const [error, setError] = useState<null | string>(null)
@@ -149,8 +151,9 @@ export const QRScanner: React.FC = () => {
     const access_token = localStorage.getItem("access_token")
 
     if (!access_token) {setError("Đăng nhập để sử dụng"); return}
-
-    if (scanned !== "" && scanned.substring(0,3) !== "STB") {
+    // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) thì nổ lỗi
+    const SUBSTR = scanned.substring(0,3)
+    if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN") {
       setError("QR này không được hỗ trợ...")
       return
     }
@@ -161,23 +164,37 @@ export const QRScanner: React.FC = () => {
       console.log("Thất bại trong việc nỗ lực dừng camera" + error)
     })
 
+    if (SUBSTR === "STB") {
+      ApiService.send_diem_danh(scanned, access_token).then((res) => {
+        
+        if (!res) return
 
-    ApiService.send_diem_danh(scanned, access_token).then((res) => {
-      
-      if (!res) return
-
-      if (!res.success) {
-        setError(String(res.error))
-      }
-      else { 
-        setIsSuccess(true)
-        toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
-      }})
+        if (!res.success) {
+          setError(String(res.error))
+        }
+        else { 
+          setIsSuccess(true)
+          toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
+        }}) 
+    } else if (SUBSTR === "LGN") {
+      authService.send_login(scanned).then((res) => {
+        if (res) {
+          toast.success("Đăng nhập thành công")
+          setIsSuccess(true)
+          setIsLoginQR(true)
+        }
+      }).catch((error) => {
+        if (error instanceof Error) {
+          setError(error.message)
+        }
+      })
+    }
   }, [scanned])
 
   const handleReset = async () => {
     setScanned("");
     setIsSuccess(false)
+    setIsLoginQR(false)
     setError(null)
     await toast.promise(
       async () => {qrScanner?.start(); await getCamera()},
@@ -281,10 +298,10 @@ export const QRScanner: React.FC = () => {
                     <img className="w-8 h-8" src="/Success.gif" alt="Success"/>
                     <div className="flex-1">
                       <p className="text-green-800 font-medium text-sm">
-                        Điểm danh thành công
+                        {scanned.substring(0,3) === "STB" ? "Điểm danh thành công" : scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : ""}
                       </p>
                       <p className="text-green-700 text-xs mt-1 break-all">
-                        {scanned ? scanned : "Không có data"}
+                        {scanned.substring(0,3) === "STB" ? scanned : "Quét QR đăng nhập thành công"}
                       </p>
                     </div>
                   </div>

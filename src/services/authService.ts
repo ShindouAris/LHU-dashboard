@@ -1,5 +1,7 @@
 import { DepositHistory, PaymentHistory, PlateData } from '@/types/parking';
 import {AuthStorage, MarkApiResponse, UserResponse} from '@/types/user';
+import { multiSessionService } from './multisession';
+import { QRSubmitResponse } from '@/types/session';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const SCHOOL_TAPI = import.meta.env.VITE_LHU_TAPI;
@@ -107,6 +109,25 @@ export const authService = {
     } catch (error) {
       throw error;
     }
+  },
+  async send_login(qr_code_data: string): Promise<UserResponse> {
+    const access_token = AuthStorage.getUserToken();
+    const res = await fetch(`${API_URL}/submit_credential`, {
+      body: JSON.stringify({
+        encrypted_data: qr_code_data,
+        access_token: access_token
+      })
+    })
+    if (!res.ok) {
+      throw new Error(`Đăng nhập thất bại - ${await res.text}`)
+    }
+    const data: QRSubmitResponse = await res.json()
+    if (data.access_token === access_token) {
+      throw new Error("Không thể đăng nhập vào chính tài khoản mà bạn đang sử dụng")
+    }
+    await multiSessionService.createSession(data.access_token, data.user_data)
+    return data.user_data
+
   }
 };
 
