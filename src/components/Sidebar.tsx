@@ -5,19 +5,16 @@ import {
   Home, 
   Calendar, 
   Sun,
-  Moon,
   GraduationCap,
   RefreshCw,
   ArrowLeft,
   ChevronRight,
   ChevronDown,
-  LogOut,
   QrCode,
   Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
-import { GitHub } from './icons/github';
 import { toast } from 'react-hot-toast';
 import { FaParking } from 'react-icons/fa';
 
