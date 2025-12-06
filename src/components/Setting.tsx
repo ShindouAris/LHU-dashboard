@@ -32,7 +32,6 @@ const SettingsPage: React.FC = () => {
   const [isClearingCache, setIsClearingCache] = useState(false);
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
-  // @ts-expect-error
   const isElectronApp = window?.electron?.isElectron || false;
   const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean } | null>(null);
 
@@ -45,7 +44,6 @@ const SettingsPage: React.FC = () => {
   useEffect(() => {
     const load = async () => {
       if (!isElectronApp) return
-      // @ts-expect-error
       const reactAppSettings = await window?.electron?.getSettings()
       setSettings(reactAppSettings)
     }
@@ -65,7 +63,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.minimizeToTray;
     // @ts-expect-error
-    window.electron.setAutoStart(newValue).then(() => {
+    window.electron.setMinimizeToTray(newValue).then(() => {
         setSettings({ ...settings, minimizeToTray: newValue });
     });
   };

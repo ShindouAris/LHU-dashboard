@@ -2,8 +2,29 @@ import { StudentSchedule } from './components/StudentSchedule';
 import LoginPage from './components/LoginPage';
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
+import { useEffect } from 'react';
+
+declare global {
+  interface Window {
+    electron: {
+      onGetLocalStorage: () => void;
+      isElectron: boolean;
+      getSettings: () => Promise<{autoStart: boolean, minimizeToTray: boolean }>;
+      setAutoStart: (enabled: boolean) => void;
+      setMinimizeToTray: (enabled: boolean) => void;
+    };
+  }
+}
+
 
 function App() {
+
+  useEffect(() => {
+    if (window?.electron) {
+      window.electron.onGetLocalStorage();
+    }
+  }, []);
+
   return (
     <Routes>
       <Route path="/" element={<StudentSchedule />} />
