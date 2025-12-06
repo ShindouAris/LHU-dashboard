@@ -1,27 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, QrCode, RefreshCw } from "lucide-react";
+import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle } from "lucide-react";
 import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs"
 import { FaRegQuestionCircle } from "react-icons/fa";
-import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle} from "@/components/ui/dialog.tsx";
+import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog.tsx";
 import { authService } from "@/services/authService";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null)
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
+  // @ts-ignore
   const [isLoginQR, setIsLoginQR] = useState(false)
   const [scanned, setScanned] = useState<string>("");
   const [scale, setScale] = useState<number>(1);
   const [error, setError] = useState<null | string>(null)
+  const [isExpiredQR, setIsExpiredQR] = useState<boolean>(false)
   const [success, setIsSuccess] = useState<boolean>(false)
   const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
+  const [dialogExpiredQROpen, setDialogExpiredQROpen] = useState<boolean>(false)
   const nav = useNavigate()
 
   const getCamera = async () => {
@@ -140,6 +143,8 @@ export const QRScanner: React.FC = () => {
   useEffect(() => {
 
     setError(null)
+    setIsExpiredQR(false)
+    setDialogExpiredQROpen(false)
 
     if (scanned === "") return
 
@@ -170,10 +175,28 @@ export const QRScanner: React.FC = () => {
         if (!res) return
 
         if (!res.success) {
-          setError(String(res.error))
+          const errorMessage = String(res.error)
+          setError(errorMessage)
+          // Check if it's an expired QR code error
+          if (errorMessage.includes("Mã QR điểm danh đã hết hạn") || errorMessage.includes("hết hạn")) {
+            setIsExpiredQR(true)
+            setDialogExpiredQROpen(true)
+            toast.error("⚠️ Mã QR điểm danh đã hết hạn!", {
+              duration: 5000,
+              style: {
+                background: '#ef4444',
+                color: '#fff',
+                fontWeight: 'bold',
+              },
+            })
+          } else {
+            setIsExpiredQR(false)
+            setDialogExpiredQROpen(false)
+          }
         }
         else { 
           setIsSuccess(true)
+          setIsExpiredQR(false)
           toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
         }}) 
     } else if (SUBSTR === "LGN") {
@@ -196,6 +219,8 @@ export const QRScanner: React.FC = () => {
     setIsSuccess(false)
     setIsLoginQR(false)
     setError(null)
+    setIsExpiredQR(false)
+    setDialogExpiredQROpen(false)
     await toast.promise(
       async () => {qrScanner?.start(); await getCamera()},
       {
@@ -205,6 +230,10 @@ export const QRScanner: React.FC = () => {
       }
     )
   };
+
+  const handleCloseExpiredDialog = () => {
+    setDialogExpiredQROpen(false)
+  }
 
   const handleBack = () => {
     setScanned("")
@@ -312,15 +341,30 @@ export const QRScanner: React.FC = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="bg-red-50 border-l-4 border-red-500 p-4 rounded"
+                  className={`${
+                    isExpiredQR 
+                      ? "bg-red-100 border-l-4 border-red-600 shadow-lg ring-2 ring-red-200" 
+                      : "bg-red-50 border-l-4 border-red-500"
+                  } p-4 rounded`}
                 >
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    {isExpiredQR ? (
+                      <AlertTriangle className="w-6 h-6 text-red-700 flex-shrink-0 mt-0.5 animate-pulse" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                    )}
                     <div className="flex-1">
-                      <p className="text-red-800 font-medium text-sm">Lỗi</p>
-                      <p className="text-red-700 text-xs mt-1 break-all">
+                      <p className={`${isExpiredQR ? "text-red-900 font-bold text-base" : "text-red-800 font-medium text-sm"}`}>
+                        {isExpiredQR ? "Cảnh báo: Mã QR đã hết hạn" : "Lỗi"}
+                      </p>
+                      <p className={`${isExpiredQR ? "text-red-800 font-semibold" : "text-red-700"} text-xs mt-1 break-all`}>
                         {error}
                       </p>
+                      {isExpiredQR && (
+                        <p className="text-red-700 text-xs mt-2 italic">
+                          Vui lòng quét mã QR mới để điểm danh.
+                        </p>
+                      )}
                     </div>
                   </div>
                 </motion.div>
@@ -368,6 +412,15 @@ export const QRScanner: React.FC = () => {
         </CardContent>
       </Card>
 
+      <Card className="mt-3">
+        <CardHeader>
+          727
+        </CardHeader>
+        <CardContent>
+          WYSI
+        </CardContent>
+      </Card>
+
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (
         <motion.button
@@ -396,6 +449,52 @@ export const QRScanner: React.FC = () => {
                         className="rounded-lg w-full max-h-[70vh] object-contain"
                     />
                 </DialogDescription>
+            </DialogContent>
+        </Dialog>
+
+        {/* Expired QR Code Warning Dialog */}
+        <Dialog open={dialogExpiredQROpen} onOpenChange={setDialogExpiredQROpen}>
+            <DialogContent className="max-w-md border-red-500 border-2 bg-red-50 dark:bg-red-950/30">
+                <DialogHeader>
+                    <div className="flex items-center gap-3 mb-2">
+                        <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400 animate-pulse" />
+                        <DialogTitle className="text-red-900 dark:text-red-100 text-xl font-bold">
+                            CẢNH BÁO: Mã QR đã hết hạn
+                        </DialogTitle>
+                    </div>
+                </DialogHeader>
+                <DialogDescription className="text-red-800 dark:text-red-200 space-y-3">
+                    <p className="font-semibold text-base">
+                        Mã QR điểm danh bạn vừa quét đã hết hạn sử dụng.
+                    </p>
+                    <div className="bg-red-100 dark:bg-red-900/50 p-3 rounded-lg border border-red-300 dark:border-red-700">
+                        <p className="text-sm font-medium text-red-900 dark:text-red-100 mb-1">
+                            Chi tiết lỗi:
+                        </p>
+                        <p className="text-sm text-red-800 dark:text-red-200 break-all">
+                            {error}
+                        </p>
+                    </div>
+                    <p className="text-sm font-medium text-red-900 dark:text-red-100">
+                        💡 Vui lòng quét mã QR mới từ giảng viên để điểm danh.
+                    </p>
+                </DialogDescription>
+                <DialogFooter className="mt-4">
+                    <Button
+                        onClick={handleCloseExpiredDialog}
+                        className="bg-red-600 hover:bg-red-700 text-white font-semibold"
+                    >
+                        Đã hiểu
+                    </Button>
+                    <Button
+                        onClick={handleReset}
+                        variant="outline"
+                        className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/50"
+                    >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Quét lại
+                    </Button>
+                </DialogFooter>
             </DialogContent>
         </Dialog>
     </div>
