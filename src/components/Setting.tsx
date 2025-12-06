@@ -14,7 +14,9 @@ import {
   RefreshCw,
   LogOut,
   Shield,
-  Globe
+  Globe,
+  Power,
+  PowerOff
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { cacheService } from '@/services/cacheService';
@@ -22,6 +24,7 @@ import { examCacheService } from '@/services/examCacheService';
 import { AuthStorage } from '@/types/user';
 import { authService } from '@/services/authService';
 import { GitHub } from './icons/github';
+import { PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -29,12 +32,43 @@ const SettingsPage: React.FC = () => {
   const [isClearingCache, setIsClearingCache] = useState(false);
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
+  // @ts-expect-error
+  const isElectronApp = window?.electron?.isElectron || false;
+  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean } | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     setIsDarkMode(savedTheme === 'dark');
     checkCacheSize();
   }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      if (!isElectronApp) return
+      // @ts-expect-error
+      const reactAppSettings = await window?.electron?.getSettings()
+      setSettings(reactAppSettings)
+    }
+    load()
+  }, [])
+
+  const toggleAutoStart = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.autoStart;
+    // @ts-expect-error
+    window.electron.setAutoStart(newValue).then(() => {
+        setSettings({ ...settings, autoStart: newValue });
+    });
+  };
+
+  const toggleAutoMinimizeToTray = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.minimizeToTray;
+    // @ts-expect-error
+    window.electron.setAutoStart(newValue).then(() => {
+        setSettings({ ...settings, minimizeToTray: newValue });
+    });
+  };
 
   const checkCacheSize = async () => {
     try {
@@ -170,6 +204,43 @@ const SettingsPage: React.FC = () => {
               />
             </CardContent>
           </Card>
+
+          {isElectronApp && settings && (
+            <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Sun className="h-5 w-5" />
+                Cài đặt dành riêng cho Ứng dụng LHU Dashboard
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SettingItem
+                icon={settings?.autoStart ? Power : PowerOff}
+                title="Tự động khởi động"
+                description="Tự động khởi động app khi mở máy"
+                action={
+                  <Switch
+                    checked={settings?.autoStart}
+                    onCheckedChange={toggleAutoStart}
+                  />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={settings?.minimizeToTray ? PiTrayArrowDown  : PiTrayArrowUpLight }
+                title="Tự động ẩn vào khay"
+                description="Tự động ẩn app sau khi autostart"
+                action={
+                  <Switch
+                    checked={settings?.minimizeToTray}
+                    onCheckedChange={toggleAutoMinimizeToTray}
+                  />
+                }
+              />
+            </CardContent>
+          </Card>
+
+          )}
 
           {/* Data & Storage */}
           <Card>
