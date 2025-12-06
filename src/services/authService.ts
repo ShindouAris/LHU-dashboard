@@ -112,6 +112,7 @@ export const authService = {
   },
   async send_login(qr_code_data: string): Promise<UserResponse> {
     const access_token = AuthStorage.getUserToken();
+    const current_loggedin_user = AuthStorage.getUser()
     const res = await fetch(`${API_URL}/submit_credential`, {
       body: JSON.stringify({
         encrypted_data: qr_code_data,
@@ -122,7 +123,7 @@ export const authService = {
       throw new Error(`Đăng nhập thất bại - ${await res.text}`)
     }
     const data: QRSubmitResponse = await res.json()
-    if (data.access_token === access_token) {
+    if (data.user_data.UserID === current_loggedin_user?.UserID) {
       throw new Error("Không thể đăng nhập vào chính tài khoản mà bạn đang sử dụng")
     }
     await multiSessionService.createSession(data.access_token, data.user_data)
