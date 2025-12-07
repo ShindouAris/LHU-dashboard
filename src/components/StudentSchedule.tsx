@@ -425,7 +425,7 @@ export const StudentSchedule: React.FC = () => {
     return (
       <Layout
         showBack={true}
-        onBack={handleBackToInput}
+        onBack={() => handleChangeView('schedule')}
         page={page}
         onPageChange={handleChangeView}
       >
