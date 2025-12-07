@@ -253,7 +253,7 @@ const SettingsPage: React.FC = () => {
                 action={
                   <Switch
                     checked={settings?.checkForUpdatesOnStart}
-                    onCheckedChange={toggleAutoMinimizeToTray}
+                    onCheckedChange={toggleCheckForUpdatesOnStart}
                   />
                 }
               />
