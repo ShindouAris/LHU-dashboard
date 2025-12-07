@@ -9,8 +9,9 @@ declare global {
     electron: {
       onGetLocalStorage: () => void;
       isElectron: boolean;
-      getSettings: () => Promise<{autoStart: boolean, minimizeToTray: boolean }>;
+      getSettings: () => Promise<{autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean}>;
       setAutoStart: (enabled: boolean) => void;
+      setCheckForUpdatesOnStart: (enabled: boolean) => void;
       setMinimizeToTray: (enabled: boolean) => void;
     };
   }

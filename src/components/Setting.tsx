@@ -25,6 +25,7 @@ import { AuthStorage } from '@/types/user';
 import { authService } from '@/services/authService';
 import { GitHub } from './icons/github';
 import { PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
+import { MdUpdateDisabled, MdUpdate } from "react-icons/md";
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -33,7 +34,7 @@ const SettingsPage: React.FC = () => {
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
-  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean } | null>(null);
+  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean } | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -65,6 +66,15 @@ const SettingsPage: React.FC = () => {
     // @ts-expect-error
     window.electron.setMinimizeToTray(newValue).then(() => {
         setSettings({ ...settings, minimizeToTray: newValue });
+    });
+  };
+
+  const toggleCheckForUpdatesOnStart = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.checkForUpdatesOnStart;
+    // @ts-expect-error
+    window.electron.setCheckForUpdatesOnStart(newValue).then(() => {
+        setSettings({ ...settings, checkForUpdatesOnStart: newValue });
     });
   };
 
@@ -231,6 +241,18 @@ const SettingsPage: React.FC = () => {
                 action={
                   <Switch
                     checked={settings?.minimizeToTray}
+                    onCheckedChange={toggleAutoMinimizeToTray}
+                  />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={settings?.checkForUpdatesOnStart ? MdUpdate  : MdUpdateDisabled }
+                title="Tự động kiểm tra cập nhật"
+                description="Tự động kiểm tra cập nhật sau khi khởi động ứng dụng"
+                action={
+                  <Switch
+                    checked={settings?.checkForUpdatesOnStart}
                     onCheckedChange={toggleAutoMinimizeToTray}
                   />
                 }
