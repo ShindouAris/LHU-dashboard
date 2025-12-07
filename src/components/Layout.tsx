@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
-import { authService } from '@/services/authService';
-import { toast } from 'react-hot-toast';
 import { AuthStorage } from '@/types/user';
 
 interface LayoutProps {
@@ -29,46 +27,19 @@ export const Layout: React.FC<LayoutProps> = ({
   title,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const loggedInUser = AuthStorage.isLoggedIn()
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  const handleLogout = async () => {
-    try {
-      const logoutmsg: string | null = await authService.logOut();
-      if (logoutmsg) {
-        toast.success(logoutmsg)
-        window.location.reload();
-      }
-    } catch (error) {
-      if (error instanceof Error) {
-        toast.error(error.message)
-      }
-    }
-    
-  }
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
-      setIsDarkMode(true);
       document.documentElement.classList.add('dark');
     }
   }, []);
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    }
-  };
 
 
   return (
@@ -90,11 +61,8 @@ export const Layout: React.FC<LayoutProps> = ({
           page={page}
           onPageChange={onPageChange}
           title={title}
-          onThemeToggle={toggleTheme}
-          isDark={isDarkMode}
           isOpen={sidebarOpen}
           isAuth={loggedInUser}
-          onLogout={handleLogout}
           onToggle={toggleSidebar}
         />
 

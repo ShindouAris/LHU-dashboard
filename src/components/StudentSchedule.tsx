@@ -347,6 +347,9 @@ export const StudentSchedule: React.FC = () => {
     } else if (newPage === "parkinglhu") {
       setPage("parkinglhu")
       navigate("/parking")
+    } else if (newPage === "settings") {
+      setPage("settings")
+      navigate("/settings")
     }
   };
 
@@ -406,7 +409,7 @@ export const StudentSchedule: React.FC = () => {
     return (
       <Layout 
         showBack={true}
-        onBack={() => handleChangeView('schhedule')}
+        onBack={() => handleChangeView('schedule')}
         page={page}
         onPageChange={handleChangeView}
         title='Quản lý đỗ xe LHU'

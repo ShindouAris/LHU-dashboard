@@ -198,7 +198,16 @@ export const QRScanner: React.FC = () => {
           setIsSuccess(true)
           setIsExpiredQR(false)
           toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
-        }}) 
+        }}).catch(error => {
+          if (error instanceof Error) {
+            if (error.message.toLowerCase() === "failed to fetch") {
+              toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
+            }
+            else {
+              toast.error("Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME")
+            }
+          }
+        })
     } else if (SUBSTR === "LGN") {
       authService.send_login(scanned).then((res) => {
         if (res) {
@@ -411,8 +420,9 @@ export const QRScanner: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
+      
       {/* <Card className="mt-3">
+      // TODO: hiển thị danh sách người đã đăng nhập vào thiết bị này
         <CardHeader>
           727
         </CardHeader>

@@ -114,13 +114,17 @@ export const authService = {
     const access_token = AuthStorage.getUserToken();
     const current_loggedin_user = AuthStorage.getUser()
     const res = await fetch(`${API_URL}/submit_credential`, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         encrypted_data: qr_code_data,
         access_token: access_token
       })
     })
     if (!res.ok) {
-      throw new Error(`Đăng nhập thất bại - ${await res.text}`)
+      throw new Error(`Đăng nhập thất bại - ${await res.text()}`)
     }
     const data: QRSubmitResponse = await res.json()
     if (data.user_data.UserID === current_loggedin_user?.UserID) {

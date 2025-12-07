@@ -48,7 +48,7 @@ const SettingsPage: React.FC = () => {
       setSettings(reactAppSettings)
     }
     load()
-  }, [])
+  }, [isElectronApp])
 
   const toggleAutoStart = () => {
     if (!settings || !isElectronApp) return;

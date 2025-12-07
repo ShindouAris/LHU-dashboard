@@ -23,15 +23,11 @@ interface SidebarProps {
   onRefresh?: () => void;
   showBack?: boolean;
   showRefresh?: boolean;
+  title?: string;
   page: string;
   onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh" | "qrscan" | "settings") => void;
-  title?: string;
-  showThemeToggle?: boolean;
-  onThemeToggle?: () => void;
-  isDark?: boolean;
   isOpen?: boolean;
   isAuth?: boolean;
-  onLogout?: () => Promise<string | void>
   onToggle?: () => void;
 }
 
@@ -110,7 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
-      authrequired: true
+      authrequired: false
     },
     {
       id: "parkinglhu",
