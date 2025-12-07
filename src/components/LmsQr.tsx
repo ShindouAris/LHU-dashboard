@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, /* CardHeader */ } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle } from "lucide-react";
 import { ApiService } from "@/services/apiService";
@@ -412,14 +412,14 @@ export const QRScanner: React.FC = () => {
         </CardContent>
       </Card>
 
-      <Card className="mt-3">
+      {/* <Card className="mt-3">
         <CardHeader>
           727
         </CardHeader>
         <CardContent>
           WYSI
         </CardContent>
-      </Card>
+      </Card> */}
 
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (
