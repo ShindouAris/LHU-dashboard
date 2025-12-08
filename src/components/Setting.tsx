@@ -31,8 +31,11 @@ import { GitHub } from './icons/github';
 import { PiExamDuotone, PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
 import { MdUpdateDisabled, MdUpdate } from "react-icons/md";
 import { getSettings, NavigationItem } from '@/types/settings';
-import { FaParking } from 'react-icons/fa';
+import { FaParking, FaRegWindowClose, FaBomb } from 'react-icons/fa';
 import { FiSidebar } from "react-icons/fi";
+import { IoHardwareChipOutline } from "react-icons/io5";
+import { BsWindowDesktop } from "react-icons/bs";
+import { IoIosNotifications, IoIosNotificationsOff  } from "react-icons/io";
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -41,7 +44,7 @@ const SettingsPage: React.FC = () => {
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
-  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean } | null>(null);
+  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean, notifyNextClassStartedSoon: boolean, minimizeOnClose: boolean, hardwareAcceleration: boolean } | null>(null);
   const [appsettings, setAppsettings] = useState(() => {
     const saved = getSettings();
     return saved;
@@ -90,6 +93,57 @@ const SettingsPage: React.FC = () => {
         setSettings({ ...settings, checkForUpdatesOnStart: newValue });
     });
   };
+
+  const toggleNotifyNextClassStartedSoon = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.notifyNextClassStartedSoon;
+    // @ts-expect-error
+    window.electron.setNotifyNextClassStartedSoon(newValue).then(() => {
+        setSettings({ ...settings, notifyNextClassStartedSoon: newValue });
+    });
+  };
+
+  const toggleMinimizeOnClose = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.minimizeOnClose;
+    // @ts-expect-error
+    window.electron.setMinimizeOnClose(newValue).then(() => {
+        setSettings({ ...settings, minimizeOnClose: newValue });
+    });
+  }
+
+  const restartApp = (toastId: string) => {
+    toast.loading('Đang khởi động lại ứng dụng...', { id: toastId });
+    setTimeout(() => {
+      toast.success('Ứng dụng đang được khởi động lại.', { id: toastId });
+    }, 3000);
+    window.electron.forceRestartApp();
+  }
+
+
+
+  const toggleHardwareAcceleration = () => {
+    if (!settings || !isElectronApp) return;
+    
+    const newValue = !settings.hardwareAcceleration;
+    // @ts-expect-error
+    window.electron.setHardwareAcceleration(newValue).then(() => {
+        setSettings({ ...settings, hardwareAcceleration: newValue });
+    });
+    toast((t) => {
+      return (
+        <div>
+          <p>Bạn vừa thay đổi cài đặt tăng tốc phần cứng, bấm vào đây để khởi động lại ứng dụng.</p>
+          <Button className='mt-3' onClick={() => restartApp(t.id)}>
+            Khởi động lại ngay
+          </Button>
+          <Button variant="outline" className="ml-2 mt-3" onClick={() => toast.dismiss(t.id)}>
+            Để sau
+          </Button>
+        </div>
+      )
+    }, {duration: Infinity})
+  }
 
   const checkCacheSize = async () => {
     try {
@@ -349,6 +403,62 @@ const SettingsPage: React.FC = () => {
                     checked={settings?.checkForUpdatesOnStart}
                     onCheckedChange={toggleCheckForUpdatesOnStart}
                   />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={settings?.notifyNextClassStartedSoon ? IoIosNotifications  : IoIosNotificationsOff }
+                title="Nhận thông báo khi lớp học tiếp theo sắp bắt đầu"
+                description="Nhận thông báo nhắc nhở trước khi lớp học tiếp theo bắt đầu"
+                action={
+                  <Switch
+                    checked={settings?.notifyNextClassStartedSoon}
+                    onCheckedChange={toggleNotifyNextClassStartedSoon}
+                  />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={settings?.minimizeOnClose ? BsWindowDesktop  : FaRegWindowClose }
+                title="Tự động thu nhỏ khi đóng ứng dụng"
+                description="Thu nhỏ ứng dụng vào khay hệ thống khi đóng cửa sổ chính"
+                action={
+                  <Switch
+                    checked={settings?.minimizeOnClose}
+                    onCheckedChange={toggleMinimizeOnClose}
+                  />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={IoHardwareChipOutline}
+                title="Kích hoạt tăng tốc phần cứng"
+                description="Sử dụng GPU để cải thiện hiệu suất ứng dụng, tắt nếu gặp sự cố hiển thị (Cần khởi động lại ứng dụng)"
+                action={
+                  <Switch
+                    checked={settings?.hardwareAcceleration}
+                    onCheckedChange={toggleHardwareAcceleration}
+                  />
+                }
+              />
+              <Separator />
+              <SettingItem
+                icon={FaBomb}
+                title="🐧🐧"
+                description=''
+                action={
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => {
+                        toast.error("Destructive mode activated!", { duration: 2000 });
+                        setTimeout(() => {
+                          window.electron.forceRestartApp();
+                        }, 3000)
+                    }}
+                  >
+                    🐧
+                  </Button>
                 }
               />
             </CardContent>
