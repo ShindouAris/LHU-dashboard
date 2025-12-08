@@ -7,12 +7,28 @@ import { useEffect } from 'react';
 declare global {
   interface Window {
     electron: {
-      onGetLocalStorage: () => void;
+      // Variables
       isElectron: boolean;
-      getSettings: () => Promise<{autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean}>;
+
+      // Callbacks
+      onGetLocalStorage: () => void;
+      getSettings: () => Promise<{
+          autoStart: boolean, 
+          minimizeToTray: boolean, 
+          checkForUpdatesOnStart: boolean, 
+          notifyNextClassStartedSoon: boolean,
+          minimizeOnClose: boolean,
+          hardwareAcceleration: boolean
+        }>;
+      forceRestartApp: () => void;
+
+      // Settings setters
       setAutoStart: (enabled: boolean) => void;
       setCheckForUpdatesOnStart: (enabled: boolean) => void;
       setMinimizeToTray: (enabled: boolean) => void;
+      setNotifyNextClassStartedSoon: (enabled: boolean) => void;
+      setMinimizeOnClose: (enabled: boolean) => void;
+      setHardwareAcceleration: (enabled: boolean) => void;
     };
   }
 }
