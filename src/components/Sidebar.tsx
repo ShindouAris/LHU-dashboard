@@ -17,6 +17,7 @@ import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { toast } from 'react-hot-toast';
 import { FaParking } from 'react-icons/fa';
+import { defaultSettings, getSettings } from '@/types/settings';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -60,6 +61,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     description: string;
     url?: string;
     authrequired?: boolean;
+    hidden?: boolean;
+    forceshow?: boolean;
   }
 
   const navigationItems: NavigationItem[] = [
@@ -67,7 +70,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'home',
       label: 'Trang chủ',
       icon: Home,
-      description: 'Trang chính của ứng dụng'
+      description: 'Trang chính của ứng dụng',
+      forceshow: true
     },
     {
       id: 'schedule',
@@ -79,7 +83,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: 'timetable',
       label: 'Thời khóa biểu',
       icon: Calendar,
-      description: 'Xem thời khóa biểu dạng lịch'
+      description: 'Xem thời khóa biểu dạng lịch',
+      forceshow: true
     },
     {
       id: 'weather',
@@ -93,6 +98,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: PiExamDuotone,
       description: "Xem thông tin điểm danh (cần đăng nhập)",
       authrequired: true,
+      forceshow: true
     },
     {
       id: "mark",
@@ -106,7 +112,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
-      authrequired: false
+      authrequired: false,
+      forceshow: true
     },
     {
       id: "parkinglhu",
@@ -119,9 +126,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
       id: "settings",
       label: "Cài đặt",
       icon: Settings,
-      description: "Cài đặt và tùy chọn ứng dụng"
+      description: "Cài đặt và tùy chọn ứng dụng",
+      forceshow: true
     },
   ];
+
+  const settings = getSettings();
+
+  const sidebarItems = navigationItems.filter(item => {
+    if (item.forceshow) return true;
+    if (!settings.hiddenSidebarItems === null) return true;
+    return !settings.hiddenSidebarItems.includes(item.id);
+  });
+
 
   const actionItems = [
     ...(showBack && onBack ? [{
@@ -199,7 +216,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               
               {expandedItems.includes('navigation') && (
                 <div className="ml-4 space-y-1">
-                  {navigationItems.map((item) => {
+                  {sidebarItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = page === item.id;
                     

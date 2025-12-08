@@ -16,7 +16,11 @@ import {
   Shield,
   Globe,
   Power,
-  PowerOff
+  PowerOff,
+  Home,
+  Calendar,
+  QrCode,
+  Settings
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { cacheService } from '@/services/cacheService';
@@ -24,8 +28,11 @@ import { examCacheService } from '@/services/examCacheService';
 import { AuthStorage } from '@/types/user';
 import { authService } from '@/services/authService';
 import { GitHub } from './icons/github';
-import { PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
+import { PiExamDuotone, PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
 import { MdUpdateDisabled, MdUpdate } from "react-icons/md";
+import { getSettings, NavigationItem } from '@/types/settings';
+import { FaParking } from 'react-icons/fa';
+import { FiSidebar } from "react-icons/fi";
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -35,6 +42,8 @@ const SettingsPage: React.FC = () => {
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
   const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean } | null>(null);
+  const appsettings = getSettings();
+
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -94,6 +103,82 @@ const SettingsPage: React.FC = () => {
       setCacheSize('Không xác định');
     }
   };
+
+  const navigationItems: NavigationItem[] = [
+      {
+        id: 'home',
+        label: 'Trang chủ',
+        icon: Home,
+        description: 'Trang chính của ứng dụng',
+        forceshow: true
+      },
+      {
+        id: 'schedule',
+        label: 'Lịch học',
+        icon: Calendar,
+        description: 'Xem lịch học chi tiết'
+      },
+      {
+        id: 'timetable',
+        label: 'Thời khóa biểu',
+        icon: Calendar,
+        description: 'Xem thời khóa biểu dạng lịch',
+        forceshow: true
+      },
+      {
+        id: 'weather',
+        label: 'Thời tiết',
+        icon: Sun,
+        description: 'Thông tin thời tiết hiện tại'
+      },
+      {
+        id: "diemdanh",
+        label: "Điểm danh",
+        icon: PiExamDuotone,
+        description: "Xem thông tin điểm danh (cần đăng nhập)",
+        authrequired: true,
+        forceshow: true
+      },
+      {
+        id: "mark",
+        label: "Xem điểm thi", 
+        icon: PiExamDuotone,
+        description: "Xem điểm thi của bạn (cần đăng nhập)",
+        authrequired: true,
+      },
+      {
+        id: "qrscan",
+        label: "Quét QR",
+        icon: QrCode,
+        description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
+        authrequired: false,
+        forceshow: true
+      },
+      {
+        id: "parkinglhu",
+        label: "Quản lý đỗ xe LHU",
+        icon: FaParking,
+        description: "Quản lý xe của tôi",
+        authrequired: true
+      },
+      {
+        id: "settings",
+        label: "Cài đặt",
+        icon: Settings,
+        description: "Cài đặt và tùy chọn ứng dụng",
+        forceshow: true
+      },
+    ];
+  const toggleSidebarItem = (id: string) => {
+    
+    const hidden = new Set(appsettings.hiddenSidebarItems);
+
+    if (hidden.has(id)) hidden.delete(id);
+    else hidden.add(id);
+
+    appsettings.hiddenSidebarItems = [...hidden];
+    localStorage.setItem("userSettings", JSON.stringify(appsettings));
+  }
 
   const toggleTheme = () => {
     const newTheme = !isDarkMode;
@@ -261,6 +346,42 @@ const SettingsPage: React.FC = () => {
           </Card>
 
           )}
+          {/* Sidebar Settings */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FiSidebar className="h-5 w-5" />
+                Cài đặt thanh bên
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-6">
+              {/* Toggle Items */}
+              <div className="space-y-3">
+                <Label className="font-medium text-base">Tùy chọn hiển thị mục trong Sidebar</Label>
+
+                {navigationItems.map((item) => {
+                  if (item.forceshow) return null
+
+                  const enabled = !appsettings.hiddenSidebarItems.includes(item.id)
+
+                  return (
+                    <SettingItem
+                      key={item.id}
+                      icon={item.icon}
+                      title={item.label}
+                      description={item.description}
+                      action={
+                        <Switch checked={enabled} onCheckedChange={() => toggleSidebarItem(item.id)} />
+                      }
+                    />
+                  )
+                })}
+              </div>
+
+            </CardContent>
+          </Card>
+
 
           {/* Data & Storage */}
           <Card>
