@@ -198,7 +198,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
         case 'bg-red-500': return '#E62727';
         case 'bg-indigo-600': return '#4f46e5';
         case 'bg-pink-500': return '#FF8FB7'
-        default: return '#3b82f6';
+        default: return '#C47BE4';
       }
     };
     
