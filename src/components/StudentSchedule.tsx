@@ -604,7 +604,6 @@ export const StudentSchedule: React.FC = () => {
 
         {/* Student Info Card */}
         <Card className="mb-8 overflow-hidden border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-900">
-          {/* <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10"></div> */}
           <CardHeader className="relative pb-6">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
