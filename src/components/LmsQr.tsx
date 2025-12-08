@@ -137,6 +137,10 @@ export const QRScanner: React.FC = () => {
     return () => {
       scanner.stop();
       scanner.destroy();
+      if (trackRef.current) {
+        trackRef.current.stop()
+      }
+      
     };
   }, []);
 
