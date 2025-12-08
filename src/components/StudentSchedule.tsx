@@ -330,17 +330,17 @@ export const StudentSchedule: React.FC = () => {
       navigate("/weather");
     } else if (newPage === "mark") {
       setShowFullSchedule(false);
-      navigate("/mark")
+      navigate("/mark");
     } else if (newPage === "diemdanh") {
       setShowFullSchedule(false);
-      navigate("/diemdanh")
+      navigate("/diemdanh");
     } else if (newPage === "qrscan") {
-      setShowFullSchedule(false)
-      navigate("/qrscan")
+      setShowFullSchedule(false);
+      navigate("/qrscan");
     } else if (newPage === "parkinglhu") {
-      navigate("/parking")
+      navigate("/parking");
     } else if (newPage === "settings") {
-      navigate("/settings")
+      navigate("/settings");
     }
   };
 
