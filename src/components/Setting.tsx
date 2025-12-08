@@ -42,7 +42,11 @@ const SettingsPage: React.FC = () => {
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
   const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean } | null>(null);
-  const appsettings = getSettings();
+  const [appsettings, setAppsettings] = useState(() => {
+    const saved = getSettings();
+    return saved;
+  });
+
 
 
   useEffect(() => {
@@ -170,15 +174,20 @@ const SettingsPage: React.FC = () => {
       },
     ];
   const toggleSidebarItem = (id: string) => {
-    
-    const hidden = new Set(appsettings.hiddenSidebarItems);
+    setAppsettings((prev: any) => {
+      const hidden = new Set(prev.hiddenSidebarItems);
+      hidden.has(id) ? hidden.delete(id) : hidden.add(id);
 
-    if (hidden.has(id)) hidden.delete(id);
-    else hidden.add(id);
+      const newSettings = {
+        ...prev,
+        hiddenSidebarItems: [...hidden],
+      };
 
-    appsettings.hiddenSidebarItems = [...hidden];
-    localStorage.setItem("userSettings", JSON.stringify(appsettings));
-  }
+      localStorage.setItem("userSettings", JSON.stringify(newSettings));
+      // toast.success("Bạn vừa thay đổi cài đặt thanh bên, tải lại trang để áp dụng thay đổi.");
+      return newSettings; 
+    });
+  };
 
   const toggleTheme = () => {
     const newTheme = !isDarkMode;

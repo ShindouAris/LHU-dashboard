@@ -428,6 +428,7 @@ export const StudentSchedule: React.FC = () => {
         onBack={() => handleChangeView('schedule')}
         page={page}
         onPageChange={handleChangeView}
+        title='Cài đặt'
       >
         <div className="min-h-screen py-8 px-4">
           <SettingsPage />
