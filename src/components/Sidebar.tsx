@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { toast } from 'react-hot-toast';
 import { FaParking } from 'react-icons/fa';
-import { defaultSettings, getSettings } from '@/types/settings';
+import { getSettings } from '@/types/settings';
 
 interface SidebarProps {
   onBack?: () => void;
