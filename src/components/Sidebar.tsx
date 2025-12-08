@@ -112,7 +112,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
-      authrequired: false,
+      authrequired: true,
       forceshow: true
     },
     {
