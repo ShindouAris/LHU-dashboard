@@ -317,38 +317,29 @@ export const StudentSchedule: React.FC = () => {
 
   const handleChangeView = (newPage: string) => {
     if (newPage === "home") {
-      setPage("home");
       setShowFullSchedule(false);
       navigate("/home");
     } else if (newPage === "schedule") {
-      setPage("schedule");
       setShowFullSchedule(true);
       navigate("/schedule");
     } else if (newPage === "timetable") {
-      setPage("timetable");
       setShowFullSchedule(false);
       navigate("/timetable");
     } else if (newPage === "weather") {
-      setPage("weather");
       setShowFullSchedule(false);
       navigate("/weather");
     } else if (newPage === "mark") {
-      setPage("mark")
       setShowFullSchedule(false);
       navigate("/mark")
     } else if (newPage === "diemdanh") {
-      setPage("diemdanh")
       setShowFullSchedule(false);
       navigate("/diemdanh")
     } else if (newPage === "qrscan") {
-      setPage("qrscan")
       setShowFullSchedule(false)
       navigate("/qrscan")
     } else if (newPage === "parkinglhu") {
-      setPage("parkinglhu")
       navigate("/parking")
     } else if (newPage === "settings") {
-      setPage("settings")
       navigate("/settings")
     }
   };
