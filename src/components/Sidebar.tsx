@@ -215,10 +215,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             toast.error("Vui lòng đăng nhập để truy cập trang này")
                             return;
                           }
-                          if (item.id === "settings") {
-                            window.location.href = "/settings";
-                            return;
-                          }
                           onPageChange?.(item.id as any);
                           // Close sidebar on mobile after selection
                           if (window.innerWidth < 1024) {
