@@ -93,15 +93,15 @@ export const StudentSchedule: React.FC = () => {
     } else if (path.startsWith("/weather")) {
       setPage("weather");
     } else if (path.startsWith("/mark")) {
-      setPage("mark")
+      setPage("mark");
     } else if (path.startsWith("/diemdanh")) {
-      setPage("diemdanh")
+      setPage("diemdanh");
     } else if (path.startsWith("/qrscan")) {
-      setPage("qrscan")
+      setPage("qrscan");
     } else if (path.startsWith("/parking")) {
-      setPage("parkinglhu")
+      setPage("parkinglhu");
     } else if (path.startsWith("/settings")) {
-      setPage("settings")
+      setPage("settings");
     }
     else {
       setPage("home");
