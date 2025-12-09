@@ -71,7 +71,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.autoStart;
     // @ts-expect-error
-    window.electron.setAutoStart(newValue).then(() => {
+    window.electron.setAutoStart?.(newValue).then(() => {
         setSettings({ ...settings, autoStart: newValue });
     });
   };
@@ -80,7 +80,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.minimizeToTray;
     // @ts-expect-error
-    window.electron.setMinimizeToTray(newValue).then(() => {
+    window.electron.setMinimizeToTray?.(newValue).then(() => {
         setSettings({ ...settings, minimizeToTray: newValue });
     });
   };
@@ -89,7 +89,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.checkForUpdatesOnStart;
     // @ts-expect-error
-    window.electron.setCheckForUpdatesOnStart(newValue).then(() => {
+    window.electron.setCheckForUpdatesOnStart?.(newValue).then(() => {
         setSettings({ ...settings, checkForUpdatesOnStart: newValue });
     });
   };
@@ -98,7 +98,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.notifyNextClassStartedSoon;
     // @ts-expect-error
-    window.electron.setNotifyNextClassStartedSoon(newValue).then(() => {
+    window.electron.setNotifyNextClassStartedSoon?.(newValue).then(() => {
         setSettings({ ...settings, notifyNextClassStartedSoon: newValue });
     });
   };
@@ -107,7 +107,7 @@ const SettingsPage: React.FC = () => {
     if (!settings || !isElectronApp) return;
     const newValue = !settings.minimizeOnClose;
     // @ts-expect-error
-    window.electron.setMinimizeOnClose(newValue).then(() => {
+    window.electron.setMinimizeOnClose?.(newValue).then(() => {
         setSettings({ ...settings, minimizeOnClose: newValue });
     });
   }
@@ -117,17 +117,15 @@ const SettingsPage: React.FC = () => {
     setTimeout(() => {
       toast.success('Ứng dụng đang được khởi động lại.', { id: toastId });
     }, 3000);
-    window.electron.forceRestartApp();
+    window.electron.forceRestartApp?.();
   }
-
-
 
   const toggleHardwareAcceleration = () => {
     if (!settings || !isElectronApp) return;
     
     const newValue = !settings.hardwareAcceleration;
     // @ts-expect-error
-    window.electron.setHardwareAcceleration(newValue).then(() => {
+    window.electron.setHardwareAcceleration?.(newValue).then(() => {
         setSettings({ ...settings, hardwareAcceleration: newValue });
     });
     toast((t) => {
@@ -370,96 +368,120 @@ const SettingsPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <SettingItem
+              {settings?.autoStart !== undefined && (
+              <>
+                <SettingItem
                 icon={settings?.autoStart ? Power : PowerOff}
                 title="Tự động khởi động"
                 description="Tự động khởi động app khi mở máy"
                 action={
                   <Switch
-                    checked={settings?.autoStart}
-                    onCheckedChange={toggleAutoStart}
+                  checked={settings?.autoStart}
+                  onCheckedChange={toggleAutoStart}
                   />
                 }
-              />
-              <Separator />
-              <SettingItem
+                />
+                <Separator />
+              </>
+              )}
+              {settings?.minimizeToTray !== undefined && (
+              <>
+                <SettingItem
                 icon={settings?.minimizeToTray ? PiTrayArrowDown  : PiTrayArrowUpLight }
                 title="Tự động ẩn vào khay"
                 description="Tự động ẩn app sau khi autostart"
                 action={
                   <Switch
-                    checked={settings?.minimizeToTray}
-                    onCheckedChange={toggleAutoMinimizeToTray}
+                  checked={settings?.minimizeToTray}
+                  onCheckedChange={toggleAutoMinimizeToTray}
                   />
                 }
-              />
-              <Separator />
-              <SettingItem
+                />
+                <Separator />
+              </>
+              )}
+              {settings?.checkForUpdatesOnStart !== undefined && (
+              <>
+                <SettingItem
                 icon={settings?.checkForUpdatesOnStart ? MdUpdate  : MdUpdateDisabled }
                 title="Tự động kiểm tra cập nhật"
                 description="Tự động kiểm tra cập nhật sau khi khởi động ứng dụng"
                 action={
                   <Switch
-                    checked={settings?.checkForUpdatesOnStart}
-                    onCheckedChange={toggleCheckForUpdatesOnStart}
+                  checked={settings?.checkForUpdatesOnStart}
+                  onCheckedChange={toggleCheckForUpdatesOnStart}
                   />
                 }
-              />
-              <Separator />
-              <SettingItem
+                />
+                <Separator />
+              </>
+              )}
+              {settings?.notifyNextClassStartedSoon !== undefined && (
+              <>
+                <SettingItem
                 icon={settings?.notifyNextClassStartedSoon ? IoIosNotifications  : IoIosNotificationsOff }
                 title="Nhận thông báo khi lớp học tiếp theo sắp bắt đầu"
                 description="Nhận thông báo nhắc nhở trước khi lớp học tiếp theo bắt đầu"
                 action={
                   <Switch
-                    checked={settings?.notifyNextClassStartedSoon}
-                    onCheckedChange={toggleNotifyNextClassStartedSoon}
+                  checked={settings?.notifyNextClassStartedSoon}
+                  onCheckedChange={toggleNotifyNextClassStartedSoon}
                   />
                 }
-              />
-              <Separator />
-              <SettingItem
+                />
+                <Separator />
+              </>
+              )}
+              {settings?.minimizeOnClose !== undefined && (
+              <>
+                <SettingItem
                 icon={settings?.minimizeOnClose ? BsWindowDesktop  : FaRegWindowClose }
                 title="Tự động thu nhỏ khi đóng ứng dụng"
                 description="Thu nhỏ ứng dụng vào khay hệ thống khi đóng cửa sổ chính"
                 action={
                   <Switch
-                    checked={settings?.minimizeOnClose}
-                    onCheckedChange={toggleMinimizeOnClose}
+                  checked={settings?.minimizeOnClose}
+                  onCheckedChange={toggleMinimizeOnClose}
                   />
                 }
-              />
-              <Separator />
-              <SettingItem
+                />
+                <Separator />
+              </>
+              )}
+              {settings?.hardwareAcceleration !== undefined && (
+              <>
+                <SettingItem
                 icon={IoHardwareChipOutline}
                 title="Kích hoạt tăng tốc phần cứng"
                 description="Sử dụng GPU để cải thiện hiệu suất ứng dụng, tắt nếu gặp sự cố hiển thị (Cần khởi động lại ứng dụng)"
                 action={
                   <Switch
-                    checked={settings?.hardwareAcceleration}
-                    onCheckedChange={toggleHardwareAcceleration}
+                  checked={settings?.hardwareAcceleration}
+                  onCheckedChange={toggleHardwareAcceleration}
                   />
                 }
-              />
-              <Separator />
+                />
+                <Separator />
+              </>
+              )}
               <SettingItem
-                icon={FaBomb}
-                title="🐧🐧"
-                description=''
-                action={
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                        toast.error("Destructive mode activated!", { duration: 2000 });
-                        setTimeout(() => {
-                          window.electron.forceRestartApp();
-                        }, 3000)
-                    }}
-                  >
-                    🐧
-                  </Button>
-                }
+              icon={FaBomb}
+              title="🐧🐧"
+              description=''
+              action={
+                <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => {
+                  toast.error("Destructive mode activated!", { duration: 2000 });
+                  setTimeout(() => {
+                    window.electron.forceRestartApp?.();
+                  }, 3000)
+                }}
+                >
+                🐧
+                </Button>
+              }
               />
             </CardContent>
           </Card>
