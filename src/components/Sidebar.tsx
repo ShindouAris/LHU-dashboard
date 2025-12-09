@@ -180,7 +180,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <GraduationCap className="h-5 w-5 text-white" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate font-loveHouse">
                   LHU Dashboard
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">

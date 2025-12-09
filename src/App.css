@@ -5,6 +5,20 @@
   text-align: center;
 }
 
+@font-face {
+  font-family: Purrfect;
+  src: url(/fonts/Purrfect.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: LoveHouse;
+  src: url(/fonts/LoveHouse.woff) format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Custom animations for the app */
 @keyframes blob {
   0% {

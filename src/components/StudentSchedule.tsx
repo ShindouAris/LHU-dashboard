@@ -1,38 +1,41 @@
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { CalendarDays, User, Clock, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 // Layouts
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './ScheduleCard';
 import { EmptySchedule } from './EmptySchedule';
 import { LoadingSpinner } from './LoadingSpinner';
 import { ErrorMessage } from './ErrorMessage';
-import { StatsCard } from './StatsCard';
 import { Layout } from './Layout';
-// Others
+// Interfaces & Helpers
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
 import { ApiResponse, ExamInfo } from '@/types/schedule';
 import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
+import type { WeatherCurrentAPIResponse } from '@/types/weather';
+import { examCacheService } from '@/services/examCacheService';
+import { authService } from '@/services/authService';
+import { AuthStorage } from '@/types/user';
+// Shadcn UI Components
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { toast } from 'react-hot-toast';
-import { Timetable } from './Timetable';
-import type { WeatherCurrentAPIResponse } from '@/types/weather';
-
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 // Pages
 import WeatherPage from '@/components/WeatherPage';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { AuthStorage } from '@/types/user';
+import { Timetable } from './Timetable';
 import { MarkPage } from './StudentMark';
-import { examCacheService } from '@/services/examCacheService';
 import { ExamCard } from './ExamCard';
 import { LmsDiemDanhPage } from './LmsDiemDanhPage';
-import { authService } from '@/services/authService';
 import { QRScanner } from './LmsQr';
 import ParkingLHUPage from './ParkingLHU'
 import SettingsPage from './Setting';
+// Icons
+import { PiExamDuotone } from 'react-icons/pi';
+import { NavigationItem } from '@/types/settings';
+import { CalendarDays, User, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
+
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -138,6 +141,32 @@ export const StudentSchedule: React.FC = () => {
   
     initAuth();
   }, []);
+
+    const quickNavigationItems: NavigationItem[] = [
+    {
+      id: "diemdanh",
+      label: "Điểm danh",
+      icon: PiExamDuotone,
+      description: "Xem thông tin điểm danh (cần đăng nhập)",
+      authrequired: true,
+      forceshow: true
+    },
+    {
+      id: "mark",
+      label: "Xem điểm thi", 
+      icon: PiExamDuotone,
+      description: "Xem điểm thi của bạn (cần đăng nhập)",
+      authrequired: true,
+    },
+    {
+      id: "qrscan",
+      label: "Quét QR",
+      icon: QrCode,
+      description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
+      authrequired: true,
+      forceshow: true
+    }
+  ];
 
   const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
     setLoading(true);
@@ -478,7 +507,7 @@ export const StudentSchedule: React.FC = () => {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
                 <GraduationCap className="h-10 w-10 text-white" />
               </div>
-              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4">
+              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
                 LHU Dashboard
               </h1>
               <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
@@ -605,7 +634,7 @@ export const StudentSchedule: React.FC = () => {
 
         {/* Student Info Card */}
         <Card className="mb-8 overflow-hidden border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-900">
-          <CardHeader className="relative pb-6">
+          <CardHeader className="relative pb-1">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -651,35 +680,31 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </CardHeader>
           
-          <CardContent className={`relative ${page!=="home" && page!=="schedule" && ("hidden")}`}>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-              <StatsCard
-                title="Tổng số tiết"
-                value={weekInfo?.TotalRecord ?? 0}
-                icon={BookOpen}
-                color="blue"
-                description="Tiết học còn lại trong kì"
-              />
-              
-              {nextClass && (
-                <StatsCard
-                  title="Tiết tiếp theo"
-                  value={formatDate(nextClass.ThoiGianBD)}
-                  icon={Clock}
-                  color="green"
-                  description="Ngày có tiết học tiếp theo"
-                />
-              )}
-              
-              <StatsCard
-                title="Trạng thái"
-                value={hasUpcomingClasses ? "Có lịch" : "Không có lịch"}
-                icon={CalendarDays}
-                color={hasUpcomingClasses ? "purple" : "orange"}
-                description={hasUpcomingClasses ? "Trong 7 ngày tới" : "Trong 7 ngày tới"}
-              />
-            </div>
-          </CardContent>
+            <CardContent className={`relative ${page!=="home" && page!=="schedule" && ("hidden")}`}>
+              <span className="relative text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
+                Quick Actions
+                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-3">
+                {
+                user && user.UserID === currentStudentId && 
+                quickNavigationItems.map((item) => {
+                  return (
+                  <Button
+                    key={item.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleChangeView(item.id)}
+                    className="w-full hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex flex-col items-center justify-center gap-1 p-2 min-h-[80px] md:p-4 md:min-h-[100px] md:size-lg"
+                    >
+                    <item.icon className="h-5 w-5 md:h-6 md:w-6" />
+                    <span className="font-medium text-xs md:text-sm">{item.label}</span>
+                    </Button>
+                  )
+                })
+                }
+              </div>
+            </CardContent>
           <CardFooter className="w-full">
             {currentWeather && (
               <div className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 min-h-[72px] w-full">
