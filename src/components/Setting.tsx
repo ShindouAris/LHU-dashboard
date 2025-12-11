@@ -29,7 +29,7 @@ import { AuthStorage } from '@/types/user';
 import { authService } from '@/services/authService';
 import { GitHub } from './icons/github';
 import { PiExamDuotone, PiTrayArrowDown, PiTrayArrowUpLight } from 'react-icons/pi';
-import { MdUpdateDisabled, MdUpdate } from "react-icons/md";
+import { MdUpdateDisabled, MdUpdate, MdOutlineBadge } from "react-icons/md";
 import { getSettings, NavigationItem } from '@/types/settings';
 import { FaParking, FaRegWindowClose, FaBomb } from 'react-icons/fa';
 import { FiSidebar } from "react-icons/fi";
@@ -216,6 +216,13 @@ const SettingsPage: React.FC = () => {
         icon: FaParking,
         description: "Quản lý xe của tôi",
         authrequired: true
+      },
+      {
+        id: "diemrenluyen",
+        label: "Điểm rèn luyện",
+        icon: MdOutlineBadge,
+        description: "Xem điểm rèn luyện của bạn (cần đăng nhập)",
+        authrequired: true,
       },
       {
         id: "settings",

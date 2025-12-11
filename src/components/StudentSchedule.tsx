@@ -31,6 +31,8 @@ import { LmsDiemDanhPage } from './LmsDiemDanhPage';
 import { QRScanner } from './LmsQr';
 import ParkingLHUPage from './ParkingLHU'
 import SettingsPage from './Setting';
+import {LoadingScreen} from './LoadingScreen';
+import DiemRL from './DiemRL';
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
 import { NavigationItem } from '@/types/settings';
@@ -105,8 +107,9 @@ export const StudentSchedule: React.FC = () => {
       setPage("parkinglhu")
     } else if (path.startsWith("/settings")) {
       setPage("settings")
-    }
-    else {
+    } else if (path.startsWith("/diemrenluyen")) {
+      setPage("diemrenluyen")
+    } else {
       setPage("home");
     }
   }, [location.pathname || currentStudentId]);
@@ -379,6 +382,9 @@ export const StudentSchedule: React.FC = () => {
     } else if (newPage === "settings") {
       setPage("settings")
       navigate("/settings")
+    } else if (newPage === "diemrenluyen") {
+      setPage("diemrenluyen")
+      navigate("/diemrenluyen")
     }
   };
 
@@ -466,6 +472,22 @@ export const StudentSchedule: React.FC = () => {
     )
   }
 
+  if (page === "diemrenluyen") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title='Cài đặt'
+      >
+        <div className="min-h-screen py-8 px-4">
+          <DiemRL />
+        </div>
+      </Layout>
+    )
+  }
+
   if (error) {
     return (
       <Layout
@@ -517,7 +539,7 @@ export const StudentSchedule: React.FC = () => {
 
             {loading ? (
               <div className="flex justify-center">
-                <LoadingSpinner />
+                <LoadingScreen loading={loading} />
               </div>
             ) : (
               <div className="max-w-2xl mx-auto">

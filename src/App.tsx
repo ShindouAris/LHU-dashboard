@@ -54,6 +54,7 @@ function App() {
       <Route path='/qrscan' element={<StudentSchedule/>}/>
       <Route path='/parking' element={<StudentSchedule />} />
       <Route path='/settings' element={<StudentSchedule />} />
+      <Route path='/diemrenluyen' element={<StudentSchedule />} />
       <Route path="*" element={<StudentSchedule />} />
     </Routes>
   );
