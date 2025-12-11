@@ -77,7 +77,7 @@ export const getNextClass = (schedules: any[]): any | null => {
     .filter(schedule => {
       try {
         const classDate = parseISO(schedule.ThoiGianBD);
-        // Bỏ qua các lịch bị huỷ/báo nghỉ (TinhTrang 1 hoặc 2)
+        // Bỏ qua các lịch bị huỷ/báo nghỉ/nghỉ lễ (TinhTrang 1, 2 hoặc 6)
         const isCancelledOrOff = schedule?.TinhTrang === 1 || schedule?.TinhTrang === 2 || schedule?.TinhTrang === 6;
         if (isCancelledOrOff) return false;
         return isAfter(classDate, now);
