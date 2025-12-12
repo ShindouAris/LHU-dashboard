@@ -3,6 +3,7 @@ import {HourForecast, WeatherCurrentAPIResponse, WeatherForeCastAPIResponse} fro
 
 const API_ENDPOINT = import.meta.env.VITE_API_URL 
 const SCHOOL_ENDPOINT = import.meta.env.VITE_SCHOOL_ENDPOINT
+const TAPI = import.meta.env.VITE_LHU_TAPI
 
 export class ApiService {
   // Lấy thời khóa biểu (api trường)
@@ -210,20 +211,26 @@ export class ApiService {
   static async send_diem_danh(qr_code: string, access_token: string) {
     if (qr_code === "") return
     try {
-      const res = await fetch(`${API_ENDPOINT}/lms/checkin`, {
-        method: "POST", 
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          accessToken: access_token,
-          qr_data: qr_code
+      const sysID = qr_code.substring(0, 3)
+      if (sysID !== "STB") {
+        return {success: false, error: "Mã QR không hợp lệ"}
+      }
+      const tdata = qr_code.substring(3)
+      const payload = {
+                QRID: tdata
+          }
+      const res = await fetch(`${TAPI}/lms/QR_ScanCode`, {
+            method: "POST",
+            headers:{
+                authorization: `Bearer ${access_token}`,
+                "Content-type": "application/json"
+            },
+            body: JSON.stringify(payload)
         })
-      })
 
       if (!res.ok) {
         const data = await res.json()
-        return {success: false, error: data?.error}
+        return {success: false, error: data?.Message || "Điểm danh thất bại"}
       }
 
       return {success: true}
@@ -233,6 +240,37 @@ export class ApiService {
         throw new Error(error.message)
       }
       throw error;
+    }
+  }
+  static async elib_scanCode(qr_code: string, access_token: string) {
+    if (qr_code === "") return
+    try {
+      const sysID = qr_code.substring(0, 3)
+      if (sysID !== "LIB") {
+        return {success: false, error: "Mã QR không hợp lệ"}
+      }
+      const tdata = qr_code.substring(3)
+      const payload = {
+        DangKyID: tdata
+      }
+      const res = await fetch(`${TAPI}/elib/DANGKY_JoinRoom`, {
+        method: "POST",
+        headers:{
+            authorization: `Bearer ${access_token}`,
+            "Content-type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        return {success: false, error: data?.Message || "Tham gia thất bại"}
+      }
+
+      return {success: true}
+
+    } catch (error) {
+
     }
   }
   static async testnet (): Promise<boolean>  {
