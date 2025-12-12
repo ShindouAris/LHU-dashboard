@@ -162,7 +162,7 @@ export const QRScanner: React.FC = () => {
     if (!access_token) {setError("Đăng nhập để sử dụng"); return}
     // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) thì nổ lỗi
     const SUBSTR = scanned.substring(0,3)
-    if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN") {
+    if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN" && SUBSTR !== "LIB") {
       setError("QR này không được hỗ trợ...")
       return
     }
@@ -222,6 +222,28 @@ export const QRScanner: React.FC = () => {
       }).catch((error) => {
         if (error instanceof Error) {
           setError(error.message)
+        }
+      })
+    } else if (SUBSTR === "LIB") {
+      ApiService.elib_scanCode(scanned, access_token).then((res) => {
+        if (!res) return
+
+        if (!res.success) {
+          const errorMessage = String(res.error)
+          setError(errorMessage)
+        }
+        else { 
+          setIsSuccess(true)
+          toast.success(`Quét mã thư viện thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
+        }
+      }).catch((error) => {
+        if (error instanceof Error) {
+          if (error.message.toLowerCase() === "failed to fetch") {
+            toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
+          }
+          else {
+            toast.error("Đã xảy ra lỗi không mong muốn, hãy thử lại")
+          }
         }
       })
     }
@@ -340,10 +362,16 @@ export const QRScanner: React.FC = () => {
                     <img className="w-8 h-8" src="/Success.gif" alt="Success"/>
                     <div className="flex-1">
                       <p className="text-green-800 font-medium text-sm">
-                        {scanned.substring(0,3) === "STB" ? "Điểm danh thành công" : scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : ""}
+                        {
+                        scanned.substring(0,3) === "STB" ? "Điểm danh thành công" : 
+                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" :
+                        scanned.substring(0,3) === "LIB" ? "Quét mã thư viện thành công" : "Thành công"
+                        }
                       </p>
                       <p className="text-green-700 text-xs mt-1 break-all">
-                        {scanned.substring(0,3) === "STB" ? scanned : "Quét QR đăng nhập thành công"}
+                        {scanned.substring(0,3) === "STB" ? scanned : 
+                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : 
+                        scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""}
                       </p>
                     </div>
                   </div>
