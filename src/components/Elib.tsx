@@ -6,7 +6,7 @@ import { Clock, Users, ChevronDown, ChevronUp, UserPlus, MoreVertical, QrCode, C
 import { MdNoFood } from "react-icons/md";
 import { LuClockAlert, LuPowerOff } from "react-icons/lu";
 import { PiWarningDiamondFill } from "react-icons/pi";
-import { ELIB_SERVICE } from '@/services/elib';
+import { ELIB_SERVICE } from '@/services/elibService';
 import { vi } from 'date-fns/locale';
 import { format, getDay, startOfWeek, parse } from 'date-fns';
 import dayjs from 'dayjs';
@@ -14,6 +14,7 @@ import { ToolbarProps } from "react-big-calendar";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import toast from 'react-hot-toast';
 
 // ============== TYPES ==============
 
@@ -46,12 +47,6 @@ enum ActionType {
   Cancel = 'cancel',
   Detail = 'detail',
   Expired = 'expired'
-}
-type NotificationType = 'info' | 'success' | 'error' | 'warning';
-
-interface Notification {
-  message: string;
-  type: NotificationType;
 }
 
 interface Action {
@@ -340,7 +335,6 @@ const Elib: React.FC = () => {
   const [chkAgree, setChkAgree] = useState<boolean>(false);
   const [showQRModal, setShowQRModal] = useState<boolean>(false);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
-  const [notification, setNotification] = useState<Notification | null>(null);
   const [MaxRoomBookingLimit, setMaxRoomBookingLimit] = useState<number>(0);
   const [noiQuyItems, setNoiQuyItems] = useState<NoiQuy[]>([]);
   const [roomConfiguration, setRoomConfiguration] = useState<RoomData[]>([]);
@@ -485,53 +479,52 @@ const Elib: React.FC = () => {
   };
 
 
-  const showNotification = (message: string, type: NotificationType = 'info'): void => {
-    setNotification({ message, type });
-    setTimeout(() => setNotification(null), 3000);
-  };
-
   const handleAction = (actionType: ActionType, bookingId: string): void => {
+    toast.error("Đang được phát triển dần, sẽ có trong bản cập nhật gần nhất")
+    return
+
     switch(actionType) {
       case 'invite':
-        showNotification('Chức năng mời thành viên đang được phát triển', 'info');
+        toast.success('Chức năng mời thành viên đang được phát triển');
         break;
       case 'qr':
         setSelectedBookingId(bookingId);
         setShowQRModal(true);
         break;
       case 'edit':
-        showNotification('Mở form chỉnh sửa đặt phòng', 'info');
+        toast.success('Mở form chỉnh sửa đặt phòng');
         break;
       case 'cancel':
         if (confirm('Bạn có chắc muốn hủy đăng ký này?')) {
           setDataLichCaNhan(prev => prev.filter(b => b.DangKyID !== bookingId));
           setDataLuotDaDangKy(prev => prev - 1);
-          showNotification('Đã hủy đăng ký thành công', 'success');
+          toast.success('Đã hủy đăng ký thành công');
         }
         break;
       case 'detail':
-        showNotification('Hiển thị chi tiết đặt phòng', 'info');
+        toast.success('Hiển thị chi tiết đặt phòng');
         break;
       case 'expired':
         setDataLichCaNhan(prev => prev.map(b => 
           b.DangKyID === bookingId ? { ...b, TrangThai: 3 as const } : b
         ));
-        showNotification('Đăng ký đã hết hạn và bị hủy', 'warning');
+        toast.success('Đăng ký đã hết hạn và bị hủy');
         break;
     }
+
   };
 
   const handleRegister = (): void => {
+    toast.error("Đang được phát triển dần, sẽ có trong bản cập nhật gần nhất")
+    return
     if (dataLuotDaDangKy >= MaxRoomBookingLimit) {
-      showNotification('Bạn đã đạt giới hạn số lượt đăng ký', 'error');
       return;
     }
-    showNotification('Mở form đăng ký phòng mới', 'info');
   };
 
   const copyToClipboard = (text: string): void => {
     navigator.clipboard.writeText(text);
-    showNotification('Đã sao chép mã QR', 'success');
+    toast.success("Đã sao chép mã QR vào clipboard")
   };
 
   const progressPercentage: number = (dataLuotDaDangKy / MaxRoomBookingLimit) * 100;
@@ -540,16 +533,6 @@ const Elib: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6">
       <div className="mx-auto space-y-6">
-        {notification && (
-          <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
-            notification.type === 'success' ? 'bg-green-500 dark:bg-green-600' :
-            notification.type === 'error' ? 'bg-red-500 dark:bg-red-600' :
-            notification.type === 'warning' ? 'bg-yellow-500 dark:bg-yellow-600' :
-            'bg-blue-500 dark:bg-blue-600'
-          } text-white`}>
-            {notification.message}
-          </div>
-        )}
 
         <ExpansionPanel 
           title="📋 Nội quy đăng ký phòng học nhóm"
