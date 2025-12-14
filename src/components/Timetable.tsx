@@ -504,8 +504,8 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               style={{ height: '100%' }}
               views={['month', 'week', 'day']}
               defaultView={isMobile ? 'day' : isTablet ? 'week' : 'week'}
-              step={60}
-              timeslots={1}
+              step={30}
+              timeslots={4}
               eventPropGetter={eventStyleGetter}
               components={{
                 event: EventComponent,
