@@ -16,6 +16,20 @@ export interface NavigationItem {
     forceshow?: boolean;
   }
 
+export enum NavigationInstruction {
+    HOME = "home",
+    SCHEDULE = "schedule",
+    TIMETABLE = "timetable",
+    WEATHER = "weather",
+    MARK = "mark",
+    DIEMDANH = "diemdanh",
+    QRSCAN = "qrscan",
+    PARKINGLHU = "parkinglhu",
+    SETTINGS = "settings",
+    DIEMRENLUYEN = "diemrenluyen",
+    THUVIEN = "thuvien"
+}
+
 export const getSettings = (): UserSettings => {
     let settings = localStorage.getItem("userSettings");
     if (settings) {

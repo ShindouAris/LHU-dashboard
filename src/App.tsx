@@ -55,6 +55,7 @@ function App() {
       <Route path='/parking' element={<StudentSchedule />} />
       <Route path='/settings' element={<StudentSchedule />} />
       <Route path='/diemrenluyen' element={<StudentSchedule />} />
+      <Route path='/thuvien' element={<StudentSchedule />} />
       <Route path="*" element={<StudentSchedule />} />
     </Routes>
   );

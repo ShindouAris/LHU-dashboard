@@ -13,6 +13,8 @@ import dayjs from 'dayjs';
 import { ToolbarProps } from "react-big-calendar";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { Badge } from './ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+
 // ============== TYPES ==============
 
 interface NoiQuy {
@@ -343,6 +345,8 @@ const Elib: React.FC = () => {
   const [noiQuyItems, setNoiQuyItems] = useState<NoiQuy[]>([]);
   const [roomConfiguration, setRoomConfiguration] = useState<RoomData[]>([]);
   const [event, setEvent] = useState<any[]>([]); // Tao đầu hàng, any[] cứu tao pha này
+  const [currentViewedEvent, setCurrentViewedEvent] = useState<any>(null)
+  const [showDetailFocusedEvent, setShowFocusedEvent] = useState(false)
   const eventCache = useRef<Record<string, any[]>>({})
   const user = AuthStorage.getUser();
 
@@ -535,7 +539,7 @@ const Elib: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+      <div className="mx-auto space-y-6">
         {notification && (
           <div className={`fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 ${
             notification.type === 'success' ? 'bg-green-500 dark:bg-green-600' :
@@ -583,7 +587,7 @@ const Elib: React.FC = () => {
                 onChange={(e) => setChkAgree(e.target.checked)}
                 className="w-5 h-5 text-blue-600 rounded"
               />
-              <span className="text-gray-700 dark:text-gray-300 font-loveHouse">OK to the rule</span>
+              <span className="text-gray-700 dark:text-gray-300 font-loveHouse">OK to the rule ?</span>
             </label>
 
             <button
@@ -644,6 +648,12 @@ const Elib: React.FC = () => {
               resourceIdAccessor={"TenPhong"}
               resourceTitleAccessor={"TenPhong"}
               resources={roomConfiguration}
+              onSelectEvent={(event) => {
+                setCurrentViewedEvent(event)
+                setShowFocusedEvent(true)
+                console.log(JSON.stringify(currentViewedEvent))
+                console.log(showDetailFocusedEvent)
+              }}
               events={event}
               eventPropGetter={eventStyleGetter}
               components={{
@@ -653,6 +663,91 @@ const Elib: React.FC = () => {
               onNavigate={handleNavigate}
             />
         </div>
+
+        <Dialog open={showDetailFocusedEvent && currentViewedEvent !== null} onOpenChange={setShowFocusedEvent}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>
+                Xem lịch {currentViewedEvent?.resourceId} 
+              </DialogTitle>
+              <DialogDescription>
+                Phòng thuê bởi {currentViewedEvent?.FirstName} {currentViewedEvent?.LastName}
+              </DialogDescription>
+            </DialogHeader>
+            {currentViewedEvent && (
+              <div className="space-y-4 text-sm">
+                {/* Thời gian */}
+                <div className="border rounded-lg p-3">
+                  <p className="font-semibold mb-1">⏰ Thời gian sử dụng</p>
+                  <p>
+                    <span className="font-medium">Bắt đầu:</span>{" "}
+                    {new Date(currentViewedEvent.ThoiGianBD).toLocaleString()}
+                  </p>
+                  <p>
+                    <span className="font-medium">Kết thúc:</span>{" "}
+                    {new Date(currentViewedEvent.ThoiGianKT).toLocaleString()}
+                  </p>
+                </div>
+
+                {/* Người đăng ký */}
+                <div className="border rounded-lg p-3">
+                  <p className="font-semibold mb-1">👤 Người đăng ký</p>
+                  <p>
+                    {currentViewedEvent.FirstName} {currentViewedEvent.LastName}
+                  </p>
+                  <p className="text-gray-500">
+                    Mã độc giả: {currentViewedEvent.DocGiaDangKy}
+                  </p>
+                </div>
+
+                {/* Phòng + trạng thái */}
+                <div className="border rounded-lg p-3">
+                  <p className="font-semibold mb-1">🏫 Thông tin phòng</p>
+                  <p>Tên phòng: {currentViewedEvent.TenPhong}</p>
+                  <p>
+                    Trạng thái:{" "}
+                    <span className="font-medium">
+                      {currentViewedEvent.TrangThai === 1 && "Đã đăng ký"}
+                      {currentViewedEvent.TrangThai === 2 && "Đang sử dụng"}
+                      {currentViewedEvent.TrangThai === 3 && "Đã trả phòng"}
+                    </span>
+                  </p>
+                </div>
+
+                {/* Số người */}
+                <div className="border rounded-lg p-3">
+                  <p className="font-semibold mb-1">👥 Số lượng thành viên</p>
+                  <p>{currentViewedEvent.SoLuongTV} người</p>
+                </div>
+
+                {/* Thiết bị */}
+                <div className="border rounded-lg p-3">
+                  <p className="font-semibold mb-2">🔌 Thiết bị mượn</p>
+
+                  {JSON.parse(currentViewedEvent.ThietBi || "[]").length === 0 ? (
+                    <p className="text-gray-500 italic">Không mượn thiết bị</p>
+                  ) : (
+                    <ul className="list-disc list-inside space-y-1">
+                      {JSON.parse(currentViewedEvent.ThietBi).map((tb: any) => (
+                        <li key={tb.ThietBiID}>
+                          {tb.TenThietBi} — ĐK mượn: {tb.SoLuongDKMuon}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                {/* Ghi chú */}
+                {currentViewedEvent.GhiChu && (
+                  <div className="border rounded-lg p-3">
+                    <p className="font-semibold mb-1">📝 Ghi chú</p>
+                    <p>{currentViewedEvent.GhiChu}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {showQRModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">

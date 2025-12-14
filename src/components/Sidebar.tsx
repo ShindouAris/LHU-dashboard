@@ -17,8 +17,8 @@ import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { toast } from 'react-hot-toast';
 import { FaParking } from 'react-icons/fa';
-import { getSettings } from '@/types/settings';
-import { MdOutlineBadge } from 'react-icons/md';
+import { getSettings, NavigationInstruction } from '@/types/settings';
+import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -27,7 +27,7 @@ interface SidebarProps {
   showRefresh?: boolean;
   title?: string;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark"| "diemdanh" | "qrscan" | "settings" | "diemrenluyen") => void;
+  onPageChange?: (page: NavigationInstruction) => void;
   isOpen?: boolean;
   isAuth?: boolean;
   onToggle?: () => void;
@@ -129,6 +129,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MdOutlineBadge,
       description: "Xem điểm rèn luyện của bạn (cần đăng nhập)",
       authrequired: true,
+    },
+    {
+      id: "thuvien",
+      label: "Quản lý thư viện",
+      icon: MdOutlineLocalLibrary ,
+      description: "Quản lý thư viện LHU",
+      authrequired: true
     },
     {
       id: "settings",

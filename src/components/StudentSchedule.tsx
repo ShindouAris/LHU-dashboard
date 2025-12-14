@@ -37,6 +37,7 @@ import DiemRL from './DiemRL';
 import { PiExamDuotone } from 'react-icons/pi';
 import { NavigationItem } from '@/types/settings';
 import { CalendarDays, User, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
+import Elib from './Elib';
 
 
 export const StudentSchedule: React.FC = () => {
@@ -109,6 +110,8 @@ export const StudentSchedule: React.FC = () => {
       setPage("settings")
     } else if (path.startsWith("/diemrenluyen")) {
       setPage("diemrenluyen")
+    } else if (path.startsWith("/thuvien")) {
+      setPage("thuvien")
     } else {
       setPage("home");
     }
@@ -385,6 +388,9 @@ export const StudentSchedule: React.FC = () => {
     } else if (newPage === "diemrenluyen") {
       setPage("diemrenluyen")
       navigate("/diemrenluyen")
+    } else if (newPage === "thuvien") {
+      setPage("thuvien")
+      navigate("/thuvien")
     }
   };
 
@@ -479,10 +485,26 @@ export const StudentSchedule: React.FC = () => {
         onBack={() => handleChangeView('schedule')}
         page={page}
         onPageChange={handleChangeView}
-        title='Cài đặt'
+        title='Điểm rèn luyện'
       >
         <div className="min-h-screen py-8 px-4">
           <DiemRL />
+        </div>
+      </Layout>
+    )
+  }
+
+  if (page === "thuvien") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title='Quản lý thư viện'
+      >
+        <div className="min-h-screen py-8 px-4">
+          <Elib />
         </div>
       </Layout>
     )

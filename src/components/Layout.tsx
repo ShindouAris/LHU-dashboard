@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AuthStorage } from '@/types/user';
+import { NavigationInstruction } from '@/types/settings';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,7 +12,7 @@ interface LayoutProps {
   showBack?: boolean;
   showRefresh?: boolean;
   page: string;
-  onPageChange?: (page: "home" | "schedule" | "timetable" | "weather" | "mark" | "diemdanh" | "qrscan" | "parkinglhu" | "settings" | "diemrenluyen") => void;
+  onPageChange?: (page: NavigationInstruction) => void;
   title?: string;
   isDark?: boolean;
 }
