@@ -27,6 +27,7 @@ interface StatusColor {
   bg: string;
   text: string;
   label: string;
+  style: string;
 }
 
 interface TimeLeft {
@@ -99,14 +100,14 @@ class Presenter {
   static getStatusColor(trangThai: number, TGKetThuc: string): StatusColor {
 
     if (new Date(TGKetThuc).getTime() < new Date().getTime()) {
-      return { bg: '#57595B', text: '#E8D1C5', label: 'Đã trả phòng' }
+      return { bg: '#57595B', text: '#E8D1C5', label: 'Đã kết thúc', style: ''}
     }
     
     const colors: Record<number, StatusColor> = {
-      0: { bg: '#8CA9FF', text: '#FFF8DE', label: 'Chờ đủ người' },
-      1: { bg: '#F39EB6', text: '#F7F6D3', label: 'Đã xác nhận' },
-      2: { bg: '#360185', text: '#F4B342', label: 'Đang sử dụng' },
-      3: { bg: '#57595B', text: '#E8D1C5', label: 'Đã trả phòng' }
+      0: { bg: '#8CA9FF', text: '#FFF8DE', label: 'Chờ đủ người', style: '' },
+      1: { bg: '#F39EB6', text: '#F7F6D3', label: 'Đã xác nhận', style: '' },
+      2: { bg: '#360185', text: '#F4B342', label: 'Đang sử dụng', style: '' },
+      3: { bg: '#57595B', text: '#E8D1C5', label: 'Phòng đã bị huỷ', style: 'hidden' }
     };
     return colors[trangThai];
   }
@@ -361,7 +362,11 @@ const Elib: React.FC = () => {
       const init_date = dayjs().format("YYYY-MM-DD")
 
       if (eventCache.current[init_date]) {
-        setEvent(eventCache.current[init_date]);
+        setEvent(
+          eventCache.current[init_date].filter(e => 
+            Presenter.getStatusColor(e.TrangThai, e.ThoiGianKT).style !== 'hidden'
+          )
+        );
         return;
       }
       
@@ -373,7 +378,7 @@ const Elib: React.FC = () => {
         start: new Date(e.ThoiGianBD),
         end: new Date(e.ThoiGianKT),
         resourceId: e.TenPhong,
-      })) || []
+      })).filter(e => Presenter.getStatusColor(e.TrangThai, e.ThoiGianKT).style !== 'hidden') || []
 
       eventCache.current[init_date] = events;
 
@@ -389,7 +394,11 @@ const Elib: React.FC = () => {
 
     // 🔥 cache hit
     if (eventCache.current[dayKey]) {
-      setEvent(eventCache.current[dayKey]);
+      setEvent(
+        eventCache.current[dayKey].filter(e => 
+          Presenter.getStatusColor(e.TrangThai, e.ThoiGianKT).style !== 'hidden'
+        )
+      );
       return;
     }
 
@@ -397,13 +406,16 @@ const Elib: React.FC = () => {
     const booked_list = await ELIB_SERVICE.get_reservation_by_day(dayKey);
 
     const events =
-      booked_list?.data.map(e => ({
-        ...e,
-        title: `${e.FirstName} ${e.LastName}`,
-        start: new Date(e.ThoiGianBD),
-        end: new Date(e.ThoiGianKT),
-        resourceId: e.TenPhong,
-      })) || [];
+      booked_list?.data
+        .map(e => ({
+          ...e,
+          title: `${e.FirstName} ${e.LastName}`,
+          start: new Date(e.ThoiGianBD),
+          end: new Date(e.ThoiGianKT),
+          resourceId: e.TenPhong,
+        }))
+        .filter(e => Presenter.getStatusColor(e.TrangThai, e.ThoiGianKT).style !== 'hidden') // 🔥 lọc luôn
+      || [];
 
     // 🧠 lưu cache
     eventCache.current[dayKey] = events;
@@ -453,7 +465,7 @@ const Elib: React.FC = () => {
 
   const EventComponent = memo(({ event }: {event: any}) => {
     const status = Presenter.getStatusColor(event.TrangThai, event.ThoiGianKT)
-    
+
     return (
       <div className="p-1">
         <div className="text-sm font-semibold line-clamp-2">
