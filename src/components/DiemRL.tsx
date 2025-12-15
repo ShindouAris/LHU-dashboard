@@ -4,6 +4,7 @@ import { Activity, UserStatistics } from '@/types/drl';
 import { AuthStorage, UserResponse } from '@/types/user';
 import { drlService } from '@/services/diemrenluyenService';
 import {LoadingScreen} from './LoadingScreen';
+import { Badge } from './ui/badge';
 
 // Component hiển thị trạng thái
 const StatusChip = ({ status }: { status: number }) => {
@@ -23,9 +24,9 @@ const StatusChip = ({ status }: { status: number }) => {
   const config = getStatusConfig();
 
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
+    <Badge className={`px-3 py-1 rounded-full text-sm font-medium ${config.bg} ${config.text}`}>
       {config.label}
-    </span>
+    </Badge>
   );
 };
 
@@ -57,7 +58,7 @@ const DiemRL: React.FC = () => {
             if (!userStatistics) return;
             setTotalPoints(userStatistics.data[1][0].TotalPoints ? userStatistics.data[1][0].TotalPoints : 0);
             setTotalActivities(userStatistics.data[0][0].TongHoatDong);
-            if (userStatistics.data[0][0].TongHoatDong === 0) return; // không có hoạt động thì thôi, không tải gì nữa
+            // if (userStatistics.data[0][0].TongHoatDong === 0) return; // không có hoạt động thì thôi, không tải gì nữa
             setActivities(userStatistics.data[2]);
         } catch (error) {
             console.error("Error loading user statistics:", error);
