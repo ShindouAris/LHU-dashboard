@@ -151,7 +151,7 @@ return (
                     <div className="flex gap-8">
                         <div>
                             <span className="text-sm text-gray-600 dark:text-gray-300">Tổng điểm:</span>
-                            <span className="ml-2 text-2xl font-bold text-blue-600 dark:text-blue-400">{totalPoints}</span>
+                            <span className="ml-2 text-2xl font-bold text-blue-600 dark:text-blue-400">{totalPoints} / 45</span>
                         </div>
                         <div>
                             <span className="text-sm text-gray-600 dark:text-gray-300">Số hoạt động đã duyệt:</span>
