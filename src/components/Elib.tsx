@@ -96,12 +96,17 @@ const getNoiQuy = async (systemThongSo: ThongSo | null): Promise<NoiQuy[]> => {
 
 // ============== PRESENTER ==============
 class Presenter {
-  static getStatusColor(trangThai: number): StatusColor {
+  static getStatusColor(trangThai: number, TGKetThuc: string): StatusColor {
+
+    if (new Date(TGKetThuc).getTime() < new Date().getTime()) {
+      return { bg: '#57595B', text: '#E8D1C5', label: 'Đã trả phòng' }
+    }
+    
     const colors: Record<number, StatusColor> = {
       0: { bg: '#8CA9FF', text: '#FFF8DE', label: 'Chờ đủ người' },
       1: { bg: '#F39EB6', text: '#F7F6D3', label: 'Đã xác nhận' },
       2: { bg: '#360185', text: '#F4B342', label: 'Đang sử dụng' },
-      3: { bg: '#57595B', text: '#E8D1C5', label: 'Đã hủy / Đã kết thúc' }
+      3: { bg: '#57595B', text: '#E8D1C5', label: 'Đã trả phòng' }
     };
     return colors[trangThai];
   }
@@ -224,7 +229,7 @@ interface BookingCardProps {
 }
 
 const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAction }) => {
-  const status = Presenter.getStatusColor(booking.TrangThai);
+  const status = Presenter.getStatusColor(booking.TrangThai, booking.ThoiGianKT);
   const startTime = Presenter.formatDateTime(new Date(booking.ThoiGianBD));
   const endTime = Presenter.formatDateTime(new Date(booking.ThoiGianKT));
   const isOwner = currentUserId === booking.DocGiaDangKy;
@@ -447,7 +452,7 @@ const Elib: React.FC = () => {
   };
 
   const EventComponent = memo(({ event }: {event: any}) => {
-    const status = Presenter.getStatusColor(event.TrangThai)
+    const status = Presenter.getStatusColor(event.TrangThai, event.ThoiGianKT)
     
     return (
       <div className="p-1">
@@ -466,7 +471,7 @@ const Elib: React.FC = () => {
   });
 
   const eventStyleGetter = (event: any) => {
-    const status = Presenter.getStatusColor(event.TrangThai)
+    const status = Presenter.getStatusColor(event.TrangThai, event.ThoiGianKT)
 
     return {
       style: {
