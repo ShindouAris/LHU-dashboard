@@ -29,15 +29,18 @@ import {
 import { getTinhTrangInfo, isTinhTrangCancelled } from '@/utils/tinhtrang';
 import FuzzyText from "@/components/FuzzyText.tsx";
 import { motion } from "framer-motion";
+import { PiExam } from 'react-icons/pi';
 
 interface ScheduleCardProps {
   schedule: ScheduleItem;
   isNext?: boolean;
   allSchedules?: ScheduleItem[]; // Thêm để phát hiện lịch trùng
+  is_a_exam_class?: boolean;
 }
 
 const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = false, allSchedules = [] }) => {
   const getStatusConfig = (status: number, isCanceled: boolean) => {
+    // Trạng thái bị hủy
     if (isCanceled) {
         return {
             color: 'bg-gradient-to-r from-rose-600 to-rose-700',
@@ -78,10 +81,15 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
     }
   };
 
-  const getColor = (isCanceled: boolean, isNext: boolean): string => {
+  const getColor = (isCanceled: boolean, isNext: boolean, is_a_exam_class: boolean): string => {
     if (isNext && !isCanceled) {
       // Tiết tiếp theo
       return 'bg-gradient-to-r from-sky-600 via-sky-700 to-indigo-700 dark:from-indigo-900 dark:via-indigo-800 dark:to-sky-900 shadow-lg shadow-sky-300/40 dark:shadow-sky-900/40'
+    }
+
+    if (is_a_exam_class && !isCanceled) {
+      // Tiết thi
+      return 'bg-gradient-to-r from-amber-500 via-amber-600 to-amber-700 dark:from-[#FFAA00] dark:via-[#FF77AA] dark:to-[#FFBBE1] shadow-lg shadow-amber-300/40 dark:shadow-indigo-900/40'
     }
   
     if (isCanceled) {
@@ -238,10 +246,10 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
 
   return (
     <Card className={`group relative transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border-0 overflow-hidden focus-within:ring-2 focus-within:ring-sky-500/70 dark:focus-within:ring-sky-400/60 focus-within:ring-offset-2 focus-within:ring-offset-white dark:focus-within:ring-offset-gray-900 ${
-      getColor(canceled, isNext)
+      getColor(canceled, isNext, schedule.CalenType === 2)
     }`}>
       {/* Next Class Banner */}
-      {isNext && (
+      {isNext && schedule.CalenType !== 2 && (
         <div className="bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Clock className="h-4 w-4 animate-pulse" />
@@ -249,6 +257,16 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({ schedule, isNext = fal
           </div>
         </div>
       )}
+
+      {schedule.CalenType === 2 && !canceled && (
+        <div className="bg-gradient-to-r from-sky-600 via-indigo-600 to-violet-600 text-white px-4 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <PiExam className="h-4 w-4 animate-pulse" />
+              Đây là lịch thi. {!isNext ? 'Hãy chuẩn bị thật tốt cho kỳ thi sắp tới!' : 'Chúc bạn thi tốt!'} - Bắt đầu sau: {timestring}
+          </div>
+        </div>
+      )}
+
 
         {canceled && (
             <div className={`absolute inset-0 z-20 flex flex-col items-center justify-center text-center py-16 sm:py-24 px-4 ${overlayBackgroundClass}`}>
