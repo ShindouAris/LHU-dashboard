@@ -91,16 +91,17 @@ export const authService = {
       })
       const data: MarkApiResponse = await response.json()
       if (!response.ok) {
-        if (response.status === 401 && response.statusText === "Token not found") {
+        if (response.statusText === "Token not found") {
           throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
         }
-        if (response.status === 400 && data.Message === "Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học") {
+        if (data.Message === "Bạn vui lòng vào hệ thống <a href=\"//qa.lhu.edu.vn\">khảo sát</a> và hoành thành tất cả trước khi xem được điểm") {
           throw new Error("Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học")
         }
-        if (response.status === 400 && data.Message === "Bạn không có quyền xem điểm") {
+        if (data.Message === "Bạn không có quyền xem điểm") {
           throw new Error("Bạn không có quyền xem điểm")
         }
-        throw new Error("Đã xảy ra lỗi, hãy xem trên app ME nhé bạn")
+
+        throw new Error(`Đã xảy ra lỗi: ${data.Message}`)
       }
       if (!data.data || Object.keys(data.data).length === 0) {
         throw new Error("Không tìm thấy điểm của mã sinh viên này")
