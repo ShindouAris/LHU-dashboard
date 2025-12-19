@@ -15,7 +15,8 @@ import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import toast from 'react-hot-toast';
-
+// @ts-ignore
+import RoomBookingForm from './Elib_register';
 // ============== TYPES ==============
 
 interface NoiQuy {
@@ -349,6 +350,9 @@ const Elib: React.FC = () => {
   const [showDetailFocusedEvent, setShowFocusedEvent] = useState(false)
   const eventCache = useRef<Record<string, any[]>>({})
   const user = AuthStorage.getUser();
+  const [is_booking_open, setIsBookingOpen] = useState<boolean>(false);
+  const [is_modification_room_dialog_open, setIsModificationRoomDialogOpen] = useState<boolean>(false);
+  const [selectedBookingNumber, setSelectedBookingNumber] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -531,13 +535,32 @@ const Elib: React.FC = () => {
 
   };
 
+  useEffect(() => {
+    setIsModificationRoomDialogOpen(selectedBookingNumber !== null);
+  }, [selectedBookingNumber]);
+
   const handleRegister = (): void => {
-    toast.error("Đang được phát triển dần, sẽ có trong bản cập nhật gần nhất")
-    return
-    if (dataLuotDaDangKy >= MaxRoomBookingLimit) {
-      return;
-    }
+    setIsBookingOpen(true);
   };
+
+  // @ts-expect-error
+  const handleBookingSuccess = (madatcho: string) => {
+    setIsBookingOpen(false);
+    setSelectedBookingNumber(madatcho);
+  }
+
+  if (is_booking_open) {
+    return (
+      // <RoomBookingForm onBookingSuccess={handleBookingSuccess} onClose={() => setIsBookingOpen(false)} />
+      <img src="/under_construction.png" alt="Under Construction" className="mx-auto mt-20" />
+    )
+  }
+
+  if (is_modification_room_dialog_open && selectedBookingNumber) {
+    return (
+      <img src="/under_construction.png" alt="Under Construction" className="mx-auto mt-20" />
+    )
+  }
 
   const copyToClipboard = (text: string): void => {
     navigator.clipboard.writeText(text);
