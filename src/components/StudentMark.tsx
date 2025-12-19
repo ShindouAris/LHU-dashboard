@@ -173,6 +173,24 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
         </Card>
       )}
 
+      {error === "Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học" && (
+        <Card className="border-0 shadow-lg">
+          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">
+            <a>
+              Vui lòng hoàn thành khảo sát đánh giá giảng viên và môn học tại{' '}
+              <a
+                href="https://qa.lhu.edu.vn"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 underline"
+              >Trang khảo sát của trường 
+              </a>{' '}
+              trước khi xem điểm.
+            </a>
+          </CardContent>
+        </Card>
+      )}
+
       {!loading && !error && marks && (
         <>
           <Card className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
