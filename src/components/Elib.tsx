@@ -571,7 +571,7 @@ const Elib: React.FC = () => {
   const progressColor: string = Presenter.getProgressColor(dataLuotDaDangKy, MaxRoomBookingLimit);
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 md:p-6">
+    <div className="min-h-screen p-4 md:p-6">
       <div className="mx-auto space-y-6">
 
         <ExpansionPanel 

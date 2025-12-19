@@ -160,7 +160,7 @@ export const LmsDiemDanhPage: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen p-4 flex items-center justify-center">
         <div className="text-center">
           <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-600 dark:text-blue-400 animate-spin" />
           <p className="text-gray-600 dark:text-gray-300 text-lg">Đang tải dữ liệu điểm danh...</p>
@@ -172,7 +172,7 @@ export const LmsDiemDanhPage: React.FC = () => {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen p-4 flex items-center justify-center">
         <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md">
           <XCircle className="w-16 h-16 mx-auto mb-4 text-red-500 dark:text-red-400" />
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Có lỗi xảy ra</h2>
@@ -185,7 +185,7 @@ export const LmsDiemDanhPage: React.FC = () => {
   // Empty state
   if (!data || !data.data || data.data.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+      <div className="min-h-screen p-4 flex items-center justify-center">
         <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md">
           <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
           <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Chưa có dữ liệu</h2>
@@ -197,7 +197,7 @@ export const LmsDiemDanhPage: React.FC = () => {
 
   // Main content
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-gray-900 dark:to-gray-800 p-4">
+    <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
