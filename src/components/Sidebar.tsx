@@ -19,6 +19,7 @@ import { toast } from 'react-hot-toast';
 import { FaParking } from 'react-icons/fa';
 import { getSettings, NavigationInstruction } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
+import { Badge } from './ui/badge';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -64,6 +65,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     authrequired?: boolean;
     hidden?: boolean;
     forceshow?: boolean;
+    isBetaItem?: boolean;
   }
 
   const navigationItems: NavigationItem[] = [
@@ -129,13 +131,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MdOutlineBadge,
       description: "Xem điểm rèn luyện của bạn (cần đăng nhập)",
       authrequired: true,
+      isBetaItem: true
     },
     {
       id: "thuvien",
       label: "Quản lý thư viện",
       icon: MdOutlineLocalLibrary ,
       description: "Quản lý thư viện LHU",
-      authrequired: true
+      authrequired: true,
+      isBetaItem: true
     },
     {
       id: "settings",
@@ -274,6 +278,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         {isActive && (
                           <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full flex-shrink-0" />
                         )}
+                        {
+                          (item.isBetaItem) && (
+                            <Badge>Beta</Badge>
+                          )
+                        }
                       </button>
                     );
                   })}
