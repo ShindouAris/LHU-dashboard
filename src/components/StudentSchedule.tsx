@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 // Layouts
@@ -23,21 +23,21 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 // Pages
-import WeatherPage from '@/components/WeatherPage';
-import { Timetable } from './Timetable';
-import { MarkPage } from './StudentMark';
+const WeatherPage = lazy(() => import('@/components/WeatherPage'));
+const Timetable = lazy(() => import('./Timetable'));
+const MarkPage = lazy(() => import('./StudentMark'));
 import { ExamCard } from './ExamCard';
-import { LmsDiemDanhPage } from './LmsDiemDanhPage';
-import { QRScanner } from './LmsQr';
-import ParkingLHUPage from './ParkingLHU'
-import SettingsPage from './Setting';
+const LmsDiemDanhPage = lazy(() => import('./LmsDiemDanhPage'));
+const QRScanner = lazy(() => import('./LmsQr'));
+const ParkingLHUPage = lazy(() => import('./ParkingLHU'));
+const SettingsPage = lazy(() => import('./Setting'));
 import {LoadingScreen} from './LoadingScreen';
-import DiemRL from './DiemRL';
+const DiemRL = lazy(() => import('./DiemRL'));
+const Elib = lazy(() => import('./Elib'));
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
 import { NavigationItem } from '@/types/settings';
 import { CalendarDays, User, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
-import Elib from './Elib';
 
 
 export const StudentSchedule: React.FC = () => {
@@ -406,7 +406,9 @@ export const StudentSchedule: React.FC = () => {
       >
         <div className="min-h-screen py-6 sm:py-8 px-4">
           <div className="max-w-6xl mx-auto">
-            <MarkPage onBackToSchedule={() => handleChangeView('schedule')} />
+            <Suspense fallback={<LoadingScreen loading={true} />}>
+              <MarkPage onBackToSchedule={() => handleChangeView('schedule')} />
+            </Suspense>
           </div>
         </div>
       </Layout>
@@ -423,7 +425,9 @@ export const StudentSchedule: React.FC = () => {
       >
         <div className="min-h-screen py-6 sm:py-8 px-4">
           <div className="max-w-6xl mx-auto">
-            <LmsDiemDanhPage />
+            <Suspense fallback={<LoadingScreen loading={true} />}>
+              <LmsDiemDanhPage />
+            </Suspense>
           </div>
         </div>
       </Layout>
@@ -440,7 +444,9 @@ export const StudentSchedule: React.FC = () => {
         title="Quét mã điểm danh"
       >
         <div className="flex justify-center items-start px-4">
-          <QRScanner />
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <QRScanner />
+          </Suspense>
         </div>
       </Layout>
     )
@@ -456,7 +462,9 @@ export const StudentSchedule: React.FC = () => {
         title='Quản lý đỗ xe LHU'
       >
         <div className="flex justify-center items-start w-full">
-          <ParkingLHUPage />
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <ParkingLHUPage />
+          </Suspense>
         </div>
       </Layout>
     )
@@ -472,7 +480,9 @@ export const StudentSchedule: React.FC = () => {
         title='Cài đặt'
       >
         <div className="min-h-screen py-8 px-4">
-          <SettingsPage />
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <SettingsPage />
+          </Suspense>
         </div>
       </Layout>
     )
@@ -488,7 +498,9 @@ export const StudentSchedule: React.FC = () => {
         title='Điểm rèn luyện'
       >
         <div className="min-h-screen py-8 px-4">
-          <DiemRL />
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <DiemRL />
+          </Suspense>
         </div>
       </Layout>
     )
@@ -504,7 +516,9 @@ export const StudentSchedule: React.FC = () => {
         title='Quản lý thư viện'
       >
         <div className="min-h-screen py-8 px-4">
-          <Elib />
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <Elib />
+          </Suspense>
         </div>
       </Layout>
     )
@@ -773,16 +787,22 @@ export const StudentSchedule: React.FC = () => {
 
         {/* Schedule Display */}
         {page === "timetable" ? (
-          <Timetable 
-            schedules={schedules} 
-            studentName={studentInfo?.HoTen}
-            exams={exams || []}
-            examDurationMinutes={120}
-          />
+          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
+            <Timetable 
+              schedules={schedules} 
+              studentName={studentInfo?.HoTen}
+              exams={exams || []}
+              examDurationMinutes={120}
+            />
+        </Suspense>
         ) : page === "weather" ? (
-          <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
+          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
+            <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
+          </Suspense>
         ) : page === "mark" ? (
-          <MarkPage />
+          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
+            <MarkPage />
+          </Suspense>
         ) : !hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={handleChangeView} />
         ) : (

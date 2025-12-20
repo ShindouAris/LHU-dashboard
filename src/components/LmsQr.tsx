@@ -3,7 +3,7 @@ import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, /* CardHeader */ } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle } from "lucide-react";
+import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle, UserPlus, CheckCircle2 } from "lucide-react";
 import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,8 @@ import dayjs from "dayjs"
 import { FaRegQuestionCircle } from "react-icons/fa";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog.tsx";
 import { authService } from "@/services/authService";
+import { multiSessionService } from "@/services/multisession";
+import { UserResponse } from "@/types/user";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -25,6 +27,9 @@ export const QRScanner: React.FC = () => {
   const [success, setIsSuccess] = useState<boolean>(false)
   const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
   const [dialogExpiredQROpen, setDialogExpiredQROpen] = useState<boolean>(false)
+  const [usersList, setUsersList] = useState<UserResponse[]>([])
+  const [newlyAddedUser, setNewlyAddedUser] = useState<UserResponse | null>(null)
+  const [showUserListAnimation, setShowUserListAnimation] = useState<boolean>(false)
   const nav = useNavigate()
 
   const getCamera = async () => {
@@ -146,7 +151,9 @@ export const QRScanner: React.FC = () => {
 
   useEffect(() => {
 
-    setError(null)
+    const useScanned = async () => {
+
+          setError(null)
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
 
@@ -158,9 +165,8 @@ export const QRScanner: React.FC = () => {
     }
 
     const access_token = localStorage.getItem("access_token")
-
     if (!access_token) {setError("Đăng nhập để sử dụng"); return}
-    // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) thì nổ lỗi
+    // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) hoặc LIB (điểm danh sử dụng phòng thư viện) thì nổ lỗi
     const SUBSTR = scanned.substring(0,3)
     if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN" && SUBSTR !== "LIB") {
       setError("QR này không được hỗ trợ...")
@@ -174,50 +180,74 @@ export const QRScanner: React.FC = () => {
     })
 
     if (SUBSTR === "STB") {
-      ApiService.send_diem_danh(scanned, access_token).then((res) => {
-        
-        if (!res) return
+      try {
+        const res = await ApiService.send_diem_danh(scanned, access_token);
+        if (!res) return;
 
         if (!res.success) {
-          const errorMessage = String(res.error)
-          setError(errorMessage)
+          const errorMessage = String(res.error);
+          setError(errorMessage);
           // Check if it's an expired QR code error
-          if (errorMessage.includes("Mã QR điểm danh đã hết hạn") || errorMessage.includes("hết hạn")) {
-            setIsExpiredQR(true)
-            setDialogExpiredQROpen(true)
+          if (
+            errorMessage.includes("Mã QR điểm danh đã hết hạn") ||
+            errorMessage.includes("hết hạn")
+          ) {
+            setIsExpiredQR(true);
+            setDialogExpiredQROpen(true);
             toast.error("⚠️ Mã QR điểm danh đã hết hạn!", {
               duration: 5000,
               style: {
-                background: '#ef4444',
-                color: '#fff',
-                fontWeight: 'bold',
+                background: "#ef4444",
+                color: "#fff",
+                fontWeight: "bold",
               },
-            })
+            });
           } else {
-            setIsExpiredQR(false)
-            setDialogExpiredQROpen(false)
+            setIsExpiredQR(false);
+            setDialogExpiredQROpen(false);
+          }
+        } else {
+          setIsSuccess(true);
+          setIsExpiredQR(false);
+          toast.success(
+            `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+          );
+        }
+      } catch (error) {
+        if (error instanceof Error) {
+          if (error.message.toLowerCase() === "failed to fetch") {
+            toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối");
+          } else {
+            toast.error(
+              "Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME"
+            );
           }
         }
-        else { 
-          setIsSuccess(true)
-          setIsExpiredQR(false)
-          toast.success(`Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
-        }}).catch(error => {
-          if (error instanceof Error) {
-            if (error.message.toLowerCase() === "failed to fetch") {
-              toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
-            }
-            else {
-              toast.error("Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME")
-            }
-          }
-        })
+      }
     } else if (SUBSTR === "LGN") {
-      authService.send_login(scanned).then((res) => {
-        if (res) {
-          toast.success("Đăng nhập thành công")
+      // Fetch users before login
+      multiSessionService.getAllUsers().then(async (existingUsers) => {
+        setUsersList(existingUsers)
+        
+        // Perform login
+        const newUser = await authService.send_login(scanned)
+        
+        if (newUser) {
+          // Fetch updated users list after login
+          const updatedUsers = await multiSessionService.getAllUsers()
+          setUsersList(updatedUsers)
+          setNewlyAddedUser(newUser)
+          setShowUserListAnimation(true)
           setIsSuccess(true)
           setIsLoginQR(true)
+          
+          // Hide animation after 4 seconds
+          setTimeout(() => {
+            setShowUserListAnimation(false)
+            setNewlyAddedUser(null)
+          }, 4000)
+          
+          toast.success("Đăng nhập thành công")
         }
       }).catch((error) => {
         if (error instanceof Error) {
@@ -225,7 +255,8 @@ export const QRScanner: React.FC = () => {
         }
       })
     } else if (SUBSTR === "LIB") {
-      ApiService.elib_scanCode(scanned, access_token).then((res) => {
+      try {
+        const res = await ApiService.elib_scanCode(scanned, access_token)
         if (!res) return
 
         if (!res.success) {
@@ -236,7 +267,8 @@ export const QRScanner: React.FC = () => {
           setIsSuccess(true)
           toast.success(`Quét mã thư viện thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
         }
-      }).catch((error) => {
+
+      } catch (error) {
         if (error instanceof Error) {
           if (error.message.toLowerCase() === "failed to fetch") {
             toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
@@ -245,8 +277,20 @@ export const QRScanner: React.FC = () => {
             toast.error("Đã xảy ra lỗi không mong muốn, hãy thử lại")
           }
         }
-      })
+      }
+    }}
+
+    useScanned();
+
+    return () => {
+      setScanned("");
+      setIsSuccess(false)
+      setIsLoginQR(false)
+      setError(null)
+      setIsExpiredQR(false)
+      setDialogExpiredQROpen(false)
     }
+
   }, [scanned])
 
   const handleReset = async () => {
@@ -256,6 +300,9 @@ export const QRScanner: React.FC = () => {
     setError(null)
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
+    setShowUserListAnimation(false)
+    setNewlyAddedUser(null)
+    setUsersList([])
     await toast.promise(
       async () => {qrScanner?.start(); await getCamera()},
       {
@@ -371,7 +418,8 @@ export const QRScanner: React.FC = () => {
                       <p className="text-green-700 text-xs mt-1 break-all">
                         {scanned.substring(0,3) === "STB" ? scanned : 
                         scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : 
-                        scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""}
+                        scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""
+                        }
                       </p>
                     </div>
                   </div>
@@ -452,16 +500,72 @@ export const QRScanner: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-      
-      {/* <Card className="mt-3">
-      // TODO: hiển thị danh sách người đã đăng nhập vào thiết bị này
-        <CardHeader>
-          727
-        </CardHeader>
-        <CardContent>
-          WYSI
-        </CardContent>
-      </Card> */}
+
+      {/* User List Card - Shows when LGN QR is scanned */}
+      {showUserListAnimation && newlyAddedUser && (
+        <Card className="w-full max-w-md mt-4 border-2 border-green-500">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <UserPlus className="w-5 h-5 text-green-600" />
+              <h3 className="font-semibold text-gray-800">Người dùng đã được thêm</h3>
+            </div>
+            
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {usersList.map((user) => {
+                const isNewUser = user.UserID === newlyAddedUser.UserID;
+                return (
+                  <div
+                    key={user.UserID}
+                    className={`flex items-center gap-3 p-2 rounded-lg ${
+                      isNewUser ? "bg-green-50 ring-2 ring-green-500 shadow-md" : ""
+                    }`}
+                  >
+                    <div className="relative">
+                      {user.Avatar ? (
+                        <img
+                          src={user.Avatar}
+                          alt={user.FullName}
+                          className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                        />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                          {user.FullName?.charAt(0) || user.UserName?.charAt(0) || "?"}
+                        </div>
+                      )}
+                      {isNewUser && (
+                        <div className="absolute -top-1 -right-1 bg-green-500 rounded-full p-0.5">
+                          <CheckCircle2 className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className={`font-medium text-sm truncate ${
+                        isNewUser ? "text-green-800 font-semibold" : "text-gray-800"
+                      }`}>
+                        {user.FullName || user.UserName || "Người dùng"}
+                      </p>
+                      <p className="text-xs text-gray-500 truncate">
+                        {user.UserID} {user.Class ? `• ${user.Class}` : ""}
+                      </p>
+                    </div>
+                    {isNewUser && (
+                      <div className="text-green-600 text-xs font-semibold">
+                        Mới
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-3 pt-3 border-t border-gray-200">
+              <p className="text-xs text-center text-gray-600">
+                Tổng số: <span className="font-semibold text-green-600">{usersList.length}</span> người dùng
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (
@@ -470,7 +574,7 @@ export const QRScanner: React.FC = () => {
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
           onClick={() => setScale(1)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center"
+          className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40"
         >
           <span className="text-sm font-bold">1x</span>
         </motion.button>
@@ -542,3 +646,5 @@ export const QRScanner: React.FC = () => {
     </div>
   );
 };
+
+export default QRScanner;

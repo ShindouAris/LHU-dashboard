@@ -1,8 +1,7 @@
 import { StudentSchedule } from './components/StudentSchedule';
-import LoginPage from './components/LoginPage';
+const  LoginPage = lazy(() => import('./components/LoginPage'));
 import './App.css';
 import { Routes, Route } from 'react-router-dom';
-import { useEffect } from 'react';
 
 declare global {
   interface Window {

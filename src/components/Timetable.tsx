@@ -562,3 +562,5 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     </div>
   );
 });
+
+export default Timetable;

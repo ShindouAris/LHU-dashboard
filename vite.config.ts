@@ -49,4 +49,15 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          calendar: ['react-big-calendar', 'date-fns'],
+          lucide: ['lucide-react'],
+          vendor: ['react', 'react-dom', 'react-router-dom', 'react-hot-toast'],
+        }
+      }
+    }
+  }
 });

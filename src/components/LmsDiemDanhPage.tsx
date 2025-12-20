@@ -215,3 +215,5 @@ export const LmsDiemDanhPage: React.FC = () => {
     </div>
   );
 };
+
+export default LmsDiemDanhPage;
