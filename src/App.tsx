@@ -1,3 +1,4 @@
+import { useEffect, lazy } from 'react';
 import { StudentSchedule } from './components/StudentSchedule';
 const  LoginPage = lazy(() => import('./components/LoginPage'));
 import './App.css';
