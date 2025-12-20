@@ -206,7 +206,7 @@ export const LmsDiemDanhPage: React.FC = () => {
         </div>
         
         {/* List */}
-        <div className="space-y-4">
+        <div className="space-y-4 overflow-y-scroll max-h-[75vh]">
           {data.data.map((item, index) => (
             <DiemDanhCard key={index} item={item} />
           ))}
