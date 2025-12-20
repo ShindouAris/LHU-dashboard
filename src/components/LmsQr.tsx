@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, /* CardHeader */ } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Dia
 import { authService } from "@/services/authService";
 import { multiSessionService } from "@/services/multisession";
 import { UserResponse } from "@/types/user";
+import { DiemDanhOut } from "@/types/schedule";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -30,8 +31,10 @@ export const QRScanner: React.FC = () => {
   const [usersList, setUsersList] = useState<UserResponse[]>([])
   const [newlyAddedUser, setNewlyAddedUser] = useState<UserResponse | null>(null)
   const [showUserListAnimation, setShowUserListAnimation] = useState<boolean>(false)
+  const [snapshotData, setSnapshotData] = useState<DiemDanhOut[] | null>(null)
+  const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
   const nav = useNavigate()
-
+1
   const getCamera = async () => {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: "environment"}, audio: false});
@@ -64,6 +67,64 @@ export const QRScanner: React.FC = () => {
       }
     }
   }, [trackRef.current]);
+
+
+
+  useEffect(() => {
+
+    const load = async () => {
+
+      const access_token = localStorage.getItem("access_token")
+      if (!access_token) return;
+      try {
+        const res = await ApiService.get_lms_diem_danh(access_token)
+
+        if (res && res.data.length > 0) {
+          setSnapshotData(res.data)
+        }
+
+      } catch (error) {
+        console.error("Lỗi khi lấy snapshot điểm danh:", error);
+      }
+    }
+
+    load();
+
+    return () => {
+      setSnapshotData(null);
+    }
+
+  }, [])
+
+  const filterData = useCallback((oldSnapshot: DiemDanhOut[], newSnapshot: DiemDanhOut[]) => {
+
+    let changed = null;
+
+    const getKey = (item: DiemDanhOut) =>
+    `${item.TenMonHoc}|${item.NgayHoc}|${item.HoTenGV}`;
+
+    const oldMap = new Map<string, DiemDanhOut>();
+    oldSnapshot.filter(item => {(item.TrangThai === 2 || item.TrangThai === 1)}).forEach(item => oldMap.set(getKey(item), item));
+
+    if (oldSnapshot.length < newSnapshot.length) {
+      for (const item of newSnapshot) {
+        if (!oldMap.has(getKey(item))) {
+          changed = item;
+          break;
+        }
+    }
+    } else if (oldSnapshot.length === newSnapshot.length) {
+        for (const item of newSnapshot) {
+          const oldItem = oldMap.get(getKey(item));
+          if (oldItem && oldItem.TrangThai !== item.TrangThai) {
+            changed = item
+          }
+        }
+    }
+
+    return changed;
+    
+  }, []);
 
   useEffect(() => {
   let cancelled = false;
@@ -105,9 +166,7 @@ export const QRScanner: React.FC = () => {
     }
   };
   
-  handleZoom().then(() => {
-
-  });
+  handleZoom();
   
   return () => {
     cancelled = true;
@@ -209,9 +268,16 @@ export const QRScanner: React.FC = () => {
         } else {
           setIsSuccess(true);
           setIsExpiredQR(false);
-          toast.success(
-            `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-          );
+          const nowSnapShot = await ApiService.get_lms_diem_danh(access_token); // Fetch latest data for snapshot comparison
+          const changedItem = filterData(snapshotData || [], nowSnapShot.data || []);
+          if (changedItem) {
+            toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
+            setMonHocDaDiemDanh(changedItem.TenMonHoc)
+          } else {
+            toast.success(
+              `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+            );
+          }
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -298,6 +364,7 @@ export const QRScanner: React.FC = () => {
     setIsSuccess(false)
     setIsLoginQR(false)
     setError(null)
+    setMonHocDaDiemDanh(null)
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
     setShowUserListAnimation(false)
@@ -319,6 +386,7 @@ export const QRScanner: React.FC = () => {
 
   const handleBack = () => {
     setScanned("")
+    setMonHocDaDiemDanh(null)
     nav("/")
     qrScanner?.stop()
   }
@@ -416,7 +484,7 @@ export const QRScanner: React.FC = () => {
                         }
                       </p>
                       <p className="text-green-700 text-xs mt-1 break-all">
-                        {scanned.substring(0,3) === "STB" ? scanned : 
+                        {scanned.substring(0,3) === "STB" ? monHocDaDiemDanh ? `Môn học: ${monHocDaDiemDanh}` : scanned :
                         scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : 
                         scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""
                         }
