@@ -177,6 +177,12 @@ export const StudentSchedule: React.FC = () => {
   const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
     setLoading(true);
     setError(null);
+
+    if (!/^\d+$/.test(studentId)) {
+      toast.error('Mã sinh viên không hợp lệ. Vui lòng chỉ nhập chữ số.');
+      setLoading(false);
+      return;
+    }
     
     try {
         const hasnet = await ApiService.testnet()

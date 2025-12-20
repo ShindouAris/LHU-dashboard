@@ -75,11 +75,15 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
           <Input
             ref={inputRef}
             type="text"
+            inputMode='numeric'
+            pattern='[0-9]*'
             placeholder="Nhập mã sinh viên..."
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
             className="border-0 shadow-none text-base sm:text-lg py-3 sm:py-4 px-4 sm:px-6 bg-transparent focus:ring-0 focus-visible:ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500"
             disabled={loading}
+            minLength={9}
+            maxLength={9}
           />
           <div className="absolute inset-y-0 right-0 flex items-center pr-4">
             <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" />
