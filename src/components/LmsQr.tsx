@@ -68,11 +68,7 @@ export const QRScanner: React.FC = () => {
     }
   }, [trackRef.current]);
 
-
-
-  useEffect(() => {
-
-    const load = async () => {
+  const loadSnapshot = async () => {
 
       const access_token = localStorage.getItem("access_token")
       if (!access_token) return;
@@ -87,14 +83,6 @@ export const QRScanner: React.FC = () => {
         console.error("Lỗi khi lấy snapshot điểm danh:", error);
       }
     }
-
-    load();
-
-    return () => {
-      setSnapshotData(null);
-    }
-
-  }, [])
 
   const filterData = useCallback((oldSnapshot: DiemDanhOut[], newSnapshot: DiemDanhOut[]) => {
 
@@ -240,6 +228,7 @@ export const QRScanner: React.FC = () => {
 
     if (SUBSTR === "STB") {
       try {
+        loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
         const res = await ApiService.send_diem_danh(scanned, access_token);
         if (!res) return;
 
@@ -270,14 +259,23 @@ export const QRScanner: React.FC = () => {
           setIsExpiredQR(false);
           const nowSnapShot = await ApiService.get_lms_diem_danh(access_token); // Fetch latest data for snapshot comparison
           const changedItem = filterData(snapshotData || [], nowSnapShot.data || []);
-          if (changedItem) {
-            toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
-            setMonHocDaDiemDanh(changedItem.TenMonHoc)
-          } else {
-            toast.success(
-              `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-            );
+          try {
+              if (changedItem) {
+              toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
+              setMonHocDaDiemDanh(changedItem.TenMonHoc)
+            } else {
+              toast.success(
+                `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+              );
           }
+
+          } catch (e) {
+            toast.success(
+                `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+              );
+              console.log("Lỗi khi hiển thị thông báo môn học đã điểm danh: ", e);
+          }
+          
         }
       } catch (error) {
         if (error instanceof Error) {
@@ -355,6 +353,7 @@ export const QRScanner: React.FC = () => {
       setError(null)
       setIsExpiredQR(false)
       setDialogExpiredQROpen(false)
+      setSnapshotData(null)
     }
 
   }, [scanned])
