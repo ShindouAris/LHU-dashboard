@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import FuzzyText from "./FuzzyText";
+import FuzzyText from "./LHU_UI/FuzzyText";
 import { RefreshCcw } from "lucide-react";
 
 type ErrorBoundaryProps = {

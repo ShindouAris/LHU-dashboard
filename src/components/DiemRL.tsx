@@ -3,7 +3,7 @@ import { Upload, Edit2, Trash2, Plus } from 'lucide-react';
 import { Activity, UserStatistics } from '@/types/drl';
 import { AuthStorage, UserResponse } from '@/types/user';
 import { drlService } from '@/services/diemrenluyenService';
-import {LoadingScreen} from './LoadingScreen';
+import {LoadingScreen} from './LHU_UI/LoadingScreen';
 import { Badge } from './ui/badge';
 
 // Component hiển thị trạng thái

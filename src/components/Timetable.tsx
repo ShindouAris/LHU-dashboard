@@ -12,7 +12,7 @@ import {
   ScheduleWithMetadata
 } from '@/utils/scheduleUtils';
 import { getTinhTrangInfo, isTinhTrangCancelled, type TinhTrangInfo } from '@/utils/tinhtrang';
-import { DuplicateScheduleWarning } from './DuplicateScheduleWarning';
+import { DuplicateScheduleWarning } from './LHU_UI/DuplicateScheduleWarning';
 
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './Timetable.css';

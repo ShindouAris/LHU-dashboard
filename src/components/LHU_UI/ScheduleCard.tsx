@@ -27,7 +27,7 @@ import {
   getDuplicateGroupStatus 
 } from '@/utils/scheduleUtils';
 import { getTinhTrangInfo, isTinhTrangCancelled } from '@/utils/tinhtrang';
-import FuzzyText from "@/components/FuzzyText.tsx";
+import FuzzyText from "@/components/LHU_UI/FuzzyText";
 import { motion } from "framer-motion";
 import { PiExam } from 'react-icons/pi';
 

@@ -3,10 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 // Layouts
 import { StudentIdInput } from './StudentIdInput';
-import { ScheduleCard } from './ScheduleCard';
-import { EmptySchedule } from './EmptySchedule';
-import { LoadingSpinner } from './LoadingSpinner';
-import { ErrorMessage } from './ErrorMessage';
+import { ScheduleCard } from './LHU_UI/ScheduleCard';
+import { EmptySchedule } from './LHU_UI/EmptySchedule';
+import { LoadingSpinner } from './LHU_UI/LoadingSpinner';
+import { ErrorMessage } from './LHU_UI/ErrorMessage';
 import { Layout } from './Layout';
 // Interfaces & Helpers
 import { ApiService } from '@/services/apiService';
@@ -26,14 +26,16 @@ import { Button } from '@/components/ui/button';
 const WeatherPage = lazy(() => import('@/components/WeatherPage'));
 const Timetable = lazy(() => import('./Timetable'));
 const MarkPage = lazy(() => import('./StudentMark'));
-import { ExamCard } from './ExamCard';
+import { ExamCard } from './LHU_UI/ExamCard';
 const LmsDiemDanhPage = lazy(() => import('./LmsDiemDanhPage'));
 const QRScanner = lazy(() => import('./LmsQr'));
 const ParkingLHUPage = lazy(() => import('./ParkingLHU'));
 const SettingsPage = lazy(() => import('./Setting'));
-import {LoadingScreen} from './LoadingScreen';
+import {LoadingScreen} from './LHU_UI/LoadingScreen';
 const DiemRL = lazy(() => import('./DiemRL'));
 const Elib = lazy(() => import('./Elib'));
+const ToolLHU = lazy(() => import('./ToolLHU'));
+
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
 import { NavigationItem } from '@/types/settings';
@@ -112,7 +114,10 @@ export const StudentSchedule: React.FC = () => {
       setPage("diemrenluyen")
     } else if (path.startsWith("/thuvien")) {
       setPage("thuvien")
-    } else {
+    } else if (path.startsWith("/toollhu")) {
+      setPage("toollhu")
+    }
+     else {
       setPage("home");
     }
   }, [location.pathname || currentStudentId]);
@@ -397,6 +402,9 @@ export const StudentSchedule: React.FC = () => {
     } else if (newPage === "thuvien") {
       setPage("thuvien")
       navigate("/thuvien")
+    } else if (newPage === "toollhu") {
+      setPage("toollhu")
+      navigate("/toollhu")
     }
   };
 
@@ -524,6 +532,24 @@ export const StudentSchedule: React.FC = () => {
         <div className="min-h-screen py-8 px-4">
           <Suspense fallback={<LoadingScreen loading={true} />}>
             <Elib />
+          </Suspense>
+        </div>
+      </Layout>
+    )
+  }
+
+  if (page === "toollhu") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title='Công cụ LHU'
+      >
+        <div className="min-h-screen py-8 px-4">
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <ToolLHU />
           </Suspense>
         </div>
       </Layout>

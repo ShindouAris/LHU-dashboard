@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { toast } from 'react-hot-toast';
-import { FaParking } from 'react-icons/fa';
+import { FaParking, FaToolbox } from 'react-icons/fa';
 import { getSettings, NavigationInstruction } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
-      authrequired: true,
+      authrequired: false,
       forceshow: true
     },
     {
@@ -138,6 +138,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Quản lý thư viện",
       icon: MdOutlineLocalLibrary ,
       description: "Quản lý thư viện LHU",
+      authrequired: true,
+      isBetaItem: true
+    },
+    {
+      id: "toollhu",
+      label: "Công cụ LHU",
+      icon: FaToolbox,
+      description: "Các công cụ hỗ trợ LHU",
       authrequired: true,
       isBetaItem: true
     },
