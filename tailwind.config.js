@@ -134,6 +134,7 @@ export default {
         mono: ["JetBrains Mono", "monospace"],
         Purrfect: ["Purrfect", "monospace"],
         loveHouse: ["LoveHouse", "monospace"],
+        zzz_font: ["ZZZ_font", "monospace"],
       },
       boxShadow: {
         "soft": "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)",

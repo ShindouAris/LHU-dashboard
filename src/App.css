@@ -19,6 +19,13 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: ZZZ_font;
+  src: url(/fonts/ZZZ_font.ttf) format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
 /* Custom animations for the app */
 @keyframes blob {
   0% {
