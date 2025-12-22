@@ -1,4 +1,4 @@
-import { useEffect, lazy } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { StudentSchedule } from './components/StudentSchedule';
 const  LoginPage = lazy(() => import('./components/LoginPage'));
 import './App.css';
@@ -45,7 +45,7 @@ function App() {
   return (
     <Routes>
       <Route path="/" element={<StudentSchedule />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/login" element={<Suspense fallback={<div>Loading...</div>}><LoginPage /></Suspense>} />
       <Route path="/schedule" element={<StudentSchedule />} />
       <Route path="/timetable" element={<StudentSchedule />} />
       <Route path="/weather" element={<StudentSchedule />} />
