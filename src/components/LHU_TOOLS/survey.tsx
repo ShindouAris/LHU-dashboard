@@ -275,14 +275,44 @@ return (
                 </Dialog>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-3 gap-4">
-                    <div className="bg-gradient-to-br from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-xl p-4 text-white">
-                        <div className="text-2xl font-bold">{surveys.length}</div>
-                        <div className="text-xs opacity-90">Khảo sát chờ xử lý</div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 auto-rows-fr">
+                    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm min-w-0">
+                        <div className="p-3 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 flex-shrink-0">
+                            <RefreshCw className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0 w-full">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Khảo sát chờ xử lý</div>
+                            <div className="mt-1 text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                                {surveys.length}
+                                <span className="ml-3 text-xs font-medium text-gray-400">{loading ? 'Đang tải...' : 'Sẵn sàng'}</span>
+                            </div>
+                            {surveys.length > 0 && (
+                                <div className="mt-2 h-2 w-full bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
+                                    <div
+                                        className="h-2 bg-blue-500 dark:bg-blue-600 transition-all"
+                                        style={{ width: `${Math.min(100, (surveys.length / Math.max(1, surveys.length + processedCount)) * 100)}%` }}
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className="bg-gradient-to-br from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-xl p-4 text-white">
-                        <div className="text-2xl font-bold">{processedCount}</div>
-                        <div className="text-xs opacity-90">Đã xử lý</div>
+
+                    <div className="flex flex-col sm:flex-row items-center gap-4 p-4 bg-white/60 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm min-w-0">
+                        <div className="p-3 rounded-lg bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-300 flex-shrink-0">
+                            <CheckCircle className="w-6 h-6" />
+                        </div>
+                        <div className="flex-1 min-w-0 w-full">
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Đã xử lý</div>
+                            <div className="mt-1 text-2xl font-semibold text-gray-800 dark:text-gray-100">
+                                {processedCount}
+                                <span className="ml-3 text-xs font-medium text-gray-400">tổng</span>
+                            </div>
+                            <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                                {processedCount + surveys.length > 0
+                                    ? `${Math.round((processedCount / (processedCount + surveys.length)) * 100)}% đã hoàn thành`
+                                    : 'Chưa có dữ liệu'}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -316,21 +346,21 @@ return (
                 )}
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <button
                         onClick={handleFetchSurveys}
                         disabled={loading || processing}
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-medium py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                        className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 dark:from-blue-600 dark:to-blue-700 dark:hover:from-blue-700 dark:hover:to-blue-800 text-white font-medium py-3 px-4 sm:px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                     >
                         {loading ? (
                             <>
                                 <Loader2 className="w-5 h-5 animate-spin" />
-                                Đang tải...
+                                <span className="text-sm">Đang tải...</span>
                             </>
                         ) : (
                             <>
                                 <RefreshCw className="w-5 h-5" />
-                                Lấy danh sách
+                                <span className="text-sm">Lấy danh sách</span>
                             </>
                         )}
                     </button>
@@ -339,18 +369,18 @@ return (
                         <button
                             onClick={handleProcessBatch}
                             disabled={processing || surveys.length === 0 || loading}
-                            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white font-medium py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+                            className="w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 dark:from-green-600 dark:to-green-700 dark:hover:from-green-700 dark:hover:to-green-800 text-white font-medium py-3 px-4 sm:px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
                         >
                             <Send className="w-5 h-5" />
-                            Xử lý tự động
+                            <span className="text-sm">Xử lý tự động</span>
                         </button>
                     ) : (
                         <button
                             onClick={handleCancelTask}
-                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white font-medium py-3 px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
+                            className="w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 dark:from-red-600 dark:to-red-700 dark:hover:from-red-700 dark:hover:to-red-800 text-white font-medium py-3 px-4 sm:px-6 rounded-xl shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center justify-center gap-2"
                         >
                             <XCircle className="w-5 h-5" />
-                            Hủy tiến trình
+                            <span className="text-sm">Hủy tiến trình</span>
                         </button>
                     )}
                 </div>
@@ -363,46 +393,78 @@ return (
                                 📋 Danh sách khảo sát ({surveys.length})
                             </div>
                         </div>
-                        
-                        <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4 max-h-64 overflow-y-auto space-y-2">
-                            {surveys.map((survey, idx) => (
-                                
-                                <div key={idx} className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md dark:hover:shadow-gray-900/50 transition-shadow">
-                                    <div className="font-medium text-gray-800 dark:text-gray-200 text-sm">{survey.TenKhaoSat}</div>
-                                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">{extractSurveyInfoFromHtml(survey.MoTa)?.teacher || "404"} • {extractSurveyInfoFromHtml(survey.MoTa)?.subject || "404"}</div>
-                                    <div className="flex gap-2 mt-2">
-                                        <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded">
-                                            ID: {survey.KhaoSatID}
-                                        </span>
-                                        <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded">
-                                            Template: {survey.templateID}
-                                        </span>
+
+                        <div className="bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-xl p-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div className="col-span-1">
+                                    <div className="rounded-xl p-2 bg-transparent">
+                                        <div className="max-h-[40vh] sm:max-h-64 overflow-y-auto space-y-2 pr-2">
+                                            {surveys.map((survey, idx) => (
+                                                <div
+                                                    key={survey.KhaoSatID || idx}
+                                                    className="bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow flex flex-col sm:flex-row sm:items-center justify-between gap-2"
+                                                >
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="font-medium text-gray-800 dark:text-gray-200 text-sm truncate">
+                                                            {survey.TenKhaoSat}
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 truncate">
+                                                            {extractSurveyInfoFromHtml(survey.MoTa)?.teacher || "404"}
+                                                            <span className="mx-2">•</span>
+                                                            {extractSurveyInfoFromHtml(survey.MoTa)?.subject || "404"}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex-shrink-0 flex items-center gap-2 mt-2 sm:mt-0">
+                                                        <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded truncate">
+                                                            ID: {survey.KhaoSatID}
+                                                        </span>
+                                                        <span className="text-xs px-2 py-0.5 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded truncate">
+                                                            Template: {survey.templateID}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
 
-                {/* Logs */}
-                {logs.length > 0 && (
-                    <div className="space-y-2">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">📝 Nhật ký xử lý</div>
-                        <div className="bg-gray-900 dark:bg-gray-950 rounded-xl p-4 max-h-64 overflow-y-auto space-y-1 font-mono text-xs border dark:border-gray-800">
-                            {logs.map((log, idx) => (
-                                <div key={idx} className={`flex items-start gap-2 ${
-                                    log.type === 'success' ? 'text-green-400 dark:text-green-300' :
-                                    log.type === 'error' ? 'text-red-400 dark:text-red-300' :
-                                    log.type === 'warning' ? 'text-yellow-400 dark:text-yellow-300' :
-                                    'text-blue-400 dark:text-blue-300'
-                                }`}>
-                                    {log.type === 'success' && <CheckCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
-                                    {log.type === 'error' && <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
-                                    {log.type === 'warning' && <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />}
-                                    {log.type === 'info' && <Loader2 className="w-4 h-4 flex-shrink-0 mt-0.5" />}
-                                    <span>{log.message}</span>
+                                {/* Logs column (responsive: under list on small, side-by-side on md+) */}
+                                <div className="col-span-1">
+                                    {logs.length > 0 ? (
+                                        <div className="space-y-2">
+                                            <div className="text-sm font-medium text-gray-700 dark:text-gray-300">📝 Nhật ký xử lý</div>
+                                            <div className="bg-gray-900 dark:bg-gray-950 rounded-xl p-3 max-h-[40vh] sm:max-h-64 overflow-y-auto space-y-1 font-mono text-xs border dark:border-gray-800">
+                                                {logs.map((log, idx) => (
+                                                    <div
+                                                        key={idx}
+                                                        className={`flex items-start gap-2 break-words ${
+                                                            log.type === 'success' ? 'text-green-400 dark:text-green-300' :
+                                                            log.type === 'error' ? 'text-red-400 dark:text-red-300' :
+                                                            log.type === 'warning' ? 'text-yellow-400 dark:text-yellow-300' :
+                                                            'text-blue-400 dark:text-blue-300'
+                                                        }`}
+                                                    >
+                                                        <div className="flex-shrink-0 mt-0.5">
+                                                            {log.type === 'success' && <CheckCircle className="w-4 h-4" />}
+                                                            {log.type === 'error' && <AlertCircle className="w-4 h-4" />}
+                                                            {log.type === 'warning' && <AlertTriangle className="w-4 h-4" />}
+                                                            {log.type === 'info' && <Loader2 className="w-4 h-4" />}
+                                                        </div>
+                                                        <div className="whitespace-pre-wrap break-words text-xs">
+                                                            {log.message}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="text-sm text-gray-500 dark:text-gray-400 p-3">
+                                            📝 Chưa có nhật ký — các thông báo xử lý sẽ hiển thị ở đây.
+                                        </div>
+                                    )}
                                 </div>
-                            ))}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -416,15 +478,6 @@ return (
                         </div>
                     </div>
                 )}
-
-                {/* Footer Info */}
-                <div className="border-t dark:border-gray-700 pt-4 mt-6">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 text-center space-y-1">
-                        <p>⚠️ <strong className="dark:text-gray-300">Cảnh báo:</strong> Thoát trang trong lúc xử lý sẽ hủy toàn bộ tiến trình!</p>
-                        <p>⏱️ <strong className="dark:text-gray-300">Thời gian:</strong> Mỗi khảo sát mất ~20s (xử lý → chờ 15-20s → submit)</p>
-                        <p>💡 <strong className="dark:text-gray-300">Khuyến nghị:</strong> Xử lý từng batch nhỏ để theo dõi tiến trình tốt hơn.</p>
-                    </div>
-                </div>
 
             </div>
         </div>
