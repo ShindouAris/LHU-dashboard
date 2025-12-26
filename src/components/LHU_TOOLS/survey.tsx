@@ -128,8 +128,8 @@ export const SurveyAutomationTool = () => {
         
         if (cancelRef.current) break;
 
-        // Step 2: Random sleep 15-20 seconds
-        const sleepTime = Math.floor(Math.random() * 6000) + 15000; // 15000-21000ms
+        // Step 2: Random sleep 10-16 seconds
+        const sleepTime = Math.floor(Math.random() * 6000) + 10000; // 10000 to 16000 ms
         addLog('info', `⏱️ Chờ ${(sleepTime / 1000).toFixed(1)}s trước khi submit...`);
         
         // Sleep với check cancel mỗi 500ms
