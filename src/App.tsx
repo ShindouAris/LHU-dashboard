@@ -22,6 +22,7 @@ declare global {
           useDiscordRpc: boolean
         }>;
       forceRestartApp: () => void;
+      loggedOffUser: () => void;
 
       // Settings setters
       setAutoStart: (enabled: boolean) => void;

@@ -317,6 +317,9 @@ const SettingsPage: React.FC = () => {
     try {
       const logoutmsg: string | null = await authService.logOut();
       if (logoutmsg) {
+        if (window?.electron) {
+          window.electron.loggedOffUser();
+        }
         toast.success(logoutmsg);
         window.location.reload();
       }
