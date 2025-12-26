@@ -44,7 +44,9 @@ const SettingsPage: React.FC = () => {
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
-  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, checkForUpdatesOnStart: boolean, notifyNextClassStartedSoon: boolean, minimizeOnClose: boolean, hardwareAcceleration: boolean } | null>(null);
+  const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, 
+    checkForUpdatesOnStart: boolean, notifyNextClassStartedSoon: boolean, 
+    minimizeOnClose: boolean, hardwareAcceleration: boolean, useDiscordRpc: boolean } | null>(null);
   const [appsettings, setAppsettings] = useState(() => {
     const saved = getSettings();
     return saved;
@@ -91,6 +93,15 @@ const SettingsPage: React.FC = () => {
     // @ts-expect-error
     window.electron.setCheckForUpdatesOnStart?.(newValue).then(() => {
         setSettings({ ...settings, checkForUpdatesOnStart: newValue });
+    });
+  };
+
+  const setUseDiscordRpc = () => {
+    if (!settings || !isElectronApp) return;
+    const newValue = !settings.useDiscordRpc;
+    // @ts-expect-error
+    window.electron.setUseDiscordRpc?.(newValue).then(() => {
+        setSettings({ ...settings, useDiscordRpc: newValue });
     });
   };
 
@@ -478,6 +489,23 @@ const SettingsPage: React.FC = () => {
                 <Separator />
               </>
               )}
+              {settings?.useDiscordRpc !== undefined && (
+                <>
+                  <SettingItem
+                    icon={MdOutlineBadge}
+                    title="Sử dụng Discord Rich Presence"
+                    description="Hiển thị trạng thái học tập của bạn trên Discord (Cần khởi động lại ứng dụng)"
+                    action={
+                      <Switch
+                      checked={settings?.useDiscordRpc}
+                      onCheckedChange={setUseDiscordRpc}
+                      />
+                    }
+                  />
+                  <Separator />
+                </>
+              )
+              }
               <SettingItem
               icon={FaBomb}
               title="🐧🐧"

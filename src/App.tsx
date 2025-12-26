@@ -18,7 +18,8 @@ declare global {
           checkForUpdatesOnStart: boolean, 
           notifyNextClassStartedSoon: boolean,
           minimizeOnClose: boolean,
-          hardwareAcceleration: boolean
+          hardwareAcceleration: boolean,
+          useDiscordRpc: boolean
         }>;
       forceRestartApp: () => void;
 
@@ -29,6 +30,7 @@ declare global {
       setNotifyNextClassStartedSoon: (enabled: boolean) => void;
       setMinimizeOnClose: (enabled: boolean) => void;
       setHardwareAcceleration: (enabled: boolean) => void;
+      setUseDiscordRpc: (enabled: boolean) => void;
     };
   }
 }
