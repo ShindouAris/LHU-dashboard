@@ -197,6 +197,13 @@ export const QRScanner: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const load = async () => {
+        await loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
+    };
+    load();
+  }, []);
+
+  useEffect(() => {
 
     const useScanned = async () => {
 
@@ -228,7 +235,6 @@ export const QRScanner: React.FC = () => {
 
     if (SUBSTR === "STB") {
       try {
-        await loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
         const res = await ApiService.send_diem_danh(scanned, access_token);
         if (!res) return;
 
