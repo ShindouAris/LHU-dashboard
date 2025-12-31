@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AuthStorage } from '@/types/user';
 import { NavigationInstruction } from '@/types/settings';
-import { Snowfall } from 'react-snowfall';
+// import { Snowfall } from 'react-snowfall'; // Out of winter season
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -77,7 +77,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
-      <Snowfall />
+      {/* <Snowfall /> */}
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden hidden md:block">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
