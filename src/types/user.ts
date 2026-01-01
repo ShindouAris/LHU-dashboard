@@ -86,12 +86,35 @@ export const AuthStorage = {
     localStorage.removeItem(AUTH_STORAGE_KEY)
     localStorage.removeItem("access_token")
   },
-  getUserToken(): string {
+  getUserToken(): string | null {
     const access_token = localStorage.getItem("access_token")
     if (!access_token) {
-      throw new Error("Chưa đăng nhập")
+      return null;
     }
     return access_token
+  },
+  async getTokenWithAuth(): Promise<string | null> {
+    const userToken = this.getUserToken();
+    try {
+
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/userinfo`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ accessToken: userToken })
+      })
+      if (!response.ok) {
+        throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
+      }
+
+    } catch (error) {
+      if (error instanceof Error && error.message.includes("Phiên đã hết hạn")) {
+        // this.deleteUser()
+        return null
+      }
+    }
+    return userToken
   }
 };
 

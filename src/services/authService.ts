@@ -37,8 +37,10 @@ export const authService = {
     localStorage.setItem("access_token", data.accessToken)
   },
 
-  async getUserInfo(): Promise<UserResponse> {
-    const access_token = auth.getUserToken();
+  async getUserInfo(access_token: string | null = null): Promise<UserResponse> {
+    if (!access_token) {
+      access_token = auth.getUserToken();
+    }
     const response = await fetch(`${API_URL}/userinfo`, {
       method: 'POST',
       headers: {

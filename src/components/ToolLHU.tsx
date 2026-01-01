@@ -3,7 +3,9 @@ import BottomToolBar from "./LHU_UI/BottomToolbar";
 import { AuthStorage } from "@/types/user";
 import { TbError404 } from "react-icons/tb";
 import { MdAutoMode } from "react-icons/md";
+import { IoChatboxEllipses } from "react-icons/io5";
 import {SurveyAutomationTool} from "./LHU_TOOLS/survey";
+import ChatBot from "./LHU_TOOLS/AI";
 
 interface ToolLHUProps {
     key: string;
@@ -20,10 +22,10 @@ const toolsList: ToolLHUProps[] = [
         content: <SurveyAutomationTool />,
     },
     {
-        key: "404_1",
-        label: "Not Found",
-        icon: <TbError404 />,
-        content: null,
+        key: "chisa_ai",
+        label: "Chisa AI",
+        icon: <IoChatboxEllipses />,
+        content: <ChatBot />,
     },
     {
         key: "404_2",
@@ -70,17 +72,17 @@ export default function ToolsLocket() {
     }, []);
 
     return (
-        <div className="flex flex-col min-h-[84vh] w-full p-3">
+        <div className="flex flex-col h-screen w-full p-3 pb-20 md:pb-3">
             {/* Title */}
-            <h1 className="text-3xl font-bold text-blue-600 dark:text-blue-400 text-center">
+            <h1 className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 text-center mb-2">
                 Tool LHU by Chisadin Chan
             </h1>
 
             {/* Layout */}
-            <div className="flex flex-col md:flex-row w-full mx-auto gap-6 py-3">
+            <div className="flex flex-col md:flex-row w-full mx-auto gap-4 md:gap-6 py-3 flex-1">
                 {/* Sidebar */}
-                <div className="hidden md:block w-1/4">
-                    <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700">
+                <div className="hidden md:block md:w-64 lg:w-72 shrink-0">
+                    <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 sticky top-3">
                         {toolsList.map((tool) => (
                             <button
                                 key={tool.key}
@@ -94,17 +96,19 @@ export default function ToolsLocket() {
                                     }`}
                             >
                                 {React.cloneElement(tool.icon, { size: 20 })}
-                                <span>{tool.label}</span>
+                                <span className="text-sm lg:text-base">{tool.label}</span>
                             </button>
                         ))}
                     </div>
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 p-4 rounded-2xl shadow-md">
-                    {toolsList.find((t) => t.key === activeTab)?.content || (
-                        <div className="dark:text-gray-300">🔍 Không tìm thấy nội dung</div>
-                    )}
+                <div className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-md overflow-hidden flex flex-col h-[calc(100vh-16rem)] md:h-[calc(100vh-12rem)]">
+                    <div className="h-full overflow-hidden">
+                        {toolsList.find((t) => t.key === activeTab)?.content || (
+                            <div className="flex items-center justify-center h-full dark:text-gray-300">🔍 Không tìm thấy nội dung</div>
+                        )}
+                    </div>
                 </div>
             </div>
 
