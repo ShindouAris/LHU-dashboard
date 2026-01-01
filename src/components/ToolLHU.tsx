@@ -3,9 +3,7 @@ import BottomToolBar from "./LHU_UI/BottomToolbar";
 import { AuthStorage } from "@/types/user";
 import { TbError404 } from "react-icons/tb";
 import { MdAutoMode } from "react-icons/md";
-import { IoChatboxEllipses } from "react-icons/io5";
 import {SurveyAutomationTool} from "./LHU_TOOLS/survey";
-import ChatBot from "./LHU_TOOLS/AI";
 
 interface ToolLHUProps {
     key: string;
@@ -22,10 +20,10 @@ const toolsList: ToolLHUProps[] = [
         content: <SurveyAutomationTool />,
     },
     {
-        key: "chisa_ai",
-        label: "Chisa AI",
-        icon: <IoChatboxEllipses />,
-        content: <ChatBot />,
+        key: "404_1",
+        label: "Not Found",
+        icon: <TbError404 />,
+        content: null,
     },
     {
         key: "404_2",
