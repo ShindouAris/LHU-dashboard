@@ -76,6 +76,7 @@
     "react-turnstile": "^1.1.4",
     "react-use-websocket": "^4.13.0",
     "recharts": "^2.12.7",
+    "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
     "sonner": "^1.7.4",
     "tailwind-merge": "^2.5.2",

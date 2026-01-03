@@ -10,6 +10,8 @@ import { DefaultChatTransport } from 'ai';
 import { LoaderIcon } from '@/components/ui/LoaderIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { Avatar } from './ui/avatar';
+import rehypeKatex from 'rehype-katex'
 
 const API = import.meta.env.VITE_API_URL;
 
@@ -36,6 +38,10 @@ const ChatbotUI = () => {
         window.location.hash = id;
     }
   }, [id])
+
+  useEffect(() => {
+    setError("Trang web chưa hoạt động, quay lại sau nhé!")
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -96,7 +102,6 @@ const ChatbotUI = () => {
 
   const EmptyState = () => (
     <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
-      <div className="mb-6 text-6xl">👋</div>
       <h1 className="text-3xl font-normal mb-3 text-gray-800">
         Xin chào, {user?.FullName || "Người vô danh"}!
       </h1>
@@ -124,6 +129,7 @@ const ChatbotUI = () => {
       <div className="flex h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-white">
         <Card className="w-full max-w-md rounded-2xl shadow-lg">
           <CardContent className="p-6 text-center">
+            <img src='bruh.png' className="mx-auto mb-4" />
             <p className="text-sm text-red-600 sm:text-base">{error}</p>
           </CardContent>
         </Card>
@@ -152,9 +158,9 @@ const ChatbotUI = () => {
                 }`}
               >
                 {message.role === 'assistant' && (
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1">
-                    <Sparkles className="w-4 h-4 text-white" />
-                  </div>
+                  <Avatar className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1">
+                    <img src='/chisaAI.png'/>
+                  </Avatar>
                 )}
 
                 <div className={`flex flex-col gap-2 max-w-[85%]`}>
@@ -223,7 +229,7 @@ const ChatbotUI = () => {
 
                   {/* Message Content */}
                   <Card
-                    className={`px-4 py-3 ${
+                    className={`px-6 py-3 overflow-auto ${
                       message.role === 'user'
                         ? 'bg-gray-100 border-gray-200'
                         : 'bg-white border-gray-200'
@@ -235,6 +241,7 @@ const ChatbotUI = () => {
                           <ReactMarkdown
                             key={index}
                             remarkPlugins={[remarkGfm]}
+                            rehypePlugins={[rehypeKatex]}
                             components={{
                               table({ children }) {
                                 return (
@@ -291,7 +298,7 @@ const ChatbotUI = () => {
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
             placeholder="Chat với ChisaAI..."
             className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
           />
