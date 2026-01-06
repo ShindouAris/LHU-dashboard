@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AuthStorage } from '@/types/user';
 import { NavigationInstruction } from '@/types/settings';
+import GradientText from './ui/GradientText';
 // import { Snowfall } from 'react-snowfall'; // Out of winter season
 
 interface LayoutProps {
@@ -55,7 +56,13 @@ export const Layout: React.FC<LayoutProps> = ({
             variant="outline"
             size="sm"
             onClick={() => window.open("https://buymeacoffee.com/chisadinchan")}>
-            Ủng hộ phát triển
+            <GradientText
+            animationSpeed={0.8}
+            yoyo={false}
+            colors={["#B8DB80", "#F7F6D3", "#F39EB6"]}
+            >
+              Ủng hộ phát triển
+            </GradientText>
           </Button>
           <div className="flex gap-4 text-sm text-gray-600 dark:text-gray-400">
             <a href="#bruh-i-dont-collect-any-thing-from-your-guys" className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
@@ -76,7 +83,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
+    <div className="relative h-dvh overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 flex flex-col">
       {/* <Snowfall /> */}
       {/* Background decoration */}
       <div className="absolute inset-0 overflow-hidden hidden md:block">
@@ -85,7 +92,7 @@ export const Layout: React.FC<LayoutProps> = ({
         <div className="absolute top-40 left-40 w-80 h-80 bg-pink-200 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative z-10 flex w-full flex-1">
+      <div className="relative z-10 flex w-full flex-1 min-h-0">
         {/* Sidebar */}
         <Sidebar
           onBack={onBack}
@@ -101,7 +108,7 @@ export const Layout: React.FC<LayoutProps> = ({
         />
 
         {/* Main Content */}
-        <div className="flex-1 w-full min-w-0 lg:ml-0 flex flex-col">
+        <div className="flex-1 w-full min-w-0 lg:ml-0 flex flex-col min-h-0">
           {/* Mobile Header */}
           <div className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center justify-between p-4">
@@ -121,7 +128,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
 
           {/* Content */}
-          <main className="relative w-full min-w-0 flex-1">
+          <main className="relative w-full min-w-0 flex-1 min-h-0 overflow-y-auto">
             {children}
           </main>
 
