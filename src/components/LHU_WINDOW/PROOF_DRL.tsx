@@ -29,7 +29,11 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
+  const [uploadLinkModalOpen, setUploadLinkModalOpen] = useState<boolean>(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
+
+  const [link, setLink] = useState<string>("");
+  const [note, setNote] = useState<string>("");
 
   const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -160,6 +164,22 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           </DialogDescription>
         </DialogContent>
 
+      </Dialog>
+
+      <Dialog open={uploadLinkModalOpen} onOpenChange={setUploadLinkModalOpen}>
+        <DialogContent>
+          <DialogHeader>Tải lên / sửa link minh chứng</DialogHeader>
+          <DialogDescription>
+            <div className="flex flex-col gap-4">
+              <Input placeholder="Nhập link minh chứng..." value={link} onChange={(e) => setLink(e.target.value)} />
+              <Input placeholder="Ghi chú (tuỳ chọn)..." value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadLinkModalOpen(false)}>Huỷ</Button>
+            <Button>Thêm link</Button>
+          </DialogFooter>
+        </DialogContent>
       </Dialog>
 
       <div className="p-6">
