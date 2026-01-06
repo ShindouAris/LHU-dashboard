@@ -20,6 +20,7 @@ import { Empty,  EmptyContent,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle, } from '../ui/empty';
+import { Link } from 'react-router-dom';
 
 export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | null; onClose: () => void;}) => {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -49,8 +50,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
     }
   };
 
-  useEffect(() => {
-    const load = async () => {
+  const fetchData = async () => {
       setLoading(true);
       try {
         if (hoatdongID === null) {
@@ -68,7 +68,10 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
         setLoading(false);
       }
     }
-    load()
+
+  useEffect(() => {
+    
+    fetchData()
     return () => {
       setFiles([]);
       setLinks([]);
@@ -83,6 +86,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
         try {
           await drlService.uploadFile(file, hoatdongID);
           toast.success(`Tải lên tập tin ${file.name} thành công`);
+          await fetchData(); // Làm mới danh sách tập tin sau khi tải lên
         } catch (error) {
           console.error("Error uploading file:", error);
           toast.error(`Tải lên tập tin ${file.name} thất bại`);
@@ -282,17 +286,15 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
               ) : (
                 links.map((link) => (
                   <TableRow key={link.STT}>
-                    <TableCell>
-                      <Input
-                        placeholder="Enter link"
-                        className="border-gray-300"
-                      />
+                    <TableCell className="text-blue-600 hover:underline text-left cursor-pointer">
+                      <Link to={link.Link} target="_blank" className="text-blue-600 hover:underline">
+                        {link.Link}
+                      </Link>
                     </TableCell>
                     <TableCell>
-                      <Input
-                        placeholder="Enter note"
-                        className="border-gray-300"
-                      />
+                      <div className="text-left text-black">
+                        {link.Note || "Không có ghi chú"}
+                      </div>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button
