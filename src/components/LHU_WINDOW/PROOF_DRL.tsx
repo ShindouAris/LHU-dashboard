@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Upload, Trash2, Plus } from 'lucide-react';
+import { X, Upload, Trash2, Plus, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -21,6 +21,7 @@ import { Empty,  EmptyContent,
   EmptyMedia,
   EmptyTitle, } from '../ui/empty';
 import { Link } from 'react-router-dom';
+import { LoadingScreen } from '../LHU_UI/LoadingScreen';
 
 export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | null; onClose: () => void;}) => {
   const [files, setFiles] = useState<FileItem[]>([]);
@@ -118,20 +119,20 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
   if (loading) {
     return (
       <div className="w-full h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+        <LoadingScreen loading={loading} />
       </div>
     );
   }
 
   return (
-    <div className="w-full h-screen bg-gray-50">
+    <div className="w-full h-screen bg-gray-50 dark:bg-gray-950">
       {/* Header */}
-      <div className="bg-blue-600 text-white px-6 py-3 flex items-center justify-between">
+      <div className="bg-blue-600 text-white px-6 py-3 flex items-center justify-between dark:bg-blue-700">
         <h1 className="text-lg font-medium">Quản lý tập tin minh chứng</h1>
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-blue-700"
+          className="text-white hover:bg-blue-700 dark:hover:bg-blue-800"
           onClick={onClose}
         >
           <X className="h-5 w-5" />
@@ -184,9 +185,9 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
 
       <div className="p-6">
         {/* Files Section */}
-        <div className="bg-white rounded-lg shadow-sm mb-6">
-          <div className="border-b px-6 py-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-700">File minh chứng</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm mb-6">
+          <div className="border-b dark:border-gray-800 px-6 py-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">File minh chứng</h2>
             <div hidden={files.length < 1}>
               <Button
                 onClick={() => inputRef.current?.click()}
@@ -209,8 +210,8 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="justify-center">Tên tập tin</TableHead>
-                <TableHead className="text-right">Cập nhật</TableHead>
+                <TableHead className="justify-center dark:text-gray-200">Tên tập tin</TableHead>
+                <TableHead className="text-right dark:text-gray-200">Cập nhật</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -220,10 +221,10 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                     <Empty className="w-full py-16">
                       <EmptyHeader>
                         <EmptyMedia>
-                          <LuFileQuestion className="h-12 w-12 text-black" />
+                          <LuFileQuestion className="h-12 w-12 text-black dark:text-gray-100" />
                         </EmptyMedia>
-                        <EmptyTitle className='text-black'>Chưa có tập tin minh chứng</EmptyTitle>
-                        <EmptyDescription className='text-black'>
+                        <EmptyTitle className='text-black dark:text-gray-100'>Chưa có tập tin minh chứng</EmptyTitle>
+                        <EmptyDescription className='text-black dark:text-gray-300'>
                           Hãy tải lên tập tin minh chứng cho hoạt động này.
                         </EmptyDescription>
                       </EmptyHeader>
@@ -263,7 +264,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       variant="ghost"
                       size="icon"
                       onClick={() => {setConfirmDeleteOpen(true); setSelectedFileId(file.FileID);}}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -275,9 +276,9 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
         </div>
 
         {/* Links Section */}
-        <div className="bg-white rounded-lg shadow-sm">
-          <div className="border-b px-6 py-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-700">Link</h2>
+        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm">
+          <div className="border-b dark:border-gray-800 px-6 py-3 flex items-center justify-between">
+            <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">Link</h2>
             <Button
               variant="outline"
               size="icon"
@@ -291,15 +292,15 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%]">Link</TableHead>
-                <TableHead className="w-[40%]">Ghi chú</TableHead>
-                <TableHead className="text-right">Cập nhật</TableHead>
+                <TableHead className="w-[40%] dark:text-gray-200">Link</TableHead>
+                <TableHead className="w-[40%] dark:text-gray-200">Ghi chú</TableHead>
+                <TableHead className="text-right dark:text-gray-200">Cập nhật</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {links.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-gray-400">
+                  <TableCell colSpan={3} className="text-center py-8 text-gray-400 dark:text-gray-500">
                     Không có dữ liệu...
                   </TableCell>
                 </TableRow>
@@ -312,7 +313,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <div className="text-left text-black">
+                      <div className="text-left text-black dark:text-gray-100">
                         {link.Note || "Không có ghi chú"}
                       </div>
                     </TableCell>
@@ -320,10 +321,19 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {}}
+                        className="p-2 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-200 rounded-lg transition-colors"
+                        title="Chỉnh sửa"
+                    >
+                        <Edit2 size={18} />
+                    </Button>
                     </TableCell>
                   </TableRow>
                 ))
