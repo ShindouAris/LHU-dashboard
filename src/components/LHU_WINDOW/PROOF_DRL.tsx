@@ -29,12 +29,15 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageModalOpen, setImageModalOpen] = useState<boolean>(false);
+  const [confirmDeleteFileOpen, setConfirmDeleteFileOpen] = useState<boolean>(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState<boolean>(false);
   const [uploadLinkModalOpen, setUploadLinkModalOpen] = useState<boolean>(false);
+  const [editLinkModalOpen, setEditLinkModalOpen] = useState<boolean>(false);
   const [selectedFileId, setSelectedFileId] = useState<number | null>(null);
 
   const [link, setLink] = useState<string>("");
   const [note, setNote] = useState<string>("");
+  const [STT, setSTT] = useState<number | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -100,8 +103,67 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
     }
   };
 
-  const handleAddLink = () => {
+  const handleAddLink = async () => {
+    if (!link || hoatdongID === null) {
+      toast.error("Thiếu trường hợp lệ.");
+      return;
+    }
+
+    try {
+      if (await drlService.uploadLink(hoatdongID, link, note)) {
+        toast.success("Thêm link thành công.");
+        setUploadLinkModalOpen(false);
+        setLink("");
+        setNote("");
+        await fetchData();
+      } else {
+        toast.error("Thêm link thất bại.");
+      }
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi khi thêm link.");
+      return;
+    }
   };
+
+  const handleEditLink = async (STT: number | null) => {
+    if (!link || hoatdongID === null || STT === null) {
+      toast.error("Thiếu trường hợp lệ.");
+      return;
+    }
+    try {
+      if (await drlService.updateLink(hoatdongID.toString(), link, note, STT)) {
+        toast.success("Cập nhật link thành công.");
+        setEditLinkModalOpen(false);
+        setLink("");
+        setNote("");
+        setSTT(null);
+        await fetchData();
+      } else {
+        toast.error("Cập nhật link thất bại.");
+      }
+    } catch (error) {
+      toast.error("Đã xảy ra lỗi khi cập nhật link.");
+      return;
+    }
+  }
+
+  const handleDeleteLink = async (STT: number | null) => {
+    if (STT === null) {
+      toast.error("Thiếu trường hợp lệ.");
+      return;
+    }
+    try {
+      if (await drlService.deleteLink(STT)) {
+        toast.success("Xoá link thành công.");
+        await fetchData();
+      } else {
+        toast.error("Xoá link thất bại.");
+      }
+  } catch (error) {
+      toast.error("Đã xảy ra lỗi khi xoá link.");
+      return;
+    }
+  }
 
   const loadImagePreview = (binaryContent: string) => {
     const byteCharacters = atob(binaryContent);
@@ -139,14 +201,26 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
         </Button>
       </div>
 
-      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+      <Dialog open={confirmDeleteFileOpen} onOpenChange={setConfirmDeleteFileOpen}>
         <DialogContent>
           <DialogDescription>
             Bạn có chắc chắn muốn xoá tập tin này không?
           </DialogDescription>
           <DialogFooter>
-            <Button variant="outline" onClick={() => {setConfirmDeleteOpen(false); setSelectedFileId(null);}}>Huỷ</Button>
+            <Button variant="outline" onClick={() => {setConfirmDeleteFileOpen(false); setSelectedFileId(null);}}>Huỷ</Button>
             <Button className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteFile(selectedFileId)}>Xoá</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <DialogContent>
+          <DialogDescription>
+            Bạn có chắc chắn muốn xoá đường link này không?
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {setConfirmDeleteOpen(false); setSTT(null);}}>Huỷ</Button>
+            <Button className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteLink(STT)}>Xoá</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -169,7 +243,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
 
       <Dialog open={uploadLinkModalOpen} onOpenChange={setUploadLinkModalOpen}>
         <DialogContent>
-          <DialogHeader>Tải lên / sửa link minh chứng</DialogHeader>
+          <DialogHeader>Tải lên link minh chứng</DialogHeader>
           <DialogDescription>
             <div className="flex flex-col gap-4">
               <Input placeholder="Nhập link minh chứng..." value={link} onChange={(e) => setLink(e.target.value)} />
@@ -178,7 +252,23 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => setUploadLinkModalOpen(false)}>Huỷ</Button>
-            <Button>Thêm link</Button>
+            <Button onClick={() => {handleAddLink()}}>Thêm link</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={editLinkModalOpen} onOpenChange={setEditLinkModalOpen}>
+        <DialogContent>
+          <DialogHeader>Sửa link minh chứng</DialogHeader>
+          <DialogDescription>
+            <div className="flex flex-col gap-4">
+              <Input placeholder="Nhập link minh chứng..." value={link} onChange={(e) => setLink(e.target.value)} />
+              <Input placeholder="Ghi chú (tuỳ chọn)..." value={note} onChange={(e) => setNote(e.target.value)} />
+            </div>
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={() =>{setEditLinkModalOpen(false)}}>Huỷ</Button>
+            <Button onClick={() => {handleEditLink(STT)}}>Sửa link</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -282,7 +372,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
             <Button
               variant="outline"
               size="icon"
-              onClick={handleAddLink}
+              onClick={() => setUploadLinkModalOpen(true)}
               className="rounded-full"
             >
               <Plus className="h-4 w-4" />
@@ -321,19 +411,20 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {}}
+                        onClick={() => {setSTT(link.STT); setLink(link.Link); setNote(link.Note || ""); setEditLinkModalOpen(true);}}
                         className="p-2 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-200 rounded-lg transition-colors"
                         title="Chỉnh sửa"
                     >
                         <Edit2 size={18} />
                     </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        onClick={() => {setSTT(link.STT); setConfirmDeleteOpen(true)}}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))

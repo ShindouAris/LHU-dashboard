@@ -268,5 +268,88 @@ export const drlService = {
         } catch (error) {
             throw error
         }
+    },
+    uploadLink: async (activityId: number, link: string, note: string | null): Promise<boolean> => {
+        const access_token = AuthStorage.getUserToken()
+        if (access_token === null) {
+            throw new Error("Chứng thực của bạn đã hết hạn")
+        }
+        try {
+            const response = await fetch(`${TAPI}/GeneralPublic/MinhChungText_Update`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`
+                },
+                body: JSON.stringify({
+                    HoatDongID: activityId,
+                    Link: link,
+                    Note: note,
+                    act: 1
+                })
+            })
+
+            if (!response.ok) return false
+
+            return true
+
+        } catch (error) {
+            throw error
+        }
+    },
+    updateLink: async (activityID: string, link: string, note: string | null, STT: number): Promise<boolean> => {
+        const access_token = AuthStorage.getUserToken()
+        if (access_token === null) {
+            throw new Error("Chứng thực của bạn đã hết hạn")
+        }
+        try {
+            const response = await fetch(`${TAPI}/GeneralPublic/MinhChungText_Update`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`
+                },
+                body: JSON.stringify({
+                    HoatDongID: activityID,
+                    Link: link,
+                    Note: note || null,
+                    STT: STT,
+                    act: 1
+                })
+            })
+
+            if (!response.ok) return false
+
+            return true
+
+        } catch (error) {
+            throw error
+        }
+    },
+    deleteLink: async (STT: number): Promise<boolean> => {
+        const access_token = AuthStorage.getUserToken()
+        if (access_token === null) {
+            throw new Error("Chứng thực của bạn đã hết hạn")
+        }
+        try {
+            const response = await fetch(`${TAPI}/GeneralPublic/MinhChungText_Update`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${access_token}`
+                },
+                body: JSON.stringify({
+                    STT: STT,
+                    act: 0
+                })
+            })
+
+            if (!response.ok) return false
+
+            return true
+
+        } catch (error) {
+            throw error
+        }
     }
 }
