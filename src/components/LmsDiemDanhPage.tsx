@@ -1,8 +1,15 @@
 import { ApiService } from "@/services/apiService";
 import { AuthStorage } from "@/types/user";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { CheckCircle, XCircle, AlertCircle, Loader2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface DiemDanhOut {
   TenMonHoc: string;
@@ -126,6 +133,9 @@ export const LmsDiemDanhPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<DiemDanhData | null>(null);
 
+  const [selectedMonHoc, setSelectedMonHoc] = useState<string>("all");
+  const [selectedTrangThai, setSelectedTrangThai] = useState<string>("all");
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
@@ -156,6 +166,26 @@ export const LmsDiemDanhPage: React.FC = () => {
     };
     load();
   }, []);
+
+  const monHocOptions = useMemo(() => {
+    const list = data?.data ?? [];
+    const unique = Array.from(
+      new Set(list.map((x) => x.TenMonHoc).filter((x): x is string => Boolean(x)))
+    );
+    unique.sort((a, b) => a.localeCompare(b, "vi"));
+    return unique;
+  }, [data]);
+
+  const filteredData = useMemo(() => {
+    const list = data?.data ?? [];
+    return list.filter((item) => {
+      if (selectedMonHoc !== "all" && item.TenMonHoc !== selectedMonHoc) return false;
+      if (selectedTrangThai !== "all" && String(item.TrangThai) !== selectedTrangThai) {
+        return false;
+      }
+      return true;
+    });
+  }, [data, selectedMonHoc, selectedTrangThai]);
 
   // Loading state
   if (loading) {
@@ -202,14 +232,59 @@ export const LmsDiemDanhPage: React.FC = () => {
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Lịch sử điểm danh</h1>
-          <p className="text-gray-600 dark:text-gray-300">Tổng số: {data.data.length} buổi học</p>
+          <p className="text-gray-600 dark:text-gray-300">
+            Kết quả: {filteredData.length}/{data.data.length} buổi học
+          </p>
+
+          {/* Filters */}
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Môn học</p>
+              <Select value={selectedMonHoc} onValueChange={setSelectedMonHoc}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn môn học" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả môn</SelectItem>
+                  {monHocOptions.map((tenMonHoc) => (
+                    <SelectItem key={tenMonHoc} value={tenMonHoc}>
+                      <div className="overflow-hidden">
+                        {tenMonHoc}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1">
+              <p className="text-sm text-gray-600 dark:text-gray-300">Trạng thái</p>
+              <Select value={selectedTrangThai} onValueChange={setSelectedTrangThai}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn trạng thái" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tất cả trạng thái</SelectItem>
+                  <SelectItem value="2">Đã điểm danh</SelectItem>
+                  <SelectItem value="1">Vắng có phép</SelectItem>
+                  <SelectItem value="0">Vắng không phép</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
         
         {/* List */}
         <div className="space-y-4 overflow-y-scroll max-h-[75vh]">
-          {data.data.map((item, index) => (
-            <DiemDanhCard key={index} item={item} />
-          ))}
+          {filteredData.length === 0 ? (
+            <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
+              <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
+              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Không có kết quả</h2>
+              <p className="text-gray-600 dark:text-gray-300">Không tìm thấy buổi học phù hợp với bộ lọc</p>
+            </div>
+          ) : (
+            filteredData.map((item, index) => <DiemDanhCard key={index} item={item} />)
+          )}
         </div>
       </div>
     </div>
