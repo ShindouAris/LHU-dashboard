@@ -4,16 +4,19 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AuthStorage } from '@/types/user';
-import { Badge } from './ui/badge';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { LoaderIcon } from '@/components/ui/LoaderIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { Avatar } from './ui/avatar';
 import rehypeKatex from 'rehype-katex'
-
+import "katex/dist/katex.min.css";
+import { Avatar } from './ui/avatar';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import remarkMath from 'remark-math'
+import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 const API = import.meta.env.VITE_API_URL;
+
 
 const ChatbotUI = () => {
   const [inputValue, setInputValue] = useState('');
@@ -23,8 +26,8 @@ const ChatbotUI = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const user = AuthStorage.getUser();
-
-  const {messages, sendMessage, status, id} = useChat({
+  // @ts-ignore
+  const {messages, sendMessage, status, id, setMessages} = useChat({
     transport: new DefaultChatTransport({
       api: `${API}/chisaAI/v2/chat`,
       body: {
@@ -39,9 +42,13 @@ const ChatbotUI = () => {
     }
   }, [id])
 
-  useEffect(() => {
-    setError("Trang web chưa hoạt động, quay lại sau nhé!")
-  }, [])
+  // useEffect(() => {
+  //   setError("Trang web chưa hoạt động, quay lại sau nhé!")
+  // }, [])
+
+
+
+
 
   useEffect(() => {
     const load = async () => {
@@ -138,10 +145,12 @@ const ChatbotUI = () => {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-amber-50 to-white">
+    <div className="flex flex-col min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-slate-900 dark:to-slate-800">
       {/* Header */}
-      <div className="border-b bg-white/80 backdrop-blur-sm px-6 py-4">
-        <h2 className="text-xl font-semibold text-gray-800">ChisaAI V2</h2>
+      <div className="border-b border-gray-200 bg-white/80 dark:bg-slate-900/80 dark:border-slate-700 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4">
+        <div className="max-w-screen-xl mx-auto flex items-center justify-between">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">ChisaAI V2</h2>
+        </div>
       </div>
 
       {/* Messages Container */}
@@ -149,45 +158,43 @@ const ChatbotUI = () => {
         {messages.length === 0 ? (
           <EmptyState />
         ) : (
-          <div className="max-w-3xl mx-auto space-y-6">
+          <div className="max-w-screen-md sm:max-w-7xl mx-auto space-y-6">
             {messages.map((message) => (
               <div
                 key={message.id}
-                className={`flex gap-4 ${
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+                className={`flex gap-3 sm:gap-4 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.role === 'assistant' && (
-                  <Avatar className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1">
-                    <img src='/chisaAI.png'/>
+                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden dark:from-amber-600 dark:to-orange-700">
+                    <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
                   </Avatar>
                 )}
 
-                <div className={`flex flex-col gap-2 max-w-[85%]`}>
+                <div className="flex flex-col gap-2 max-w-[90%] sm:max-w-[85%] min-w-0">
                   {/* Reasoning Dropdown */}
                   {message.parts.find((part) => part.type === 'reasoning') && (
-                    <Card className="border border-blue-200 bg-blue-50/50 overflow-hidden">
+                    <Card className="border border-blue-200 bg-blue-50/50 overflow-hidden dark:border-blue-800 dark:bg-blue-900/20">
                       <button
                         onClick={() => toggleReasoning(message.id)}
-                        className="w-full px-4 py-3 flex items-center gap-2 hover:bg-blue-100/50 transition-colors"
+                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-blue-100/50 transition-colors text-sm sm:text-base"
                       >
                         {expandedReasoning[message.id] ? (
-                          <ChevronDown className="w-4 h-4 text-blue-600" />
+                          <ChevronDown className="w-4 h-4 text-blue-600 dark:text-blue-300" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-blue-600" />
+                          <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-300" />
                         )}
-                        <Sparkles className="w-4 h-4 text-blue-600" />
-                        <span className="text-sm font-medium text-blue-700">
+                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-200">
                           Suy nghĩ của chisa
                         </span>
                       </button>
                       {expandedReasoning[message.id] && (
-                        <div className="px-4 pb-3 pt-1">
-                          <p className="text-sm text-blue-900 leading-relaxed text-left">
-                            {message.parts.map((part, idx) => 
-                            part.type === 'reasoning' ? (
-                              <span key={idx}>{part.text}</span>
-                            ) : null
+                        <div className="px-3 sm:px-4 pb-3 pt-1">
+                          <p className="text-sm text-blue-900 leading-relaxed text-left break-words whitespace-pre-wrap dark:text-blue-200">
+                            {message.parts.map((part, idx) =>
+                              part.type === 'reasoning' ? (
+                                <span key={`${message.id}-reasoning-${idx}`}>{part.text}</span>
+                              ) : null
                             )}
                           </p>
                         </div>
@@ -197,30 +204,30 @@ const ChatbotUI = () => {
 
                   {/* Tool Calls Dropdown */}
                   {message.parts.find((part) => part.type.startsWith('tool-')) && (
-                    <Card className="border border-purple-200 bg-purple-50/50 overflow-hidden">
+                    <Card className="border border-purple-200 bg-purple-50/50 overflow-hidden dark:border-purple-800 dark:bg-purple-900/20">
                       <button
                         onClick={() => toggleToolCalls(message.id)}
-                        className="w-full px-4 py-3 flex items-center gap-2 hover:bg-purple-100/50 transition-colors"
+                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-purple-100/50 transition-colors text-sm sm:text-base"
                       >
                         {expandedToolCalls[message.id] ? (
-                          <ChevronDown className="w-4 h-4 text-purple-600" />
+                          <ChevronDown className="w-4 h-4 text-purple-600 dark:text-purple-300" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-purple-600" />
+                          <ChevronRight className="w-4 h-4 text-purple-600 dark:text-purple-300" />
                         )}
-                        <Wrench className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-purple-700">
+                        <Wrench className="w-4 h-4 text-purple-600 dark:text-purple-300" />
+                        <span className="text-sm font-medium text-purple-700 dark:text-purple-200">
                           Used {message.parts.filter((part) => part.type.includes('tool')).length} tool{message.parts.filter((part) => part.type.includes('tool')).length > 1 ? 's' : ''}
                         </span>
                       </button>
                       {expandedToolCalls[message.id] && (
-                        <div className="px-4 pb-3 pt-1 space-y-3">
-                          {message.parts.map((part, idx) => 
+                        <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-sm">
+                          {message.parts.map((part, idx) =>
                             part.type.startsWith('tool-') ? (
-                                <div key={idx} className="text-sm">
-                                    <div className="font-medium text-left text-purple-900 mb-1">
-                                        Sử dụng {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP].toLowerCase() || part.type}
-                                    </div>
+                              <div key={`${message.id}-tool-${idx}`} className="text-sm">
+                                <div className="font-medium text-left text-purple-900 mb-1 break-words dark:text-purple-200">
+                                  Sử dụng {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() || part.type}
                                 </div>
+                              </div>
                             ) : null)}
                         </div>
                       )}
@@ -228,21 +235,59 @@ const ChatbotUI = () => {
                   )}
 
                   {/* Message Content */}
-                  <Card
-                    className={`px-6 py-3 overflow-auto ${
-                      message.role === 'user'
-                        ? 'bg-gray-100 border-gray-200'
-                        : 'bg-white border-gray-200'
-                    }`}
+                  <div
+                    className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 border-gray-200 self-end dark:bg-gray-800 dark:border-slate-700' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`}
+                    style={{ wordBreak: 'break-word' }}
                   >
-                    <div className="text-gray-800 leading-relaxed text-left">
-                      {message.parts.map((Part, index) => 
+                    <div className="text-gray-800 leading-relaxed text-left break-words whitespace-pre-wrap dark:text-gray-100">
+                      {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
                           <ReactMarkdown
-                            key={index}
-                            remarkPlugins={[remarkGfm]}
-                            rehypePlugins={[rehypeKatex]}
+                            key={`${message.id}-text-${index}`}
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[rehypeKatex]} 
                             components={{
+                              pre({ children }) {
+                                return <pre className="bg-muted p-2 rounded overflow-auto dark:bg-muted/20">{children}</pre>;
+                              },
+                              code( props ) {
+                                const {children, className, node, ...rest} = props
+                                const match = /language-(\w+)/.exec(className || '')
+                                const [copied, setCopied] = useState(false);
+
+                                const handleCopy = () => {
+                                  const code = String(children).replace(/\n$/, '');
+                                  navigator.clipboard.writeText(code);
+                                  setCopied(true);
+                                  setTimeout(() => setCopied(false), 1500);
+                                }
+                                return match ? (
+                                  <div className='relative group'>
+                                    <SyntaxHighlighter
+                                    PreTag="div"
+                                    children={String(children).replace(/\n$/, '')}
+                                    language={match[1]}
+                                    style={atomDark}
+                                  />
+                                        <span className="absolute right-2 top-2 text-xs text-white z-10 flex items-center gap-2">
+                                        {match[1]}
+                                        <button
+                                          className="ml-2 px-2 py-0.5 rounded text-xs bg-purple-600 hover:bg-purple-700 transition-colors opacity-80 hover:opacity-100"
+                                          onClick={handleCopy}
+                                          type="button"
+                                        >
+                                          {copied ? "✓ Đã sao chép!" : "Sao chép"}
+                                        </button>
+                                      </span>
+
+                                  </div>
+                                  
+                                ) : (
+                                  <code {...rest} className={className}>
+                                    {children}
+                                  </code>
+                                )
+                              },                              
                               table({ children }) {
                                 return (
                                   <div className="overflow-x-auto my-4">
@@ -253,7 +298,7 @@ const ChatbotUI = () => {
                                 );
                               },
                               thead({ children }) {
-                                return <thead className="bg-muted/50">{children}</thead>;
+                                return <thead className="bg-muted/50 dark:bg-muted/20">{children}</thead>;
                               },
                               th({ children }) {
                                 return (
@@ -270,7 +315,7 @@ const ChatbotUI = () => {
                                 );
                               },
                               tr({ children }) {
-                                return <tr className="even:bg-muted/20">{children}</tr>;
+                                return <tr className="even:bg-muted/20 dark:even:bg-muted/10">{children}</tr>;
                               },
                             }}
                           >
@@ -279,39 +324,47 @@ const ChatbotUI = () => {
                         ) : null
                       )}
                     </div>
-                  </Card>
+                  </div>
                 </div>
 
                 {message.role === 'user' && (
-                  <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0 mt-1">
-                    <User className="w-4 h-4 text-gray-700" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0 mt-1 dark:bg-gray-600">
+                    <User className="w-4 h-4 text-gray-700 dark:text-gray-200" />
                   </div>
                 )}
               </div>
-            ))}            <div ref={bottomRef} />          </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
         )}
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-white px-4 py-4">
-        <div className="max-w-3xl mx-auto flex gap-2">
+      <div className="border-t bg-white px-3 sm:px-4 py-3 sm:py-4 dark:bg-slate-900 dark:border-slate-700">
+        <div className="max-w-screen-md sm:max-w-3xl mx-auto flex gap-2 items-center">
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            onKeyDown={(e) =>  {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault(); // chặn xuống dòng
+                    handleSend();
+                  }
+                }}
             placeholder="Chat với ChisaAI..."
-            className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500"
+            className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500 min-w-0 dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
           />
-          <Badge>
-            Automatic
-          </Badge>
           <Button
             onClick={handleSend}
             disabled={status !== 'ready' || !inputValue.trim()}
-            className="bg-amber-500 hover:bg-amber-600 text-white"
+            className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 dark:bg-amber-500 dark:hover:bg-amber-600"
           >
             <Send className="w-4 h-4" />
           </Button>
+        </div>
+        {/* Footer */}
+        <div className="text-center text-xs text-gray-500 mt-2">
+          <span>AI có thể sai, kiểm chứng trước khi sử dụng. Hỏi toán hơi ngu vì AI render latex không tốt lắm.</span>
         </div>
       </div>
     </div>
