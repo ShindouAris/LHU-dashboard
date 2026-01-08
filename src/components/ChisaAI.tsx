@@ -1,8 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronRight, Sparkles, Wrench, Send, User } from 'lucide-react';
+import { memo, useEffect, useRef, useState } from 'react';
+import { ChevronDown, ChevronRight, Sparkles, Wrench, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { AuthStorage } from '@/types/user';
 import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
@@ -15,7 +13,53 @@ import { Avatar } from './ui/avatar';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
+import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
 const API = import.meta.env.VITE_API_URL;
+
+type EmptyStateProps = {
+  fullName?: string;
+  inputValue: string;
+  status: string;
+  onChangeInput: (value: string) => void;
+  onSubmit: () => void;
+};
+
+const EmptyState = memo(function EmptyState({
+  fullName,
+  inputValue,
+  status,
+  onChangeInput,
+  onSubmit,
+}: EmptyStateProps) {
+  return (
+    <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
+      <h1 className="text-3xl font-normal mb-3 text-gray-800">
+        Xin chào, {fullName || 'Người vô danh'}!
+      </h1>
+      <p className="text-gray-600 mb-8 max-w-md">
+        Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
+      </p>
+      {/* Input chat */}
+      <div className="w-full max-w-md">
+        <PromptInput
+          onSubmit={onSubmit}
+          className="border border-gray-300 rounded-md px-4 py-2 focus:border-amber-500 focus:ring-amber-500 w-full dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
+        >
+          <PromptInputTextarea
+            value={inputValue}
+            placeholder="Bắt đầu trò chuyện với ChisaAI..."
+            onChange={(e) => onChangeInput(e.target.value)}
+          />
+          <PromptInputSubmit
+            status={status === 'streaming' ? 'streaming' : 'ready'}
+            disabled={!inputValue.trim()}
+            className="absolute right-4"
+          />
+        </PromptInput>
+      </div>
+    </div>
+  );
+});
 
 
 const ChatbotUI = () => {
@@ -45,10 +89,6 @@ const ChatbotUI = () => {
   // useEffect(() => {
   //   setError("Trang web chưa hoạt động, quay lại sau nhé!")
   // }, [])
-
-
-
-
 
   useEffect(() => {
     const load = async () => {
@@ -107,17 +147,6 @@ const ChatbotUI = () => {
     setInputValue('');
   };
 
-  const EmptyState = () => (
-    <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
-      <h1 className="text-3xl font-normal mb-3 text-gray-800">
-        Xin chào, {user?.FullName || "Người vô danh"}!
-      </h1>
-      <p className="text-gray-600 mb-8 max-w-md">
-        Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
-      </p>
-    </div>
-  );
-
   if (loading) {
     return (
       <div className="flex h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-white">
@@ -156,7 +185,13 @@ const ChatbotUI = () => {
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         {messages.length === 0 ? (
-          <EmptyState />
+          <EmptyState
+            fullName={user?.FullName}
+            inputValue={inputValue}
+            status={status}
+            onChangeInput={setInputValue}
+            onSubmit={handleSend}
+          />
         ) : (
           <div className="max-w-screen-md sm:max-w-7xl mx-auto space-y-6">
             {messages.map((message) => (
@@ -341,32 +376,29 @@ const ChatbotUI = () => {
 
       {/* Input Area */}
       <div className="border-t bg-white px-3 sm:px-4 py-3 sm:py-4 dark:bg-slate-900 dark:border-slate-700">
-        <div className="max-w-screen-md sm:max-w-3xl mx-auto flex gap-2 items-center">
-          <Input
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) =>  {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault(); // chặn xuống dòng
-                    handleSend();
-                  }
-                }}
-            placeholder="Chat với ChisaAI..."
-            className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500 min-w-0 dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
-          />
-          <Button
-            onClick={handleSend}
-            disabled={status !== 'ready' || !inputValue.trim()}
-            className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-2 dark:bg-amber-500 dark:hover:bg-amber-600"
-          >
-            <Send className="w-4 h-4" />
-          </Button>
-        </div>
-        {/* Footer */}
-        <div className="text-center text-xs text-gray-500 mt-2">
-          <span>AI có thể sai, kiểm chứng trước khi sử dụng. Hỏi toán hơi ngu vì AI render latex không tốt lắm.</span>
-        </div>
-      </div>
+              <div className={`max-w-screen-md sm:max-w-3xl mx-auto flex gap-2 items-center` + (messages.length === 0 ? ' hidden' : '')}>
+                <PromptInput
+                  onSubmit={handleSend}
+                  className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500 min-w-0 dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
+                >
+                
+                <PromptInputTextarea
+                  value={inputValue}
+                  placeholder="Chat với ChisaAI..."
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+                <PromptInputSubmit
+                  status={status === 'streaming' ? 'streaming' : 'ready'}
+                  disabled={!inputValue.trim()}
+                  className='absolute right-4'
+                  />
+                </PromptInput>
+              </div>
+              {/* Footer */}
+              <div className="text-center text-xs text-gray-500 mt-2">
+                <span>AI có thể sai, kiểm chứng trước khi sử dụng. Hỏi toán hơi ngu vì AI render latex không tốt lắm.</span>
+              </div>
+            </div>
     </div>
   );
 };
