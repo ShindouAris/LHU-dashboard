@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
 import './index.css';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { registerSW } from 'virtual:pwa-register';
 import { Analytics } from "@vercel/analytics/react"
 import { BrowserRouter } from 'react-router-dom';

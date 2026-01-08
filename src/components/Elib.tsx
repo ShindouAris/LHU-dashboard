@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { Calendar as Calen, dateFnsLocalizer } from 'react-big-calendar';
 import { DangKy, RoomData, ThongSo } from '@/types/elib';
 import { AuthStorage } from '@/types/user';
-import { Clock, Users, ChevronDown, ChevronUp, UserPlus, MoreVertical, QrCode, Copy, Edit, Trash2, Eye, Calendar } from 'lucide-react';
+import { Clock, Users, ChevronDown, ChevronUp, UserPlus, MoreVertical, QrCode, Copy, Edit, Trash2, Eye, Calendar, Construction } from 'lucide-react';
 import { MdNoFood } from "react-icons/md";
 import { LuClockAlert, LuPowerOff } from "react-icons/lu";
 import { PiWarningDiamondFill } from "react-icons/pi";
@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import toast from 'react-hot-toast';
 // @ts-ignore
 import RoomBookingForm from './Elib_register';
+import "./Timetable.css";
 // ============== TYPES ==============
 
 interface NoiQuy {
@@ -387,7 +388,7 @@ const Elib: React.FC = () => {
       eventCache.current[init_date] = events;
 
       setEvent(events || [])
-      
+
     }
     load();
   }, []);
@@ -552,13 +553,13 @@ const Elib: React.FC = () => {
   if (is_booking_open) {
     return (
       // <RoomBookingForm onBookingSuccess={handleBookingSuccess} onClose={() => setIsBookingOpen(false)} />
-      <img src="/under_construction.png" alt="Under Construction" className="mx-auto mt-20" />
+      <Construction />
     )
   }
 
   if (is_modification_room_dialog_open && selectedBookingNumber) {
     return (
-      <img src="/under_construction.png" alt="Under Construction" className="mx-auto mt-20" />
+      <Construction />
     )
   }
 
