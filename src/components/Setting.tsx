@@ -36,6 +36,7 @@ import { FiSidebar } from "react-icons/fi";
 import { IoHardwareChipOutline } from "react-icons/io5";
 import { BsWindowDesktop } from "react-icons/bs";
 import { IoIosNotifications, IoIosNotificationsOff  } from "react-icons/io";
+import {ChisaAI} from './ui/ChisaAI';
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -241,6 +242,13 @@ const SettingsPage: React.FC = () => {
         icon: MdOutlineLocalLibrary ,
         description: "Quản lý thư viện LHU",
         authrequired: true
+      },
+      {
+        id: "ChisaAI",
+        label: "Chisa AI",
+        icon: ChisaAI,
+        description: "Trợ lý AI của LHU-dashboard",
+        authrequired: true,
       },
       {
         id: "settings",

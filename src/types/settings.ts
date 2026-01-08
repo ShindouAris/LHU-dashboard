@@ -28,7 +28,8 @@ export enum NavigationInstruction {
     SETTINGS = "settings",
     DIEMRENLUYEN = "diemrenluyen",
     THUVIEN = "thuvien",
-    TOOLLHU = "toollhu"
+    TOOLLHU = "toollhu",
+    CHISA_AI = "chisaAI"
 }
 
 export const getSettings = (): UserSettings => {

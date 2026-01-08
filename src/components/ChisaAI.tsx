@@ -15,6 +15,7 @@ import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
 import { Card_11 } from './ui/card-11';
+import { Construction } from './LHU_UI/Contruction';
 const API = import.meta.env.VITE_API_URL;
 
 type EmptyStateProps = {
@@ -178,17 +179,7 @@ const ChatbotUI = () => {
 
   if (!access) {
     return (
-      <div className="flex min-h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-pink-300 to-cyan-300 dark:from-slate-900 dark:to-slate-800">
-        <Card_11>
-            <CardContent className="p-6 text-center">
-              <div className='text-pink-400 text-2xl font-bold'>🚧 Khu vực đang thi công</div>
-              <p className="text-sm text-gray-600 sm:text-base">
-                Trang này đang được xây dựng. <br />
-                Bạn có thể quay lại sau hoặc thử các tính năng khác.
-              </p>
-            </CardContent>
-        </Card_11>
-      </div>
+      <Construction />
     );
   }
 

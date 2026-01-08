@@ -151,7 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       isBetaItem: true
     },
     {
-      id: "ChisaAI",
+      id: "chisaAI",
       label: "Chisa AI",
       icon: ChisaAI,
       description: "Trợ lý AI của LHU-dashboard",

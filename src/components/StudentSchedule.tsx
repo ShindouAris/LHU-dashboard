@@ -35,6 +35,7 @@ import {LoadingScreen} from './LHU_UI/LoadingScreen';
 const DiemRL = lazy(() => import('./DiemRL'));
 const Elib = lazy(() => import('./Elib'));
 const ToolLHU = lazy(() => import('./ToolLHU'));
+const ChisaAI = lazy(() => import("./ChisaAI"));
 
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
@@ -116,6 +117,8 @@ export const StudentSchedule: React.FC = () => {
       setPage("thuvien")
     } else if (path.startsWith("/toollhu")) {
       setPage("toollhu")
+    } else if (path.startsWith("/chisaAI")) {
+      setPage("chisaAI")
     }
      else {
       setPage("home");
@@ -405,6 +408,9 @@ export const StudentSchedule: React.FC = () => {
     } else if (newPage === "toollhu") {
       setPage("toollhu")
       navigate("/toollhu")
+    } else if (newPage === "chisaAI") {
+      setPage("chisaAI")
+      navigate("/chisaAI")
     }
   };
 
@@ -556,6 +562,24 @@ export const StudentSchedule: React.FC = () => {
     )
   }
 
+  if (page === "chisaAI") {
+    return (
+      <Layout
+        showBack={true}
+        onBack={() => handleChangeView('schedule')}
+        page={page}
+        onPageChange={handleChangeView}
+        title='Chisa AI'
+      >
+        <div className="min-h-screen py-8 px-4">
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <ChisaAI />
+          </Suspense>
+        </div>
+      </Layout>
+    )
+  }
+
   if (error) {
     return (
       <Layout
@@ -583,6 +607,8 @@ export const StudentSchedule: React.FC = () => {
       </Layout>
     );
   }
+
+  
 
   if (!scheduleData ) {
     return (
