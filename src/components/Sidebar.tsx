@@ -20,6 +20,7 @@ import { FaParking, FaToolbox } from 'react-icons/fa';
 import { getSettings, NavigationInstruction } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
+import { ChisaAI } from './ui/ChisaAI';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -146,6 +147,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: "Công cụ LHU",
       icon: FaToolbox,
       description: "Các công cụ hỗ trợ LHU",
+      authrequired: true,
+      isBetaItem: true
+    },
+    {
+      id: "ChisaAI",
+      label: "Chisa AI",
+      icon: ChisaAI,
+      description: "Trợ lý AI của LHU-dashboard",
       authrequired: true,
       isBetaItem: true
     },
