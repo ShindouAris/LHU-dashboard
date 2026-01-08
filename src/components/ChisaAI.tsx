@@ -75,7 +75,8 @@ const ChatbotUI = () => {
     transport: new DefaultChatTransport({
       api: `${API}/chisaAI/v2/chat`,
       body: {
-        access_token: AuthStorage.getUserToken() || ''
+        access_token: AuthStorage.getUserToken() || '',
+        user_id: user?.UserID || '',
       }
     })
   });
