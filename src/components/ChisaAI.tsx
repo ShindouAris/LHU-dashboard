@@ -14,7 +14,6 @@ import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
-import { Card_11 } from './ui/card-11';
 import { Construction } from './LHU_UI/Contruction';
 const API = import.meta.env.VITE_API_URL;
 
