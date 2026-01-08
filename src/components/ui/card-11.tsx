@@ -13,7 +13,7 @@ export const Card_11 = ({
 					backgroundSize: "10px 10px",
 				}}
 			/>
-			<Card className="z-10 isolate bg-pink-200 dark:bg-pink-900 border-border border-dashed border-pink-400 border-[5px]">
+			<Card className="z-10 isolate bg-pink-200 dark:bg-indigo-600 border-border border-dashed border-pink-400 border-[5px]">
 				{children}
 			</Card>
 		</div>
