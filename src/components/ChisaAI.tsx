@@ -50,7 +50,7 @@ const EmptyState = memo(function EmptyState({
         <PromptInputTextarea
         value={inputValue}
         placeholder="Bắt đầu trò chuyện với ChisaAI..."
-        className="border-pink-300 dark:border-pink-400 pr-16"
+        className="border rounded-md border-pink-300 dark:border-pink-400 pr-16"
         onChange={(e) => onChangeInput(e.target.value)}
         />
         <PromptInputSubmit
