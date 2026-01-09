@@ -21,6 +21,7 @@ import { getSettings, NavigationInstruction } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
 import { ChisaAI } from './ui/ChisaAI';
+import GradientText from './ui/GradientText';
 
 interface SidebarProps {
   onBack?: () => void;
@@ -217,7 +218,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
               <div className="min-w-0">
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate font-loveHouse">
-                  LHU Dashboard
+                  <GradientText
+                  yoyo={false}
+                  animationSpeed={0.8}
+                  colors={["#F6B1CE", "#1581BF", "#3DB6B1", "#CCE5CF"]}
+                  >
+                    LHU Dashboard
+                  </GradientText>
                 </h1>
                 <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">
                   {title}
