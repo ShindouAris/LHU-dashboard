@@ -244,7 +244,7 @@ const SettingsPage: React.FC = () => {
         authrequired: true
       },
       {
-        id: "ChisaAI",
+        id: "chisaAI",
         label: "Chisa AI",
         icon: ChisaAI,
         description: "Trợ lý AI của LHU-dashboard",
