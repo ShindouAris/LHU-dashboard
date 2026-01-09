@@ -14,7 +14,7 @@
 
 @font-face {
   font-family: LoveHouse;
-  src: url(/fonts/LoveHouse.woff) format("woff");
+  src: url(/fonts/LoveHouse.otf) format("opentype");
   font-weight: normal;
   font-style: normal;
 }
