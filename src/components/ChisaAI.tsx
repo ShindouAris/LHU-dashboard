@@ -35,31 +35,30 @@ const EmptyState = memo(function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
       <h1 className="text-3xl font-normal mb-3 text-gray-800 dark:text-yellow-300 font-loveHouse">
-        Ciallo, {fullName || 'Người vô danh'}!
+      Ciallo, {fullName || 'Người vô danh'}!
       </h1>
       <p className="text-gray-600 dark:text-pink-400 mb-8 max-w-md">
-        Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
+      Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
       </p>
       <p className="text-red-600 dark:text-red-400 mb-8 max-w-md">
-        Lưu ý: Hệ thống này không lưu lịch sử chat, đổi trang bạn sẽ mất hêt cuộc trò chuyện hiện tại.
+      Lưu ý: Hệ thống này không lưu lịch sử chat, đổi trang bạn sẽ mất hêt cuộc trò chuyện hiện tại.
       </p>
+
       {/* Input chat */}
       <div className="w-full max-w-md">
-        <PromptInput
-          onSubmit={onSubmit}
-          className="border border-gray-300 rounded-md px-4 py-2 focus:border-amber-500 focus:ring-amber-500 w-full dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
-        >
-          <PromptInputTextarea
-            value={inputValue}
-            placeholder="Bắt đầu trò chuyện với ChisaAI..."
-            onChange={(e) => onChangeInput(e.target.value)}
-          />
-          <PromptInputSubmit
-            status={status === 'streaming' ? 'streaming' : 'ready'}
-            disabled={!inputValue.trim()}
-            className="absolute right-4"
-          />
-        </PromptInput>
+      <PromptInput onSubmit={onSubmit} className="relative rounded-md px-4 py-2">
+        <PromptInputTextarea
+        value={inputValue}
+        placeholder="Bắt đầu trò chuyện với ChisaAI..."
+        className="border-pink-300 dark:border-pink-400 pr-16"
+        onChange={(e) => onChangeInput(e.target.value)}
+        />
+        <PromptInputSubmit
+        status={status === 'streaming' ? 'streaming' : 'ready'}
+        disabled={!inputValue.trim()}
+        className="absolute right-4"
+        />
+      </PromptInput>
       </div>
     </div>
   );
