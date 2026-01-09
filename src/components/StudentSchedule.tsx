@@ -41,6 +41,7 @@ const ChisaAI = lazy(() => import("./ChisaAI"));
 import { PiExamDuotone } from 'react-icons/pi';
 import { NavigationItem } from '@/types/settings';
 import { CalendarDays, User, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
+import GradientText from './ui/GradientText';
 
 
 export const StudentSchedule: React.FC = () => {
@@ -624,7 +625,13 @@ export const StudentSchedule: React.FC = () => {
                 <GraduationCap className="h-10 w-10 text-white" />
               </div>
               <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
-                LHU Dashboard
+                <GradientText
+                  yoyo={false}
+                  animationSpeed={0.8}
+                  colors={["#F6B1CE", "#1581BF", "#3DB6B1", "#CCE5CF"]}
+                  >
+                    LHU Dashboard
+                </GradientText>
               </h1>
               <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
                 Tra cứu lịch học nhanh chóng
