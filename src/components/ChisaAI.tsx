@@ -37,8 +37,11 @@ const EmptyState = memo(function EmptyState({
       <h1 className="text-3xl font-normal mb-3 text-gray-800 dark:text-yellow-300 font-loveHouse">
         Ciallo, {fullName || 'Người vô danh'}!
       </h1>
-      <p className="text-gray-600 mb-8 max-w-md">
+      <p className="text-gray-600 dark:text-pink-400 mb-8 max-w-md">
         Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
+      </p>
+      <p className="text-red-600 dark:text-red-400 mb-8 max-w-md">
+        Lưu ý: Hệ thống này không lưu lịch sử chat, đổi trang bạn sẽ mất hêt cuộc trò chuyện hiện tại.
       </p>
       {/* Input chat */}
       <div className="w-full max-w-md">
@@ -100,7 +103,9 @@ const ChatbotUI = () => {
       if (!user) {
         setError("Phiên đã hết hạn, vui lòng đăng nhập lại");
       }
-      setLoading(false);
+      setTimeout(() => {
+        setLoading(false);
+      })
     }
     load();
   }, []);
