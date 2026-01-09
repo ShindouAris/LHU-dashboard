@@ -34,8 +34,8 @@ const EmptyState = memo(function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
-      <h1 className="text-3xl font-normal mb-3 text-gray-800">
-        Xin chào, {fullName || 'Người vô danh'}!
+      <h1 className="text-3xl font-normal mb-3 text-gray-800 dark:text-yellow-300 font-loveHouse">
+        Ciallo, {fullName || 'Người vô danh'}!
       </h1>
       <p className="text-gray-600 mb-8 max-w-md">
         Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
@@ -74,6 +74,7 @@ const ChatbotUI = () => {
   const user = AuthStorage.getUser();
   // @ts-ignore
   const {messages, sendMessage, status, id, setMessages} = useChat({
+    generateId: () => crypto.randomUUID().toString(),
     transport: new DefaultChatTransport({
       api: `${API}/chisaAI/v2/chat`,
       body: {
@@ -90,7 +91,7 @@ const ChatbotUI = () => {
   }, [id])
 
   useEffect(() => {
-    setAccess(false)
+    setAccess(true)
   }, [])
 
   useEffect(() => {
@@ -183,14 +184,7 @@ const ChatbotUI = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-amber-50 to-white dark:from-slate-900 dark:to-slate-800">
-      {/* Header */}
-      <div className="border-b border-gray-200 bg-white/80 dark:bg-slate-900/80 dark:border-slate-700 backdrop-blur-sm px-4 sm:px-6 py-3 sm:py-4">
-        <div className="max-w-screen-xl mx-auto flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">ChisaAI V2</h2>
-        </div>
-      </div>
-
+    <div className="flex flex-col min-h-[87vh] max-h-[87vh] rounded-sm">
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         {messages.length === 0 ? (

@@ -571,7 +571,7 @@ export const StudentSchedule: React.FC = () => {
         onPageChange={handleChangeView}
         title='Chisa AI'
       >
-        <div className="min-h-screen py-8 px-4">
+        <div className="py-8 px-4">
           <Suspense fallback={<LoadingScreen loading={true} />}>
             <ChisaAI />
           </Suspense>
