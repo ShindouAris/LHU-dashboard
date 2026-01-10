@@ -535,7 +535,7 @@ const ChatbotUI = () => {
                       </button>
                       {expandedReasoning[message.id] && (
                         <div className="px-3 sm:px-4 pb-3 pt-1">
-                          <p className="text-sm text-blue-900 leading-relaxed text-left break-words whitespace-pre-wrap dark:text-blue-200">
+                          <p className="text-sm text-blue-900 leading-relaxed text-left break-words dark:text-blue-200">
                             {message.parts.map((part, idx) =>
                               part.type === 'reasoning' ? (
                                 <span key={`${message.id}-reasoning-${idx}`}>{part.text}</span>
@@ -584,11 +584,11 @@ const ChatbotUI = () => {
                     className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 border-gray-200 self-end dark:bg-gray-800 dark:border-slate-700' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`}
                     style={{ wordBreak: 'break-word' }}
                   >
-                    <div className="text-gray-800 leading-relaxed text-left break-words whitespace-pre-wrap dark:text-gray-100">
+                    <div className="text-gray-800 leading-relaxed text-left break-words dark:text-gray-100">
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
                           (isGenerating && message.role === 'assistant' && message.id === lastMessageId) ? (
-                            <div key={`${message.id}-streaming-${index}`} className="whitespace-pre-wrap break-words">
+                            <div key={`${message.id}-streaming-${index}`} className="break-words">
                               {Part.text}
                             </div>
                           ) : (
