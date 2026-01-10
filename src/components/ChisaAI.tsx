@@ -25,6 +25,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { VscDebugRestart } from "react-icons/vsc";
+import { Table, TableCell } from './ui/table';
 const API = import.meta.env.VITE_API_URL;
 
 type EmptyStateProps = {
@@ -100,7 +102,7 @@ const ChatbotUI = () => {
   const persistTimerRef = useRef<number | null>(null);
 
   // @ts-ignore
-  const {messages, sendMessage, status, id, setMessages} = useChat({
+  const {messages, sendMessage, status, id, setMessages, regenerate} = useChat({
     id: chatId,
     generateId: () => crypto.randomUUID().toString(),
     transport: new DefaultChatTransport({
@@ -109,7 +111,10 @@ const ChatbotUI = () => {
         access_token: AuthStorage.getUserToken() || '',
         user_id: user?.UserID || '',
       }
-    })
+    }),
+    onError: (err) => {
+      setError(err.message || 'Đã có lỗi xảy ra trong quá trình kết nối đến máy chủ.');
+    }
   });
 
   useEffect(() => {
@@ -541,9 +546,11 @@ const ChatbotUI = () => {
                               table({ children }) {
                                 return (
                                   <div className="overflow-x-auto my-4">
-                                    <table className="w-full border-collapse text-left">
-                                      {children}
-                                    </table>
+                                    <Table>
+                                      <TableCell>
+                                        {children}
+                                      </TableCell>
+                                    </Table>
                                   </div>
                                 );
                               },
@@ -571,10 +578,27 @@ const ChatbotUI = () => {
                           >
                             {Part.text}
                           </ReactMarkdown>
+                          
                         ) : null
                       )}
                     </div>
                   </div>
+                  {message.role === 'assistant' && (
+                    <div className="flex items-center">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => regenerate()}
+                        disabled={status === 'streaming'}
+                      >
+                        {status === 'streaming' ? (
+                          <LoaderIcon className="w-7 h-7 text-gray-500" />
+                        ) : (
+                          <VscDebugRestart className="w-7 h-7 text-gray-500" />
+                        )}
+                      </Button>
+                    </div>
+                  )}
                 </div>
 
                 {message.role === 'user' && (
