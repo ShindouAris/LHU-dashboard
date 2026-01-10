@@ -83,6 +83,8 @@ const ChatbotUI = () => {
   const [expandedToolCalls, setExpandedToolCalls] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [chatSwitchLoading, setChatSwitchLoading] = useState<boolean>(false);
+  const [chatSwitchLabel, setChatSwitchLabel] = useState<string>('Đang tạo phiên chat...');
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [access, setAccess] = useState<boolean>(false);
   const user = AuthStorage.getUser();
@@ -114,7 +116,7 @@ const ChatbotUI = () => {
     }),
     onError: (err) => {
       setError(err.message || 'Đã có lỗi xảy ra trong quá trình kết nối đến máy chủ.');
-    }
+    },
   });
 
   useEffect(() => {
@@ -172,6 +174,7 @@ const ChatbotUI = () => {
         setMessages(record.messages);
       }
       didHydrateRef.current = true;
+      setChatSwitchLoading(false);
     };
 
     hydrate();
@@ -218,7 +221,20 @@ const ChatbotUI = () => {
       minute: '2-digit',
     });
 
+  const beginChatSwitch = (label: string) => {
+    setChatSwitchLabel(label);
+    setChatSwitchLoading(true);
+    setExpandedReasoning({});
+    setExpandedToolCalls({});
+    setInputValue('');
+    // Clear current messages immediately so the UI doesn't flash old chat content.
+    // @ts-ignore runtime shape matches the UI messages from useChat
+    setMessages([]);
+    didHydrateRef.current = false;
+  };
+
   const startNewChat = () => {
+    beginChatSwitch('Đang tạo phiên chat...');
     const newId = crypto.randomUUID().toString();
     setChatId(newId);
     window.location.hash = newId;
@@ -226,6 +242,7 @@ const ChatbotUI = () => {
 
   const openChat = (targetChatId: string) => {
     if (!targetChatId) return;
+    beginChatSwitch('Đang mở phiên chat...');
     setChatId(targetChatId);
     window.location.hash = targetChatId;
   };
@@ -264,6 +281,8 @@ const ChatbotUI = () => {
       [messageId]: !prev[messageId]
     }));
   };
+
+  const isGenerating = status === 'streaming';
 
    const TOOL_NAME_VI_MAP = {
     GETNEXTCLASSTOOL: "Công cụ lấy lớp học tiếp theo",
@@ -343,13 +362,13 @@ const ChatbotUI = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={startNewChat}>
+            <Button variant="outline" size="sm" onClick={startNewChat} disabled={chatSwitchLoading || isGenerating}>
               Chat mới
             </Button>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={historyLoading}>
+                <Button variant="outline" size="sm" disabled={historyLoading || chatSwitchLoading || isGenerating}>
                   {historyLoading ? 'Đang tải…' : 'Lịch sử'}
                 </Button>
               </DropdownMenuTrigger>
@@ -403,7 +422,17 @@ const ChatbotUI = () => {
       </div>
 
       {/* Messages Container */}
-      <div className="flex-1 overflow-y-auto px-4 py-6">
+      <div className="relative flex-1 overflow-y-auto px-4 py-6">
+        {chatSwitchLoading && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm dark:bg-slate-950/60">
+            <Card className="w-full max-w-sm rounded-2xl shadow-lg">
+              <CardContent className="p-6 text-center">
+                <LoaderIcon />
+                <p className="mt-2 text-sm sm:text-base text-gray-700 dark:text-gray-200">{chatSwitchLabel}</p>
+              </CardContent>
+            </Card>
+          </div>
+        )}
         {messages.length === 0 ? (
           <EmptyState
             fullName={user?.FullName}
@@ -583,19 +612,14 @@ const ChatbotUI = () => {
                       )}
                     </div>
                   </div>
-                  {message.role === 'assistant' && (
+                  {message.role === 'assistant' && status === 'ready' && (
                     <div className="flex items-center">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => regenerate()}
-                        disabled={status === 'streaming'}
                       >
-                        {status === 'streaming' ? (
-                          <LoaderIcon className="w-7 h-7 text-gray-500" />
-                        ) : (
-                          <VscDebugRestart className="w-7 h-7 text-gray-500" />
-                        )}
+                        <VscDebugRestart className="w-7 h-7 text-gray-500" />
                       </Button>
                     </div>
                   )}
@@ -608,6 +632,20 @@ const ChatbotUI = () => {
                 )}
               </div>
             ))}
+
+            {isGenerating && (
+              <div className="flex gap-3 sm:gap-4 items-start justify-start">
+                <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden dark:from-amber-600 dark:to-orange-700">
+                  <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
+                </Avatar>
+                <div className="px-4 py-3 rounded-md border bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <LoaderIcon className="w-4 h-4" />
+                    <span>Chisa đang trả lời…</span>
+                  </div>
+                </div>
+              </div>
+            )}
             <div ref={bottomRef} />
           </div>
         )}
@@ -627,7 +665,7 @@ const ChatbotUI = () => {
                   onChange={(e) => setInputValue(e.target.value)}
                 />
                 <PromptInputSubmit
-                  status={status === 'streaming' ? 'streaming' : 'ready'}
+                  status={status}
                   disabled={!inputValue.trim()}
                   className='absolute right-4'
                   />
