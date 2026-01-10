@@ -644,11 +644,9 @@ const ChatbotUI = () => {
                                 },                              
                                 table({ children }) {
                                   return (
-                                    <div className="overflow-x-auto my-4">
                                       <Table className="w-full">
                                         {children}
                                       </Table>
-                                    </div>
                                   );
                                 },
                                 thead({ children }) {
