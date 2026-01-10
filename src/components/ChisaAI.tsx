@@ -8,6 +8,9 @@ import { LoaderIcon } from '@/components/ui/LoaderIcon';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
+import remarkBreak from 'remark-breaks'
 import "katex/dist/katex.min.css";
 import { Avatar } from './ui/avatar';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
@@ -26,8 +29,39 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { VscDebugRestart } from "react-icons/vsc";
-import { Table, TableCell } from './ui/table';
+import { Table, TableCell, TableHead, TableRow } from './ui/table';
 const API = import.meta.env.VITE_API_URL;
+
+const katexSanitizeSchema = {
+  ...defaultSchema,
+  attributes: {
+    ...defaultSchema.attributes,
+    div: [
+      ...(defaultSchema.attributes?.div || []),
+      ['className'],
+      ['style'],
+      ['aria-hidden'],
+      ['aria-label'],
+      ['role'],
+    ],
+    span: [
+      ...(defaultSchema.attributes?.span || []),
+      ['className'],
+      ['style'],
+      ['aria-hidden'],
+      ['aria-label'],
+      ['role'],
+    ],
+    code: [
+      ...(defaultSchema.attributes?.code || []),
+      ['className'],
+    ],
+    pre: [
+      ...(defaultSchema.attributes?.pre || []),
+      ['className'],
+    ],
+  },
+} as const;
 
 type EmptyStateProps = {
   fullName?: string;
@@ -46,7 +80,7 @@ const EmptyState = memo(function EmptyState({
 }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
-      <h1 className="text-3xl font-normal mb-3 text-gray-800 dark:text-yellow-300 font-loveHouse">
+      <h1 className="text-3xl font-normal mb-3 text-pink-600 dark:text-yellow-300 font-loveHouse">
       Ciallo, {fullName || 'Người vô danh'}!
       </h1>
       <p className="text-gray-600 dark:text-pink-400 mb-8 max-w-md">
@@ -528,8 +562,12 @@ const ChatbotUI = () => {
                         Part.type === "text" ? (
                           <ReactMarkdown
                             key={`${message.id}-text-${index}`}
-                            remarkPlugins={[remarkGfm, remarkMath]}
-                            rehypePlugins={[rehypeKatex]} 
+                            remarkPlugins={[remarkGfm, remarkMath, remarkBreak]}
+                            rehypePlugins={[
+                              rehypeRaw,
+                              [rehypeKatex, { output: 'html' }],
+                              [rehypeSanitize, katexSanitizeSchema],
+                            ]}
                             components={{
                               pre({ children }) {
                                 return <pre className="bg-muted p-2 rounded overflow-auto dark:bg-muted/20">{children}</pre>;
@@ -575,10 +613,8 @@ const ChatbotUI = () => {
                               table({ children }) {
                                 return (
                                   <div className="overflow-x-auto my-4">
-                                    <Table>
-                                      <TableCell>
-                                        {children}
-                                      </TableCell>
+                                    <Table className="w-full">
+                                      {children}
                                     </Table>
                                   </div>
                                 );
@@ -588,20 +624,20 @@ const ChatbotUI = () => {
                               },
                               th({ children }) {
                                 return (
-                                  <th className="px-4 py-2 border font-semibold text-left">
+                                  <TableHead className="px-4 py-2 border font-semibold text-left bg-purple-400 dark:bg-green-600 text-black dark:text-white">
                                     {children}
-                                  </th>
+                                  </TableHead>
                                 );
                               },
                               td({ children }) {
                                 return (
-                                  <td className="px-4 py-2 border align-top">
+                                  <TableCell className="px-4 py-2 border align-top">
                                     {children}
-                                  </td>
+                                  </TableCell>
                                 );
                               },
                               tr({ children }) {
-                                return <tr className="even:bg-muted/20 dark:even:bg-muted/10">{children}</tr>;
+                                return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
                               },
                             }}
                           >
