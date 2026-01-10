@@ -15,6 +15,16 @@ import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
 import { Construction } from './LHU_UI/Contruction';
+import { chisaAIStorage, type ChisaAIChatSummary } from '@/services/chisaAIStorage';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 const API = import.meta.env.VITE_API_URL;
 
 type EmptyStateProps = {
@@ -41,7 +51,7 @@ const EmptyState = memo(function EmptyState({
       Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
       </p>
       <p className="text-red-600 dark:text-red-400 mb-8 max-w-md">
-      Lưu ý: Hệ thống này không lưu lịch sử chat, đổi trang bạn sẽ mất hêt cuộc trò chuyện hiện tại.
+      Lưu ý: Lịch sử chat được lưu trên chính thiết bị của bạn (IndexedDB). Xóa dữ liệu trình duyệt sẽ mất lịch sử.
       </p>
 
       {/* Input chat */}
@@ -74,8 +84,24 @@ const ChatbotUI = () => {
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [access, setAccess] = useState<boolean>(false);
   const user = AuthStorage.getUser();
+
+  const initialHashRef = useRef<string>(window.location.hash.replace('#', '').trim());
+  const hadInitialHashRef = useRef<boolean>(!!initialHashRef.current);
+  const startedRef = useRef<boolean>(false);
+
+  const [chatId, setChatId] = useState(() => {
+    return initialHashRef.current || crypto.randomUUID().toString();
+  });
+
+  const [chatSummaries, setChatSummaries] = useState<ChisaAIChatSummary[]>([]);
+  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+
+  const didHydrateRef = useRef(false);
+  const persistTimerRef = useRef<number | null>(null);
+
   // @ts-ignore
   const {messages, sendMessage, status, id, setMessages} = useChat({
+    id: chatId,
     generateId: () => crypto.randomUUID().toString(),
     transport: new DefaultChatTransport({
       api: `${API}/chisaAI/v2/chat`,
@@ -87,10 +113,117 @@ const ChatbotUI = () => {
   });
 
   useEffect(() => {
-    if (id !== window.location.hash.replace("#", "")) {
-        window.location.hash = id;
+    // Don't force-create a URL hash for a brand new, empty chat.
+    // Only keep hash in sync if user came with a hash, or chat has started.
+    if (!hadInitialHashRef.current && !startedRef.current) return;
+    if (id !== window.location.hash.replace('#', '')) {
+      window.location.hash = id;
     }
-  }, [id])
+  }, [id]);
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const next = window.location.hash.replace('#', '').trim();
+      if (!next) return;
+      if (next !== chatId) {
+        setChatId(next);
+      }
+    };
+
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, [chatId]);
+
+  useEffect(() => {
+    // Ensure switching chats re-hydrates from IndexedDB.
+    didHydrateRef.current = false;
+  }, [id, user?.UserID]);
+
+  useEffect(() => {
+    const refreshHistory = async () => {
+      const userId = user?.UserID;
+      if (!userId) return;
+      setHistoryLoading(true);
+      try {
+        const list = await chisaAIStorage.listByUser(userId, 30);
+        setChatSummaries(list);
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    refreshHistory();
+  }, [user?.UserID]);
+
+  useEffect(() => {
+    const hydrate = async () => {
+      if (didHydrateRef.current) return;
+      const userId = user?.UserID;
+      if (!userId || !id) return;
+
+      const record = await chisaAIStorage.get(userId, id);
+      if (record?.messages && Array.isArray(record.messages) && record.messages.length > 0) {
+        // @ts-ignore runtime shape matches the UI messages from useChat
+        setMessages(record.messages);
+      }
+      didHydrateRef.current = true;
+    };
+
+    hydrate();
+  }, [user?.UserID, id, setMessages]);
+
+  useEffect(() => {
+    const userId = user?.UserID;
+    if (!userId || !id) return;
+
+    // Do not persist empty chats.
+    if (!messages || messages.length === 0) {
+      return;
+    }
+
+    if (persistTimerRef.current) {
+      window.clearTimeout(persistTimerRef.current);
+    }
+
+    // Debounce writes to IndexedDB while streaming
+    persistTimerRef.current = window.setTimeout(() => {
+      (async () => {
+        await chisaAIStorage.set(userId, id, messages as unknown[]);
+        await chisaAIStorage.pruneUserChats(userId, 30);
+        const list = await chisaAIStorage.listByUser(userId, 30);
+        setChatSummaries(list);
+      })();
+    }, 250);
+
+    return () => {
+      if (persistTimerRef.current) {
+        window.clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = null;
+      }
+    };
+  }, [messages, user?.UserID, id]);
+
+  const formatTime = (ts: number) =>
+    new Date(ts).toLocaleString('vi-VN', {
+      hour12: false,
+      year: '2-digit',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+  const startNewChat = () => {
+    const newId = crypto.randomUUID().toString();
+    setChatId(newId);
+    window.location.hash = newId;
+  };
+
+  const openChat = (targetChatId: string) => {
+    if (!targetChatId) return;
+    setChatId(targetChatId);
+    window.location.hash = targetChatId;
+  };
 
   useEffect(() => {
     setAccess(true)
@@ -145,6 +278,12 @@ const ChatbotUI = () => {
   const handleSend = () => {
     if (status !== 'ready') return;
     if (!inputValue.trim()) return;
+
+    startedRef.current = true;
+    // If user didn't start with a hash, create it only when they send the first message.
+    if (!hadInitialHashRef.current && !window.location.hash) {
+      window.location.hash = id;
+    }
     
     const userMsg = {
       id: crypto.randomUUID().toString(),
@@ -189,6 +328,75 @@ const ChatbotUI = () => {
 
   return (
     <div className="flex flex-col min-h-[87vh] max-h-[87vh] rounded-sm">
+      <div className="px-3 sm:px-4 py-2">
+        <div className="max-w-screen-md sm:max-w-7xl mx-auto flex items-center justify-between gap-2">
+          <div className="min-w-0">
+            <div className="text-xs text-gray-500 dark:text-gray-400">Phiên chat</div>
+            <div className="text-sm font-medium truncate text-gray-800 dark:text-gray-100">
+              {id ? id.slice(0, 10) : '...'}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={startNewChat}>
+              Chat mới
+            </Button>
+
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" disabled={historyLoading}>
+                  {historyLoading ? 'Đang tải…' : 'Lịch sử'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-96 max-h-[60vh] overflow-auto">
+                <DropdownMenuLabel>Đoạn chat đã lưu trên thiết bị</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+
+                {chatSummaries.length === 0 ? (
+                  <div className="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">
+                    Chưa có lịch sử.
+                  </div>
+                ) : (
+                  chatSummaries.map((c) => (
+                    <DropdownMenuItem
+                      key={c.chatId}
+                      onSelect={(e) => {
+                        e.preventDefault();
+                        openChat(c.chatId);
+                      }}
+                      className={
+                        c.chatId === id
+                          ? 'bg-accent text-accent-foreground'
+                          : undefined
+                      }
+                    >
+                      <div className="flex flex-col gap-0.5 min-w-0">
+                        <div className="text-sm font-medium truncate">
+                          {c.chatId.slice(0, 12)}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {c.messageCount} tin • {formatTime(c.updatedAt)}
+                        </div>
+                      </div>
+                    </DropdownMenuItem>
+                  ))
+                )}
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onSelect={(e) => {
+                    e.preventDefault();
+                    startNewChat();
+                  }}
+                >
+                  Tạo chat mới
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      </div>
+
       {/* Messages Container */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         {messages.length === 0 ? (
@@ -382,7 +590,7 @@ const ChatbotUI = () => {
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-white px-3 sm:px-4 py-3 sm:py-4 dark:bg-slate-900 dark:border-slate-700">
+      <div className="px-3 sm:px-4 py-3 sm:py-4">
               <div className={`max-w-screen-md sm:max-w-3xl mx-auto flex gap-2 items-center` + (messages.length === 0 ? ' hidden' : '')}>
                 <PromptInput
                   onSubmit={handleSend}
