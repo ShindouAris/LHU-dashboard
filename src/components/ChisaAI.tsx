@@ -119,7 +119,10 @@ const ChatbotUI = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [chatSwitchLoading, setChatSwitchLoading] = useState<boolean>(false);
   const [chatSwitchLabel, setChatSwitchLabel] = useState<string>('Đang tạo phiên chat...');
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const shouldAutoScrollRef = useRef(true);
+  const pendingScrollRafRef = useRef<number | null>(null);
   const [access, setAccess] = useState<boolean>(false);
   const user = AuthStorage.getUser();
 
@@ -299,8 +302,31 @@ const ChatbotUI = () => {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    const el = scrollContainerRef.current;
+    if (!el) return;
+
+    const onScroll = () => {
+      const thresholdPx = 80;
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      shouldAutoScrollRef.current = distanceFromBottom < thresholdPx;
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener('scroll', onScroll);
+  }, []);
+
+  useEffect(() => {
+    if (!shouldAutoScrollRef.current) return;
+    if (pendingScrollRafRef.current) return;
+
+    const isStreaming = status === 'streaming';
+
+    pendingScrollRafRef.current = window.requestAnimationFrame(() => {
+      pendingScrollRafRef.current = null;
+      bottomRef.current?.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth' });
+    });
+  }, [messages, status]);
 
   const toggleReasoning = (messageId: string) => {
     setExpandedReasoning(prev => ({
@@ -317,6 +343,7 @@ const ChatbotUI = () => {
   };
 
   const isGenerating = status === 'streaming';
+  const lastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
 
    const TOOL_NAME_VI_MAP = {
     GETNEXTCLASSTOOL: "Công cụ lấy lớp học tiếp theo",
@@ -456,7 +483,7 @@ const ChatbotUI = () => {
       </div>
 
       {/* Messages Container */}
-      <div className="relative flex-1 overflow-y-auto px-4 py-6">
+      <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto px-4 py-6">
         {chatSwitchLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm dark:bg-slate-950/60">
             <Card className="w-full max-w-sm rounded-2xl shadow-lg">
@@ -560,89 +587,95 @@ const ChatbotUI = () => {
                     <div className="text-gray-800 leading-relaxed text-left break-words whitespace-pre-wrap dark:text-gray-100">
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
-                          <ReactMarkdown
-                            key={`${message.id}-text-${index}`}
-                            remarkPlugins={[remarkGfm, remarkMath, remarkBreak]}
-                            rehypePlugins={[
-                              rehypeRaw,
-                              [rehypeKatex, { output: 'html' }],
-                              [rehypeSanitize, katexSanitizeSchema],
-                            ]}
-                            components={{
-                              pre({ children }) {
-                                return <pre className="bg-muted p-2 rounded overflow-auto dark:bg-muted/20">{children}</pre>;
-                              },
-                              code( props ) {
-                                const {children, className, node, ...rest} = props
-                                const match = /language-(\w+)/.exec(className || '')
-                                const [copied, setCopied] = useState(false);
+                          (isGenerating && message.role === 'assistant' && message.id === lastMessageId) ? (
+                            <div key={`${message.id}-streaming-${index}`} className="whitespace-pre-wrap break-words">
+                              {Part.text}
+                            </div>
+                          ) : (
+                            <ReactMarkdown
+                              key={`${message.id}-text-${index}`}
+                              remarkPlugins={[remarkGfm, remarkMath, remarkBreak]}
+                              rehypePlugins={[
+                                rehypeRaw,
+                                [rehypeKatex, { output: 'html' }],
+                                [rehypeSanitize, katexSanitizeSchema],
+                              ]}
+                              components={{
+                                pre({ children }) {
+                                  return <pre className="bg-muted p-2 rounded overflow-auto dark:bg-muted/20">{children}</pre>;
+                                },
+                                code( props ) {
+                                  const {children, className, node, ...rest} = props
+                                  const match = /language-(\w+)/.exec(className || '')
+                                  const [copied, setCopied] = useState(false);
 
-                                const handleCopy = () => {
-                                  const code = String(children).replace(/\n$/, '');
-                                  navigator.clipboard.writeText(code);
-                                  setCopied(true);
-                                  setTimeout(() => setCopied(false), 1500);
-                                }
-                                return match ? (
-                                  <div className='relative group'>
-                                    <SyntaxHighlighter
-                                    PreTag="div"
-                                    children={String(children).replace(/\n$/, '')}
-                                    language={match[1]}
-                                    style={atomDark}
-                                  />
-                                        <span className="absolute right-2 top-2 text-xs text-white z-10 flex items-center gap-2">
-                                        {match[1]}
-                                        <button
-                                          className="ml-2 px-2 py-0.5 rounded text-xs bg-purple-600 hover:bg-purple-700 transition-colors opacity-80 hover:opacity-100"
-                                          onClick={handleCopy}
-                                          type="button"
-                                        >
-                                          {copied ? "✓ Đã sao chép!" : "Sao chép"}
-                                        </button>
-                                      </span>
+                                  const handleCopy = () => {
+                                    const code = String(children).replace(/\n$/, '');
+                                    navigator.clipboard.writeText(code);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 1500);
+                                  }
+                                  return match ? (
+                                    <div className='relative group'>
+                                      <SyntaxHighlighter
+                                      PreTag="div"
+                                      children={String(children).replace(/\n$/, '')}
+                                      language={match[1]}
+                                      style={atomDark}
+                                    />
+                                          <span className="absolute right-2 top-2 text-xs text-white z-10 flex items-center gap-2">
+                                          {match[1]}
+                                          <button
+                                            className="ml-2 px-2 py-0.5 rounded text-xs bg-purple-600 hover:bg-purple-700 transition-colors opacity-80 hover:opacity-100"
+                                            onClick={handleCopy}
+                                            type="button"
+                                          >
+                                            {copied ? "✓ Đã sao chép!" : "Sao chép"}
+                                          </button>
+                                        </span>
 
-                                  </div>
-                                  
-                                ) : (
-                                  <code {...rest} className={className}>
-                                    {children}
-                                  </code>
-                                )
-                              },                              
-                              table({ children }) {
-                                return (
-                                  <div className="overflow-x-auto my-4">
-                                    <Table className="w-full">
+                                    </div>
+                                    
+                                  ) : (
+                                    <code {...rest} className={className}>
                                       {children}
-                                    </Table>
-                                  </div>
-                                );
-                              },
-                              thead({ children }) {
-                                return <thead className="bg-muted/50 dark:bg-muted/20">{children}</thead>;
-                              },
-                              th({ children }) {
-                                return (
-                                  <TableHead className="px-4 py-2 border font-semibold text-left bg-purple-400 dark:bg-green-600 text-black dark:text-white">
-                                    {children}
-                                  </TableHead>
-                                );
-                              },
-                              td({ children }) {
-                                return (
-                                  <TableCell className="px-4 py-2 border align-top">
-                                    {children}
-                                  </TableCell>
-                                );
-                              },
-                              tr({ children }) {
-                                return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
-                              },
-                            }}
-                          >
-                            {Part.text}
-                          </ReactMarkdown>
+                                    </code>
+                                  )
+                                },                              
+                                table({ children }) {
+                                  return (
+                                    <div className="overflow-x-auto my-4">
+                                      <Table className="w-full">
+                                        {children}
+                                      </Table>
+                                    </div>
+                                  );
+                                },
+                                thead({ children }) {
+                                  return <thead className="bg-muted/50 dark:bg-muted/20">{children}</thead>;
+                                },
+                                th({ children }) {
+                                  return (
+                                    <TableHead className="px-4 py-2 border font-semibold text-left bg-purple-400 dark:bg-green-600 text-black dark:text-white">
+                                      {children}
+                                    </TableHead>
+                                  );
+                                },
+                                td({ children }) {
+                                  return (
+                                    <TableCell className="px-4 py-2 border align-top">
+                                      {children}
+                                    </TableCell>
+                                  );
+                                },
+                                tr({ children }) {
+                                  return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
+                                },
+                              }}
+                            >
+                              {Part.text}
+                            </ReactMarkdown>
+                          )
                           
                         ) : null
                       )}
