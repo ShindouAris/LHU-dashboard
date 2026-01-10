@@ -1,72 +1,89 @@
-import React from "react";
-import { motion } from "framer-motion";
-import FuzzyText from "./LHU_UI/FuzzyText";
-import { RefreshCcw } from "lucide-react";
+import React, { ErrorInfo, ReactNode } from "react";
+import { MdOutlineArrowOutward } from "react-icons/md";
 
-type ErrorBoundaryProps = {
-  children: React.ReactNode;
-};
+// Error Boundary with Windows 11 BSOD-inspired UI (black background)
 
-type ErrorBoundaryState = {
+interface ErrorBoundaryProps {
+  children: ReactNode;
+}
+
+interface ErrorBoundaryState {
   hasError: boolean;
-};
+  error?: Error | null;
+  errorInfo?: ErrorInfo | null;
+}
 
 class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = { hasError: false, error: null, errorInfo: null };
   }
 
-  static getDerivedStateFromError(_: Error): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, info: React.ErrorInfo) {
-    console.error("💀 System meltdown detected:", error, info);
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ error, errorInfo });
   }
 
-  handleReload = () => {
+  handleRestart = () => {
+    // Simple reload to reset app state
+    window.location.href = '/home'
     window.location.reload();
   };
 
   render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center h-screen bg-black text-white text-center select-none">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            <div className="mb-5 flex text-center justify-center">
-                <FuzzyText baseIntensity={0.3} hoverIntensity={0.1} enableHover={false}>500</FuzzyText>
+        <div className="w-full min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 md:p-6">
+          <div className="w-full max-w-4xl text-left">
+            <p className="text-5xl md:text-7xl font-semibold mb-4 md:mb-6">:(</p>
+            <p className="text-xl md:text-2xl mb-3 md:mb-4 font-bold">
+              Hệ thống đã gặp sự cố và cần khởi động lại.
+            </p>
+            <p className="text-sm md:text-base opacity-80 mb-4 md:mb-6">
+              Nếu sự cố vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ kỹ thuật. {' '}
+              <a href="https://discord.chisadin.site" className="underline">https://discord.chisadin.site<MdOutlineArrowOutward className="inline-block ml-1" /></a>
+            </p>
+
+            {this.state.error && (
+              <div className="rounded-2xl bg-neutral-900 p-3 md:p-4 mb-4 md:mb-6 shadow max-h-[40vh] overflow-auto">
+                <p className="text-xs md:text-sm font-mono break-all">
+                  {this.state.error.toString()}
+                </p>
+                {this.state.errorInfo && (
+                  <pre className="text-[10px] md:text-xs mt-2 whitespace-pre-wrap font-mono">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                )}
+                {/* Copy btn */}
+                <div className="mt-2">
+                  <button
+                    onClick={() => {
+                      const errorDetails = `${this.state.error?.toString()}\n\n${this.state.errorInfo?.componentStack}`;
+                      navigator.clipboard.writeText(errorDetails);
+                    }}
+                    className="rounded-2xl px-3 py-1 bg-neutral-800 hover:bg-neutral-700 transition text-xs md:text-sm"
+                  >
+                    Copy error details
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <div className="mt-2 md:mt-4">
+              <button
+                onClick={this.handleRestart}
+                className="w-full sm:w-auto rounded-2xl px-5 md:px-6 py-3 shadow hover:shadow-lg transition active:scale-95 bg-white text-black font-semibold"
+              >
+                Khởi động lại
+              </button>
             </div>
-            <FuzzyText baseIntensity={0.3} hoverIntensity={0.1} enableHover={false}>
-              SYSTEM ERROR
-            </FuzzyText>
-
-            <motion.p
-              className="mt-4 text-gray-400 text-sm tracking-wider"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 1.2 }}
-            >
-              Something went wrong. Please reload the system.
-            </motion.p>
-
-            <motion.button
-              onClick={this.handleReload}
-              className="mt-8 inline-flex items-center gap-2 px-5 py-2 rounded-2xl bg-gray-900/70 hover:bg-gray-800 border border-gray-700 transition-all"
-              whileHover={{ scale: 1.05, rotate: 1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <RefreshCcw size={18} /> Restart
-            </motion.button>
-          </motion.div>
+          </div>
         </div>
       );
     }
-
     return this.props.children;
   }
 }
