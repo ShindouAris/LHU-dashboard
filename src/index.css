@@ -199,3 +199,14 @@
     animation: marquee 10s linear infinite;
   }
 }
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

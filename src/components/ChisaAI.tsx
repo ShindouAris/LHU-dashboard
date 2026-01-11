@@ -31,6 +31,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { VscDebugRestart } from "react-icons/vsc";
 import { Table, TableCell, TableHead, TableRow } from './ui/table';
+import { Loader } from './ui/loader';
 const API = import.meta.env.VITE_API_URL;
 
 const katexSanitizeSchema = {
@@ -592,7 +593,7 @@ const ChatbotUI = () => {
                         Part.type === "text" ? (
                           (isGenerating && message.role === 'assistant' && message.id === lastMessageId) ? (
                             <div key={`${message.id}-streaming-${index}`} className="break-words">
-                              {Part.text}
+                              {Part.text} <Loader className="inline-block w-4 h-4 ml-1 text-gray-500" variant="pulse-dot" size='sm' />
                             </div>
                           ) : (
                             <ReactMarkdown
@@ -718,19 +719,6 @@ const ChatbotUI = () => {
               </div>
             ))}
 
-            {isGenerating && (
-              <div className="flex gap-3 sm:gap-4 items-start justify-start">
-                <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden dark:from-amber-600 dark:to-orange-700">
-                  <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
-                </Avatar>
-                <div className="px-4 py-3 rounded-md border bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700">
-                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                    <LoaderIcon className="w-4 h-4" />
-                    <span>Chisa đang trả lời…</span>
-                  </div>
-                </div>
-              </div>
-            )}
             <div ref={bottomRef} />
           </div>
         )}
