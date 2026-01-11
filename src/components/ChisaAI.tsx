@@ -79,7 +79,7 @@ const EmptyState = memo(function EmptyState({
   onSubmit,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full text-left px-4 py-12">
+    <div className="flex flex-col items-center justify-center h-full  px-4 py-12">
       <h1 className="text-3xl font-normal mb-3 text-pink-600 dark:text-yellow-300 font-loveHouse">
       Ciallo, {fullName || 'Người vô danh'}!
       </h1>
@@ -535,7 +535,7 @@ const ChatbotUI = () => {
                       </button>
                       {expandedReasoning[message.id] && (
                         <div className="px-3 sm:px-4 pb-3 pt-1">
-                          <p className="text-sm text-blue-900 leading-relaxed text-left break-words dark:text-blue-200">
+                          <p className="text-sm text-blue-900 leading-relaxed  break-words dark:text-blue-200">
                             {message.parts.map((part, idx) =>
                               part.type === 'reasoning' ? (
                                 <span key={`${message.id}-reasoning-${idx}`}>{part.text}</span>
@@ -569,7 +569,7 @@ const ChatbotUI = () => {
                           {message.parts.map((part, idx) =>
                             part.type.startsWith('tool-') ? (
                               <div key={`${message.id}-tool-${idx}`} className="text-sm">
-                                <div className="font-medium text-left text-purple-900 mb-1 break-words dark:text-purple-200">
+                                <div className="font-medium  text-purple-900 mb-1 break-words dark:text-purple-200">
                                   Sử dụng {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() || part.type}
                                 </div>
                               </div>
@@ -584,7 +584,7 @@ const ChatbotUI = () => {
                     className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 border-gray-200 self-end dark:bg-gray-800 dark:border-slate-700' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`}
                     style={{ wordBreak: 'break-word' }}
                   >
-                    <div className="text-gray-800 leading-relaxed text-left break-words dark:text-gray-100">
+                    <div className="text-gray-800 leading-relaxed  break-words dark:text-gray-100">
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
                           (isGenerating && message.role === 'assistant' && message.id === lastMessageId) ? (
@@ -654,7 +654,7 @@ const ChatbotUI = () => {
                                 },
                                 th({ children }) {
                                   return (
-                                    <TableHead className="px-4 py-2 border font-semibold text-left bg-purple-400 dark:bg-green-600 text-black dark:text-white">
+                                    <TableHead className="px-4 py-2 border font-semibold  bg-purple-400 dark:bg-green-600 text-black dark:text-white">
                                       {children}
                                     </TableHead>
                                   );

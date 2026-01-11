@@ -95,7 +95,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
           </div>
         </CardContent>
         <CardFooter>
-            <div className="w-full rounded-xl border border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
+            <div className="w-full rounded-xl border text-center border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
                 ⚠️ Lưu ý thời tiết
                 <hr className="my-2 border-yellow-300 dark:border-yellow-700" />
                 {get_warning(autoforecastResp, currentWeather)}

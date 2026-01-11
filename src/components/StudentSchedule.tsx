@@ -803,7 +803,7 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </CardHeader>
           
-            <CardContent className={`relative ${page!=="home" && page!=="schedule" && ("hidden")}`}>
+            <CardContent className={`relative text-center ${page!=="home" && page!=="schedule" && ("hidden")}`}>
               <span className="relative text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
                 Quick Actions
                 <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
@@ -873,7 +873,7 @@ export const StudentSchedule: React.FC = () => {
         ) : (
           <>
             {/* Exam section */}
-            <div className="mb-6">
+            <div className={`mb-6 ${exams?.length !== undefined && exams?.length <= 0 && ("hidden")}`}>
               <div className="flex items-center justify-between mb-3">
                 <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Lịch thi riêng</h3>
                 <Button variant="outline" size="sm" onClick={() => currentStudentId && fetchPrivateExam(currentStudentId)} disabled={loadingExam}>
