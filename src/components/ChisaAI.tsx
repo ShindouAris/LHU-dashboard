@@ -734,6 +734,7 @@ const ChatbotUI = () => {
                 
                 <PromptInputTextarea
                   value={inputValue}
+                  className='pr-16'
                   placeholder="Chat với ChisaAI..."
                   onChange={(e) => setInputValue(e.target.value)}
                 />
