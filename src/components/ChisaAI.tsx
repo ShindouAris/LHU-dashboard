@@ -11,6 +11,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkBreak from 'remark-breaks'
+import remarkToc from 'remark-toc'
 import "katex/dist/katex.min.css";
 import { Avatar } from './ui/avatar';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
@@ -358,6 +359,8 @@ const ChatbotUI = () => {
     GETELIBRESERVATIONBYDAYTOOL: "Công cụ lấy đặt phòng eLibrary theo ngày",
     GETELIBPHONGHOCFORREGTOOL: "Công cụ lấy phòng học có thể đăng ký",
     GETELIBTHIETBIFORREGTOOL: "Công cụ lấy thiết bị có thể đăng ký",
+    SEARCHWEBTOOL: "Công cụ tìm kiếm web",
+    EXTRACTWEBTOOL: "Công cụ trích xuất nội dung web",
 } as const;
 
   const handleSend = () => {
@@ -594,7 +597,7 @@ const ChatbotUI = () => {
                           ) : (
                             <ReactMarkdown
                               key={`${message.id}-text-${index}`}
-                              remarkPlugins={[remarkGfm, remarkMath, remarkBreak]}
+                              remarkPlugins={[remarkGfm, remarkMath, remarkBreak, remarkToc]}
                               rehypePlugins={[
                                 rehypeRaw,
                                 [rehypeKatex, { output: 'html' }],
@@ -669,6 +672,21 @@ const ChatbotUI = () => {
                                 tr({ children }) {
                                   return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
                                 },
+                                h2: ({ children }) => (
+                                  <h2 className="mt-8 mb-4 text-2xl font-bold tracking-tight border-b pb-2">
+                                    {children}
+                                  </h2>
+                                ),
+                                ul: ({ children }) => (
+                                  <ul className="my-4 ml-6 space-y-2 list-disc">
+                                    {children}
+                                  </ul>
+                                ),
+                                li: ({ children }) => (
+                                  <li className="leading-relaxed">
+                                    {children}
+                                  </li>
+                                ),
                               }}
                             >
                               {Part.text}
