@@ -425,17 +425,17 @@ const SettingsPage: React.FC = () => {
               <SettingItem
                 icon={MdOutlineBadge}
                 title="Chế độ hiển thị điểm"
-                description="Chọn hệ điểm để hiển thị trong ứng dụng"
+                description="Chọn hệ điểm"
                 action={
                   <Select defaultValue={hediem} onValueChange={(val) => { saveHeDiem(val); }}>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[79px] md:w-[120px]">
                         <SelectValue placeholder="Chọn chế độ hiển thị điểm" />
                       </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        <SelectItem value='he10'>Hệ điểm 10</SelectItem>
-                        <SelectItem value='he4'>Hệ điểm 4</SelectItem>
-                        <SelectItem value='chu'>Hệ điểm chữ</SelectItem>
+                        <SelectItem value='he10'>Hệ 10</SelectItem>
+                        <SelectItem value='he4'>Hệ 4</SelectItem>
+                        <SelectItem value='chu' className='overflow-hidden truncate'>Hệ chữ</SelectItem>
                       </SelectGroup>
                     </SelectContent>
                   </Select>

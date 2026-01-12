@@ -7,6 +7,7 @@ import {AuthStorage, MarkApiResponse, type MonHocAPI, type DiemThanhPhanItem} fr
 import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
 import { LuBookKey } from "react-icons/lu";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -261,7 +262,25 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                   </div>
                   <div>
                     <div className="text-sm text-gray-500">GPA</div>
-                    <div className="font-medium">{caculateDiem(formatScore(marks.DiemTB), hediem)}</div>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="font-medium">{caculateDiem(formatScore(marks.DiemTB), hediem)}</div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <div className="">
+                            <div>
+                              <span className="font-semibold">Điểm {hediem !== 'he10' ? 'Hệ 10' : "Hệ 4"}:</span>{' '}
+                              {caculateDiem(formatScore(marks.DiemTB), hediem !== 'he10' ? 'he10' : 'he4')}
+                            </div>
+                            <div>
+                              <span className="font-semibold">Điểm chữ:</span>{' '}
+                              {caculateDiem(formatScore(marks.DiemTB), 'chu')}
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </div>
