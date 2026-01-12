@@ -6,6 +6,7 @@ import { authService } from '@/services/authService';
 import {AuthStorage, MarkApiResponse, type MonHocAPI, type DiemThanhPhanItem} from '@/types/user';
 import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
+import { LuBookKey } from "react-icons/lu";
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -18,6 +19,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [selectedSemester, setSelectedSemester] = useState<number | null>(null);
   const [tinchi, setTinchi] = useState<number>(0)
   // const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
+  const [hediem, setHeDiem] = useState<string>("he10")
   const [imgsrc, setImgsrc] = useState<string>("")
   const user = AuthStorage.getUser();
 
@@ -27,6 +29,27 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
     if (Number.isNaN(num)) return String(value) || '—';
     return num.toFixed(fixed);
   };
+
+  const caculateDiem = (valuediem: string | number, hediem: string) => {
+    valuediem = parseFloat(String(valuediem))
+    if (hediem === 'he10') {
+      return valuediem;
+    }
+    if (hediem === 'he4') {
+      const diem = (valuediem / 10) * 4;
+      return Math.round(diem * 100) / 100;
+    }
+    if (hediem === 'chu') {
+      if ((10 >= valuediem ) && (valuediem >= 9.0)) return 'A+';
+      if ((8.9 >= valuediem ) && (valuediem >= 8.5)) return 'A';
+      if ((8.4 >= valuediem ) && (valuediem >= 8.0)) return 'B+';
+      if ((7.9 >= valuediem ) && (valuediem >= 7.0)) return 'B';
+      if ((6.9 >= valuediem ) && (valuediem >= 6.5)) return 'C+';
+      if ((6.4 >= valuediem ) && (valuediem >= 5.5)) return 'C';
+      if ((5.4 >= valuediem ) && (valuediem >= 4.0)) return 'D';
+      if (valuediem < 4.0) return 'F';
+    }
+  }
 
   const fetchIMG = async (url: string) => {
     const access_token = localStorage.getItem("access_token")
@@ -44,6 +67,20 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
     if (!value || String(value).trim() === '') return '—';
     return value;
   };
+
+  const getHeDiem = () => {
+    const heDiem = localStorage.getItem('hediem');
+    if (!(heDiem === 'he10' || heDiem ==='he4' || heDiem ==='chu')) {
+      localStorage.setItem('hediem', 'he10');
+      return 'he10';
+    }
+    setHeDiem(heDiem);
+    return heDiem;
+  }
+
+  useEffect(() => {
+    getHeDiem();
+  }, [])
 
   useEffect(() => {
     const load = async () => {
@@ -116,7 +153,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           {items.map((it) => (
             <div key={it.STT} className="flex items-center justify-between gap-2">
               <span className="truncate">{it.HinhThuc}</span>
-              <span className="ml-auto font-medium">{formatScore(it.Diem)}</span>
+              <span className="ml-auto font-medium">{caculateDiem(formatScore(it.Diem), hediem)}</span>
               <span className="text-gray-500">({formatScore(it.ptDiem, 0)}%)</span>
             </div>
           ))}
@@ -223,8 +260,8 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                     <div className="font-medium">{marks.TinhTrang}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">Điểm TB</div>
-                    <div className="font-medium">{formatScore(marks.DiemTB)}</div>
+                    <div className="text-sm text-gray-500">GPA</div>
+                    <div className="font-medium">{caculateDiem(formatScore(marks.DiemTB), hediem)}</div>
                   </div>
                 </div>
               </div>
@@ -243,6 +280,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                         <BookOpen className="h-5 w-5 text-blue-600" /> Học kỳ {hocKy}
                         <PiChalkboardSimpleDuotone className="h-5 w-5 text-green-600" /> Số tín chỉ trong kì {tinchi}
                         <PiDiceThreeDuotone className="h-5 w-5 text-yellow-600" /> Số tín chỉ tích luỹ {totalAccumulatedCredits}
+                        <LuBookKey className="h-5 w-5 text-red-600" /> Hệ điểm: {hediem === 'he10' ? 'Hệ 10' : hediem === 'he4' ? 'Hệ 4' : 'Chữ'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -262,13 +300,13 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               monHocs.map((mh: MonHocAPI, idx: number) => (
                                 <tr
                                   key={mh.MonHocID || `${hocKy}-${idx}`}
-                                  className="border-b border-gray-200 dark:border-gray-700"
+                                  className="border-b text-center border-gray-200 dark:border-gray-700"
                                 >
                                   <td className="px-4 py-2 font-mono break-words">{String(mh.MonHocID)}</td>
                                   <td className="px-4 py-2 break-words">{safeText(mh.TenMH)}</td>
                                   <td className="px-4 py-2">{formatScore(mh.HeSo, 0)}</td>
                                   <td className="px-4 py-2">{renderThanhPhan(mh.DiemThanhPhan)}</td>
-                                  <td className="px-4 py-2 font-semibold">{formatScore(mh.DiemTBMon)}</td>
+                                  <td className="px-4 py-2 font-semibold">{caculateDiem(formatScore(mh.DiemTBMon), hediem)}</td>
                                 </tr>
                               ))
                             ) : (

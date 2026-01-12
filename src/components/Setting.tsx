@@ -22,6 +22,7 @@ import {
   QrCode,
   Settings
 } from 'lucide-react';
+import { GoBook } from "react-icons/go";
 import { toast } from 'react-hot-toast';
 import { cacheService } from '@/services/cacheService';
 import { examCacheService } from '@/services/examCacheService';
@@ -37,10 +38,12 @@ import { IoHardwareChipOutline } from "react-icons/io5";
 import { BsWindowDesktop } from "react-icons/bs";
 import { IoIosNotifications, IoIosNotificationsOff  } from "react-icons/io";
 import {ChisaAI} from './ui/ChisaAI';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [cacheSize, setCacheSize] = useState<string>('0 KB');
+  const [hediem, setHeDiem] = useState<string>('he10');
   const [isClearingCache, setIsClearingCache] = useState(false);
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
@@ -59,6 +62,7 @@ const SettingsPage: React.FC = () => {
     const savedTheme = localStorage.getItem('theme');
     setIsDarkMode(savedTheme === 'dark');
     checkCacheSize();
+    getHeDiem();
   }, []);
 
   useEffect(() => {
@@ -153,6 +157,21 @@ const SettingsPage: React.FC = () => {
         </div>
       )
     }, {duration: Infinity})
+  }
+
+  const getHeDiem = () => {
+    const heDiem = localStorage.getItem('hediem');
+    if (!(heDiem === 'he10' || heDiem ==='he4' || heDiem ==='chu')) {
+      localStorage.setItem('hediem', 'he10');
+      return 'he10';
+    }
+    setHeDiem(heDiem);
+    return heDiem;
+  }
+
+  const saveHeDiem = (value: string) => {
+    localStorage.setItem('hediem', value);
+    setHeDiem(value);
   }
 
   const checkCacheSize = async () => {
@@ -390,6 +409,36 @@ const SettingsPage: React.FC = () => {
                     checked={isDarkMode}
                     onCheckedChange={toggleTheme}
                   />
+                }
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <GoBook className="h-5 w-5" />
+                Điểu chỉnh chế độ hiển thị điểm
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <SettingItem
+                icon={MdOutlineBadge}
+                title="Chế độ hiển thị điểm"
+                description="Chọn hệ điểm để hiển thị trong ứng dụng"
+                action={
+                  <Select defaultValue={hediem} onValueChange={(val) => { saveHeDiem(val); }}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Chọn chế độ hiển thị điểm" />
+                      </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        <SelectItem value='he10'>Hệ điểm 10</SelectItem>
+                        <SelectItem value='he4'>Hệ điểm 4</SelectItem>
+                        <SelectItem value='chu'>Hệ điểm chữ</SelectItem>
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
                 }
               />
             </CardContent>
