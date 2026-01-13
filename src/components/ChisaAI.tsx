@@ -682,7 +682,8 @@ const ChatbotUI = () => {
                                     {children}
                                   </li>
                                 ),
-                              }}>
+                                
+                              }} skipHtml={true}>
                               {Part.text}
                             </ReactMarkdown>
                           ) : (
