@@ -46,7 +46,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
   const Footer: React.FC = () => {
   return (
-    <footer className="relative z-10 mt-auto border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm">
+    <footer className="relative z-10 mt-auto border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm hidden lg:block">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
