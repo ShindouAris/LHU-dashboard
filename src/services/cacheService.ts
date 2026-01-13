@@ -41,7 +41,7 @@ class CacheService {
           resolve(cached.data);
         } else {
           if (cached && hasnet) {
-              this.delete(studentId);
+              // this.delete(studentId);
               resolve(null);
           } else if (cached && !hasnet) {
               resolve(cached.data);
