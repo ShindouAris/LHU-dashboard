@@ -221,14 +221,14 @@ const DiemRL: React.FC = () => {
     setActivityName(activity.TenChuongTrinh);
     setFromDate(new Date(activity.TuNgay));
     setToDate(new Date(activity.DenNgay));
-    setActivityID(activity.HoatDongBenNgoaiID);
+    setActivityID(activity.HoatDongID);
     setActivityEditOpen(true);
   };
 
   // Xử lý xóa
   const handleDelete = async () => {
     try {
-        if (activityID === null) {
+        if (activityID === null || activityID === undefined) {
             toast.error("Không tìm thấy hoạt động để xóa");
             return;
         }
@@ -511,7 +511,7 @@ return (
                                                         </button>
                                                         <button
                                                             onClick={() => {
-                                                                setActivityID(activity.HoatDongBenNgoaiID);
+                                                                setActivityID(activity.HoatDongID);
                                                                 setActivityDeleteOpen(true);
                                                             }}
                                                             className="p-2 hover:bg-red-100 dark:hover:bg-red-800 text-red-600 dark:text-red-200 rounded-lg transition-colors"
