@@ -228,8 +228,12 @@ const DiemRL: React.FC = () => {
   // Xử lý xóa
   const handleDelete = async () => {
     try {
+        if (activityID === null) {
+            toast.error("Không tìm thấy hoạt động để xóa");
+            return;
+        }
         const is_deleted = await drlService.modifyActivity(
-            activityID!,
+            activityID,
             "",
             "",
             "",
@@ -241,7 +245,6 @@ const DiemRL: React.FC = () => {
             return;
         }
         toast.success("Xóa hoạt động thành công");
-        fetchUserStatistics();
     } catch (error) {
         if (error instanceof Error) {
             toast.error(error.message);
