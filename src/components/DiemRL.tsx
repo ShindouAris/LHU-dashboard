@@ -76,7 +76,7 @@ const DiemRL: React.FC = () => {
                     id="date"
                     className="w-48 justify-between font-normal"
                 >
-                    {date ? dayjs(date.toLocaleDateString()).format('DD/MM/YYYY') : "Select date"}
+                    {date ? dayjs(date).format('DD/MM/YYYY') : "Select date"}
                     <ChevronDownIcon />
                 </Button>
                 </PopoverTrigger>
