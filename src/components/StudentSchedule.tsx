@@ -833,16 +833,18 @@ export const StudentSchedule: React.FC = () => {
               <div className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 min-h-[72px] w-full">
                 <div className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
                   {/* icon ảnh từ API */}
-                  <img
-                    src={(currentWeather.current.condition.icon || '').startsWith('http') ? currentWeather.current.condition.icon : `https:${currentWeather.current.condition.icon}`}
-                    alt="weather"
-                    className="w-7 h-7"
-                  />
+                  {currentWeather.current.condition?.icon && (
+                    <img
+                      src={(currentWeather.current.condition.icon || '').startsWith('http') ? currentWeather.current.condition.icon : `https:${currentWeather.current.condition.icon}`}
+                      alt="weather"
+                      className="w-7 h-7"
+                    />
+                  )}
                 </div>
                 <div className="min-w-0 text-center w-full">
                   <div className="text-xs text-gray-500 dark:text-gray-400">Thời tiết hiện tại</div>
                   <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
-                    {currentWeather.current.temp_c}°C • {currentWeather.current.condition.text}
+                    {currentWeather.current.temp_c}°C • {currentWeather.current.condition?.text || 'N/A'}
                   </div>
                 </div>
               </div>

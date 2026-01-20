@@ -25,7 +25,7 @@ export interface CurrentWeather {
   last_updated: string;
   temp_c: number;
   is_day: number;
-  condition: Condition;
+  condition?: Condition;
   wind_kph: number;
   wind_degree: number;
   wind_dir: string;
@@ -70,7 +70,7 @@ export interface DayForecast {
   avghumidity: number;
   daily_will_it_rain: number;
   daily_chance_of_rain: number;
-  condition: Condition;
+  condition?: Condition;
   uv: number;
   air_quality: AirQuality;
 }
@@ -80,7 +80,7 @@ export interface HourForecast {
   time: string;
   temp_c: number;
   is_day: number;
-  condition: Condition;
+  condition?: Condition;
   wind_kph: number;
   wind_degree: number;
   wind_dir: string;

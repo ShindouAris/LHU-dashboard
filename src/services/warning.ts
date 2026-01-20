@@ -101,7 +101,7 @@ export const get_warning = (weather_data: HourForecast | null, current_forecast:
     }
 
     const uv = weather_data.uv
-    const text = weather_data.condition.text.toLowerCase();
+    const text = weather_data.condition?.text?.toLowerCase() || '';
     const has_thunder = ["sét", "giông"].some(keyword => text.includes(keyword));
     const rain = text.includes("mưa")
     const humidity = weather_data.humidity

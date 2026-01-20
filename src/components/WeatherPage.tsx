@@ -86,7 +86,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
         </CardHeader>
         <CardContent className="space-y-3 flex flex-col items-center justify-center text-center">
           <div className="text-2xl font-semibold">{Math.round(currentWeather.current.temp_c)}°C</div>
-          <div className="text-gray-600 dark:text-gray-300">{currentWeather.current.condition.text}</div>
+          <div className="text-gray-600 dark:text-gray-300">{currentWeather.current.condition?.text || 'N/A'}</div>
           <div className="grid grid-cols-2 gap-3 text-sm w-full max-w-xs mx-auto">
             <div className="flex items-center gap-2 justify-center"><Thermometer className="h-4 w-4" />Cao: {Math.round(currentWeather.current.temp_c)}°C</div>
             <div className="flex items-center gap-2 justify-center"><Leaf className="h-4 w-4" />AQI: {computeAQIFromPM(currentWeather.current.air_quality.pm2_5, currentWeather.current.air_quality.pm10).aqi}</div>
@@ -135,7 +135,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="text-2xl font-semibold">{Math.round(d.day.avgtemp_c)}°C</div>
-                  <div className="text-gray-600 dark:text-gray-300">{d.day.condition.text}</div>
+                  <div className="text-gray-600 dark:text-gray-300">{d.day.condition?.text || 'N/A'}</div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
                     <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Cao: {Math.round(d.day.maxtemp_c)}°C</div>
                     <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Thấp: {Math.round(d.day.mintemp_c)}°C</div>
@@ -153,7 +153,9 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                         <div key={h.time} className="p-2 rounded-md bg-gray-50 dark:bg-gray-700/50">
                           <div className="font-medium">{formatHour(h.time)}</div>
                           <div className="flex items-center gap-1">
-                            <img src={(h.condition.icon || '').startsWith('http') ? h.condition.icon : `https:${h.condition.icon}`} className="w-4 h-4" />
+                            {h.condition?.icon && (
+                              <img src={(h.condition.icon || '').startsWith('http') ? h.condition.icon : `https:${h.condition.icon}`} className="w-4 h-4" />
+                            )}
                             <span>{Math.round(h.temp_c)}°C</span>
                           </div>
                         </div>
