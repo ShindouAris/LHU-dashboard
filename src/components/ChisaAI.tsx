@@ -239,7 +239,7 @@ const ChatbotUI = () => {
         const list = await chisaAIStorage.listByUser(userId, 30);
         setChatSummaries(list);
       })();
-    }, 250);
+    }, 1000);
 
     return () => {
       if (persistTimerRef.current) {
