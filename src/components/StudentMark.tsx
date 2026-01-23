@@ -50,6 +50,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
       if ((5.4 >= valuediem ) && (valuediem >= 4.0)) return 'D';
       if (valuediem < 4.0) return 'F';
     }
+    return valuediem;
   }
 
   const fetchIMG = async (url: string) => {
@@ -287,6 +288,14 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
             </CardContent>
           </Card>
 
+          <Card className="border-0 shadow-lg">
+            <CardContent className="py-6 text-center">
+              <span className="text-white text-md font-loveHouse">
+                Lưu ý: Điểm nào được tô đỏ tức là bạn rớt cmnr!, hoặc là chưa lên điểm
+              </span>
+            </CardContent>
+          </Card>
+
           {selectedSemester !== null && (
             <div className="space-y-6">
               {(() => {
@@ -319,7 +328,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               monHocs.map((mh: MonHocAPI, idx: number) => (
                                 <tr
                                   key={mh.MonHocID || `${hocKy}-${idx}`}
-                                  className="border-b text-center border-gray-200 dark:border-gray-700"
+                                  className={`border-b text-center ${mh.Dau ? '' : 'text-red-500'} border-gray-200 dark:border-gray-700`}
                                 >
                                   <td className="px-4 py-2 font-mono break-words">{String(mh.MonHocID)}</td>
                                   <td className="px-4 py-2 break-words">{safeText(mh.TenMH)}</td>
