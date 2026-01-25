@@ -671,12 +671,30 @@ const ChatbotUI = () => {
                         <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-sm">
                           {message.parts.map((part, idx) =>
                             part.type.startsWith('tool-') ? (
-                              <div key={`${message.id}-tool-${idx}`} className="text-sm">
-                                <div className="font-medium  text-purple-900 mb-1 break-words dark:text-purple-200">
-                                  Sử dụng {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() || part.type}
-                                </div>
+                              <div key={idx}>
+
+                                {// @ts-expect-error "This work btw"
+                                part.state === 'output-available' && (
+                                  <div>
+                                    Sử dụng công cụ {' '}
+                                    {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() ||
+                                      part.type}
+                                    <pre>{/* @ts-expect-error "This work btw" */
+                                    JSON.stringify(part.output, null, 2)}</pre>
+                                  </div>
+                                )}
+                                
+                                {// @ts-expect-error "This work btw"
+                                part.state === 'output-error' && (
+                                  <div>
+                                    Lỗi: {// @ts-expect-error "This work btw"
+                                      part.errorText
+                                    }
+                                  </div>
+                                )}
                               </div>
-                            ) : null)}
+                            ) : null
+                          )}
                         </div>
                       )}
                     </Card>
