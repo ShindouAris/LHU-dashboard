@@ -19,7 +19,7 @@ import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
 import { Construction } from './LHU_UI/Contruction';
-import { chisaAIStorage, type ChisaAIChatSummary } from '@/services/chisaAIStorage';
+import { chisaAIService } from '@/services/chisaAIService';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -32,6 +32,14 @@ import {
 import { VscDebugRestart } from "react-icons/vsc";
 import { Table, TableCell, TableHead, TableRow } from './ui/table';
 const API = import.meta.env.VITE_API_URL;
+
+type ChisaAIChatSummary = {
+  chatId: string;
+  userId: string;
+  timestamp: number;
+  updatedAt: number;
+  messageCount: number;
+};
 
 const katexSanitizeSchema = {
   ...defaultSchema,
@@ -88,7 +96,7 @@ const EmptyState = memo(function EmptyState({
       Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
       </p>
       <p className="text-red-600 dark:text-red-400 mb-8 max-w-md">
-      Lưu ý: Lịch sử chat được lưu trên chính thiết bị của bạn (IndexedDB). Xóa dữ liệu trình duyệt sẽ mất lịch sử.
+      Lưu ý: Lịch sử chat được lưu trên máy chủ. Bạn có thể truy cập từ bất kỳ thiết bị nào.
       </p>
 
       {/* Input chat */}
@@ -287,11 +295,22 @@ const ChatbotUI = () => {
   useEffect(() => {
     const refreshHistory = async () => {
       const userId = user?.UserID;
-      if (!userId) return;
+      const token = AuthStorage.getUserToken();
+      if (!userId || !token) return;
       setHistoryLoading(true);
       try {
-        const list = await chisaAIStorage.listByUser(userId, 30);
-        setChatSummaries(list);
+        const response = await chisaAIService.getChatList(token, null);
+        // Convert API response to ChisaAIChatSummary format
+        const summaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
+          chatId: chat.chatUUID,
+          userId: userId,
+          timestamp: new Date(chat.updatedAt).getTime(),
+          updatedAt: new Date(chat.updatedAt).getTime(),
+          messageCount: chat.messageCount
+        }));
+        setChatSummaries(summaries);
+      } catch (error) {
+        console.error('Failed to load chat list:', error);
       } finally {
         setHistoryLoading(false);
       }
@@ -304,12 +323,18 @@ const ChatbotUI = () => {
     const hydrate = async () => {
       if (didHydrateRef.current) return;
       const userId = user?.UserID;
-      if (!userId || !id) return;
+      const token = AuthStorage.getUserToken();
+      if (!userId || !id || !token) return;
 
-      const record = await chisaAIStorage.get(userId, id);
-      if (record?.messages && Array.isArray(record.messages) && record.messages.length > 0) {
-        // @ts-ignore runtime shape matches the UI messages from useChat
-        setMessages(record.messages);
+      try {
+        const history = await chisaAIService.getChatHistory(token, id, null);
+        if (history?.messages && Array.isArray(history.messages) && history.messages.length > 0) {
+          // @ts-ignore runtime shape matches the UI messages from useChat
+          setMessages(history.messages);
+        }
+      } catch (error) {
+        console.error('Failed to load chat history:', error);
+        // If chat doesn't exist on server yet, that's okay - it's a new chat
       }
       didHydrateRef.current = true;
       setChatSwitchLoading(false);
@@ -320,9 +345,10 @@ const ChatbotUI = () => {
 
   useEffect(() => {
     const userId = user?.UserID;
-    if (!userId || !id) return;
+    const token = AuthStorage.getUserToken();
+    if (!userId || !id || !token) return;
 
-    // Do not persist empty chats.
+    // Do not refresh for empty chats.
     if (!messages || messages.length === 0) {
       return;
     }
@@ -331,15 +357,24 @@ const ChatbotUI = () => {
       window.clearTimeout(persistTimerRef.current);
     }
 
-    // Debounce writes to IndexedDB while streaming
+    // Debounce chat list refresh while streaming
     persistTimerRef.current = window.setTimeout(() => {
       (async () => {
-        await chisaAIStorage.set(userId, id, messages as unknown[]);
-        await chisaAIStorage.pruneUserChats(userId, 30);
-        const list = await chisaAIStorage.listByUser(userId, 30);
-        setChatSummaries(list);
+        try {
+          const response = await chisaAIService.getChatList(token, null);
+          const summaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
+            chatId: chat.chatUUID,
+            userId: userId,
+            timestamp: new Date(chat.updatedAt).getTime(),
+            updatedAt: new Date(chat.updatedAt).getTime(),
+            messageCount: chat.messageCount
+          }));
+          setChatSummaries(summaries);
+        } catch (error) {
+          console.error('Failed to refresh chat list:', error);
+        }
       })();
-    }, 1000);
+    }, 2000);
 
     return () => {
       if (persistTimerRef.current) {

@@ -10,7 +10,7 @@ export interface IchatHistory {
 interface IMessage {
     id: string;
     role: 'user' | 'assistant'
-    parts: UIMessagePart<Record<string, any>, Record<string, any>>[]
+    parts: UIMessagePart<Record<string, any>, Record<string, any>>[] // Same with message parts
     createdAt: string; // ISO string
 }
 
