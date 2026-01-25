@@ -509,14 +509,25 @@ const ChatbotUI = () => {
   }, []);
 
   useEffect(() => {
-    if (!shouldAutoScrollRef.current) return;
     if (pendingScrollRafRef.current) return;
 
     const isStreaming = status === 'streaming';
 
     pendingScrollRafRef.current = window.requestAnimationFrame(() => {
       pendingScrollRafRef.current = null;
-      bottomRef.current?.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth' });
+      
+      // Kiểm tra lại xem user có đang ở dưới cùng không
+      const el = scrollContainerRef.current;
+      if (!el) return;
+      
+      const thresholdPx = 80;
+      const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+      const isNearBottom = distanceFromBottom < thresholdPx;
+      
+      // Chỉ scroll nếu user đang ở gần dưới cùng
+      if (isNearBottom) {
+        bottomRef.current?.scrollIntoView({ behavior: isStreaming ? 'auto' : 'smooth' });
+      }
     });
   }, [messages, status]);
 
