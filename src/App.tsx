@@ -2,7 +2,7 @@ import { useEffect, lazy, Suspense } from 'react';
 import { StudentSchedule } from './components/StudentSchedule';
 const LoginPage = lazy(() => import('./components/LoginPage'));
 const WeatherPage = lazy(() => import('./components/WeatherPage'));
-const Timetable = lazy(() => import('./components/Timetable'));
+const TimetablePage = lazy(() => import('./components/TimetablePage'));
 const MarkPage = lazy(() => import('./components/StudentMark'));
 const LmsDiemDanhPage = lazy(() => import('./components/LmsDiemDanhPage'));
 const QRScanner = lazy(() => import('./components/LmsQr'));
@@ -103,11 +103,7 @@ function App() {
         <Route path="/schedule" element={<StudentSchedule />} />
         <Route path="/timetable" element={
           <Suspense fallback={<LoadingScreen loading={true} />}>
-            <div className="min-h-screen py-6 sm:py-8 px-4">
-              <div className="max-w-6xl mx-auto">
-                <Timetable schedules={[]} studentName="" exams={[]} examDurationMinutes={120} />
-              </div>
-            </div>
+            <TimetablePage />
           </Suspense>
         } />
         <Route path="/weather" element={
