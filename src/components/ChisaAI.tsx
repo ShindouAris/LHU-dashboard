@@ -741,7 +741,7 @@ const ChatbotUI = () => {
                 className={`flex gap-3 sm:gap-4 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.role === 'assistant' && (
-                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden hidden lg:block dark:from-amber-600 dark:to-orange-700">
+                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 items-center justify-center flex-shrink-0 mt-1 overflow-hidden hidden lg:flex dark:from-amber-600 dark:to-orange-700">
                     <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
                   </Avatar>
                 )}
