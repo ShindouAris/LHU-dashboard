@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tra cứu lịch học</title>
+    <title>LHU Dashboard@3.6.0</title>
     <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -12,7 +12,81 @@
     <link rel="manifest" href="/site.webmanifest" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <style>
+        @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600&display=swap");
+
+        .boot-loading {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #0b1220;
+          color: #e5e7eb;
+        }
+
+        .boot-loading-inner {
+          font-family:
+        "Be Vietnam Pro",
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          padding: 24px;
+        }
+
+        .boot-loading-logo {
+          width: 64px;
+          height: 64px;
+          display: block;
+        }
+
+        .boot-loading-text {
+          font-size: 16px;
+          font-weight: 600;
+          letter-spacing: 0.2px;
+        }
+
+        .loading-spinner {
+          width: 44px;
+          height: 44px;
+        }
+
+        .loading-spinner-circle {
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
+          border: 4px solid rgba(229, 231, 235, 0.25);
+          border-top-color: #60a5fa;
+          border-radius: 999px;
+          animation: boot-spin 0.9s linear infinite;
+        }
+
+        @keyframes boot-spin {
+          to {
+        transform: rotate(360deg);
+          }
+        }
+      </style>
+
+      <div class="boot-loading" role="status" aria-live="polite" aria-busy="true">
+        <div class="boot-loading-inner">
+          <img class="boot-loading-logo" src="/favicon.svg" alt="LHU" />
+          <div class="boot-loading-text">Đang tải LHU dashboard v3.6.0...</div>
+          <div class="loading-spinner" aria-hidden="true">
+        <div class="loading-spinner-circle"></div>
+          </div>
+        </div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
