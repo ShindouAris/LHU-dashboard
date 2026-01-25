@@ -133,7 +133,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MdOutlineBadge,
       description: "Xem điểm rèn luyện của bạn (cần đăng nhập)",
       authrequired: true,
-      isBetaItem: true
     },
     {
       id: "thuvien",
@@ -149,7 +148,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: FaToolbox,
       description: "Các công cụ hỗ trợ LHU",
       authrequired: true,
-      isBetaItem: true
     },
     {
       id: "chisaAI",
