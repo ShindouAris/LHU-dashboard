@@ -638,7 +638,7 @@ const ChatbotUI = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-96 max-h-[60vh] overflow-auto">
-                <DropdownMenuLabel>Đoạn chat đã lưu trên thiết bị</DropdownMenuLabel>
+                <DropdownMenuLabel>Đoạn chat trước</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
                 {chatSummaries.length === 0 ? (
@@ -741,7 +741,7 @@ const ChatbotUI = () => {
                 className={`flex gap-3 sm:gap-4 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.role === 'assistant' && (
-                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden dark:from-amber-600 dark:to-orange-700">
+                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center flex-shrink-0 mt-1 overflow-hidden hidden lg:block dark:from-amber-600 dark:to-orange-700">
                     <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
                   </Avatar>
                 )}
@@ -830,7 +830,7 @@ const ChatbotUI = () => {
 
                   {/* Message Content */}
                   <div
-                    className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 border-gray-200 self-end dark:bg-gray-800 dark:border-slate-700' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`}
+                    className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`} 
                     style={{ wordBreak: 'break-word' }}
                   >
                     <div className="text-gray-800 leading-relaxed  break-words dark:text-gray-100">
@@ -855,7 +855,7 @@ const ChatbotUI = () => {
                 </div>
 
                 {message.role === 'user' && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 flex items-center justify-center flex-shrink-0 mt-1 dark:bg-gray-600">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 hidden lg:flex items-center justify-center flex-shrink-0 mt-1 dark:bg-gray-600">
                     <User className="w-4 h-4 text-gray-700 dark:text-gray-200" />
                   </div>
                 )}
