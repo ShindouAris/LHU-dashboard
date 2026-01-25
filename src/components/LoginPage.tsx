@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Layout } from '@/components/Layout';
 import { useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { AuthStorage } from '@/types/user';
@@ -73,14 +72,13 @@ export default function LoginPage() {
   };
 
   return (
-    <Layout title="Đăng nhập" page="home" onPageChange={() => {}}>
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="w-full max-w-md">
-          <Card className="border-0 shadow-2xl backdrop-blur-md bg-white/90 dark:bg-gray-900/90">
-            <CardHeader className="text-center space-y-2">
-              <CardTitle className="text-2xl font-bold">Chào mừng trở lại 👋</CardTitle>
-              <p className="text-sm text-muted-foreground">Đăng nhập để tiếp tục</p>
-            </CardHeader>
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <Card className="border-0 shadow-2xl backdrop-blur-md bg-white/90 dark:bg-gray-900/90">
+          <CardHeader className="text-center space-y-2">
+            <CardTitle className="text-2xl font-bold">Chào mừng trở lại 👋</CardTitle>
+            <p className="text-sm text-muted-foreground">Đăng nhập để tiếp tục</p>
+          </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
@@ -133,6 +131,5 @@ export default function LoginPage() {
           </Card>
         </div>
       </div>
-    </Layout>
   );
 }

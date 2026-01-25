@@ -6,8 +6,6 @@ import {
   Calendar, 
   Sun,
   GraduationCap,
-  RefreshCw,
-  ArrowLeft,
   ChevronRight,
   ChevronDown,
   QrCode,
@@ -17,37 +15,28 @@ import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
 import { toast } from 'react-hot-toast';
 import { FaParking, FaToolbox } from 'react-icons/fa';
-import { getSettings, NavigationInstruction } from '@/types/settings';
+import { getSettings } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
 import { ChisaAI } from './ui/ChisaAI';
 import GradientText from './ui/GradientText';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
-  onBack?: () => void;
-  onRefresh?: () => void;
-  showBack?: boolean;
-  showRefresh?: boolean;
   title?: string;
-  page: string;
-  onPageChange?: (page: NavigationInstruction) => void;
   isOpen?: boolean;
   isAuth?: boolean;
   onToggle?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
-  onBack,
-  onRefresh,
-  showBack = false,
-  showRefresh = false,
   title = "LHU Dashboard",
-  page = "home",
-  onPageChange,
   isOpen = false,
   isAuth = false,
   onToggle
 }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [expandedItems, setExpandedItems] = useState<string[]>(['navigation']);
 
   const toggleExpanded = (item: string) => {
@@ -63,6 +52,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
     label: string;
     icon: React.ElementType;
     description: string;
+    path?: string;
     url?: string;
     authrequired?: boolean;
     hidden?: boolean;
@@ -76,26 +66,30 @@ export const Sidebar: React.FC<SidebarProps> = ({
       label: 'Trang chủ',
       icon: Home,
       description: 'Trang chính của ứng dụng',
-      forceshow: true
+      forceshow: true,
+      path: '/'
     },
     {
       id: 'schedule',
       label: 'Lịch học',
       icon: Calendar,
-      description: 'Xem lịch học chi tiết'
+      description: 'Xem lịch học chi tiết',
+      path: '/schedule'
     },
     {
       id: 'timetable',
       label: 'Thời khóa biểu',
       icon: Calendar,
       description: 'Xem thời khóa biểu dạng lịch',
-      forceshow: true
+      forceshow: true,
+      path: '/timetable'
     },
     {
       id: 'weather',
       label: 'Thời tiết',
       icon: Sun,
-      description: 'Thông tin thời tiết hiện tại'
+      description: 'Thông tin thời tiết hiện tại',
+      path: '/weather'
     },
     {
       id: "diemdanh",
@@ -103,7 +97,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: PiExamDuotone,
       description: "Xem thông tin điểm danh (cần đăng nhập)",
       authrequired: true,
-      forceshow: true
+      forceshow: true,
+      path: '/diemdanh'
     },
     {
       id: "mark",
@@ -111,6 +106,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: PiExamDuotone,
       description: "Xem điểm thi của bạn (cần đăng nhập)",
       authrequired: true,
+      path: '/mark'
     },
     {
       id: "qrscan",
@@ -118,14 +114,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
       authrequired: false,
-      forceshow: true
+      forceshow: true,
+      path: '/qrscan'
     },
     {
       id: "parkinglhu",
       label: "Quản lý đỗ xe LHU",
       icon: FaParking,
       description: "Quản lý xe của tôi",
-      authrequired: true
+      authrequired: true,
+      path: '/parking'
     },
     {
       id: "diemrenluyen",
@@ -133,6 +131,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MdOutlineBadge,
       description: "Xem điểm rèn luyện của bạn (cần đăng nhập)",
       authrequired: true,
+      path: '/diemrenluyen'
     },
     {
       id: "thuvien",
@@ -140,7 +139,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: MdOutlineLocalLibrary ,
       description: "Quản lý thư viện LHU",
       authrequired: true,
-      isBetaItem: true
+      isBetaItem: true,
+      path: '/thuvien'
     },
     {
       id: "toollhu",
@@ -148,6 +148,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: FaToolbox,
       description: "Các công cụ hỗ trợ LHU",
       authrequired: true,
+      path: '/toollhu'
     },
     {
       id: "chisaAI",
@@ -155,14 +156,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       icon: ChisaAI,
       description: "Trợ lý AI của LHU-dashboard",
       authrequired: true,
-      isBetaItem: true
+      isBetaItem: true,
+      path: '/chisaAI'
     },
     {
       id: "settings",
       label: "Cài đặt",
       icon: Settings,
       description: "Cài đặt và tùy chọn ứng dụng",
-      forceshow: true
+      forceshow: true,
+      path: '/settings'
     },
   ];
 
@@ -173,24 +176,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (!settings.hiddenSidebarItems === null) return true;
     return !settings.hiddenSidebarItems.includes(item.id);
   });
-
-
-  const actionItems = [
-    ...(showBack && onBack ? [{
-      id: 'back',
-      label: 'Quay lại',
-      icon: ArrowLeft,
-      action: onBack,
-      description: 'Quay về trang trước'
-    }] : []),
-    ...(showRefresh && onRefresh ? [{
-      id: 'refresh',
-      label: 'Làm mới',
-      icon: RefreshCw,
-      action: onRefresh,
-      description: 'Tải lại dữ liệu'
-    }] : [])
-  ];
 
   return (
     <>
@@ -244,7 +229,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {/* Navigation Section */}
             <div className="space-y-1">
               <button
-                onClick={() => {toggleExpanded('navigation'); (expandedItems.includes("actions") && toggleExpanded("actions"))}}
+                onClick={() => toggleExpanded('navigation')}
                 className="flex items-center justify-between w-full p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
               >
                 <span>Điều hướng</span>
@@ -259,21 +244,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 <div className="ml-4 space-y-1">
                   {sidebarItems.map((item) => {
                     const Icon = item.icon;
-                    const isActive = page === item.id;
+                    const isActive = location.pathname === item.path || 
+                                   (item.path === '/' && location.pathname === '/home');
                     
                     return (
                       <button
                         key={item.id}
                         onClick={() => {
                           if (item.url) {
-                            // window.location.href = item.url
                             window.open(item.url, "_blank", "noopener,noreferrer")
+                            return;
                           }
                           if (item.authrequired && !isAuth) {
                             toast.error("Vui lòng đăng nhập để truy cập trang này")
                             return;
                           }
-                          onPageChange?.(item.id as any);
+                          if (item.path) {
+                            navigate(item.path);
+                          }
                           // Close sidebar on mobile after selection
                           if (window.innerWidth < 1024) {
                             onToggle?.();
@@ -311,53 +299,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
               )}
             </div>
-
-            {/* Actions Section */}
-            {actionItems.length > 0 && (
-              <div className="space-y-1 pt-4 border-t border-gray-200 dark:border-gray-800">
-                <button
-                  onClick={() => {toggleExpanded('actions'); (expandedItems.includes("navigation") && toggleExpanded("navigation"))}}
-                  className="flex items-center justify-between w-full p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <span>Hành động</span>
-                  {expandedItems.includes('actions') ? (
-                    <ChevronDown className="h-4 w-4" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4" />
-                  )}
-                </button>
-                
-                {expandedItems.includes('actions') && (
-                  <div className="ml-4 space-y-1">
-                    {actionItems.map((item) => {
-                      const Icon = item.icon;
-                      
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => {
-                            item.action?.();
-                            // Close sidebar on mobile after action
-                            if (window.innerWidth < 1024) {
-                              onToggle?.();
-                            }
-                          }}
-                          className="flex items-center gap-3 w-full p-3 text-left rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300 group"
-                        >
-                          <Icon className="h-5 w-5 flex-shrink-0 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300" />
-                          <div className="min-w-0 flex-1">
-                            <div className="font-medium">{item.label}</div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                              {item.description}
-                            </div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Status Section */}
             <div className="pt-4 border-t border-gray-200 dark:border-gray-800">

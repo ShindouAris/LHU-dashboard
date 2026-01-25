@@ -1,13 +1,11 @@
-import React, { useState, useCallback, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 // Layouts
 import { StudentIdInput } from './StudentIdInput';
 import { ScheduleCard } from './LHU_UI/ScheduleCard';
 import { EmptySchedule } from './LHU_UI/EmptySchedule';
-import { LoadingSpinner } from './LHU_UI/LoadingSpinner';
 import { ErrorMessage } from './LHU_UI/ErrorMessage';
-import { Layout } from './Layout';
 // Interfaces & Helpers
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
@@ -22,25 +20,10 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-// Pages
-const WeatherPage = lazy(() => import('@/components/WeatherPage'));
-const Timetable = lazy(() => import('./Timetable'));
-const MarkPage = lazy(() => import('./StudentMark'));
 import { ExamCard } from './LHU_UI/ExamCard';
-const LmsDiemDanhPage = lazy(() => import('./LmsDiemDanhPage'));
-const QRScanner = lazy(() => import('./LmsQr'));
-const ParkingLHUPage = lazy(() => import('./ParkingLHU'));
-const SettingsPage = lazy(() => import('./Setting'));
-import {LoadingScreen} from './LHU_UI/LoadingScreen';
-const DiemRL = lazy(() => import('./DiemRL'));
-const Elib = lazy(() => import('./Elib'));
-const ToolLHU = lazy(() => import('./ToolLHU'));
-const ChisaAI = lazy(() => import("./ChisaAI"));
-
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
-import { NavigationItem } from '@/types/settings';
-import { CalendarDays, User, ArrowLeft, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
+import { CalendarDays, User, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
 import GradientText from './ui/GradientText';
 
 
@@ -52,16 +35,24 @@ export const StudentSchedule: React.FC = () => {
   const [showFullSchedule, setShowFullSchedule] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [page, setPage] = useState("home"); // synced with URL
-  const [showEnded, setShowEnded] = useState(false); // mặc định không hiển thị lớp đã kết thúc
+  const [showEnded, setShowEnded] = useState(false);
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
-  const [avatar, setAvatar] = useState("")
-  const user = AuthStorage.getUser()
+  const [avatar, setAvatar] = useState("");
+  const user = AuthStorage.getUser();
 
   // Exam state
   const [exams, setExams] = useState<ExamInfo[] | null>(null);
   const [loadingExam, setLoadingExam] = useState(false);
   const [examError, setExamError] = useState<string | null>(null);
+
+  // Determine if we should show full schedule based on route
+  useEffect(() => {
+    if (location.pathname === '/schedule') {
+      setShowFullSchedule(true);
+    } else {
+      setShowFullSchedule(false);
+    }
+  }, [location.pathname]);
 
   useEffect(() => {
     cacheService.init();
@@ -81,6 +72,7 @@ export const StudentSchedule: React.FC = () => {
   useEffect(() => {
     getAvatar();
   }, [])
+  
   const getAvatar = () => {
     const isLogin = AuthStorage.isLoggedIn()
     if (isLogin) {
@@ -90,41 +82,6 @@ export const StudentSchedule: React.FC = () => {
       }
     }
   }
-
-  // Sync page state with URL on first load and when pathname changes
-  useEffect(() => {
-    const path = location.pathname;
-    if (path === "/home") {
-      setPage("home");
-    } else if (path.startsWith("/schedule")) {
-      setPage("schedule");
-    } else if (path.startsWith("/timetable")) {
-      setPage("timetable");
-    } else if (path.startsWith("/weather")) {
-      setPage("weather");
-    } else if (path.startsWith("/mark")) {
-      setPage("mark")
-    } else if (path.startsWith("/diemdanh")) {
-      setPage("diemdanh")
-    } else if (path.startsWith("/qrscan")) {
-      setPage("qrscan")
-    } else if (path.startsWith("/parking")) {
-      setPage("parkinglhu")
-    } else if (path.startsWith("/settings")) {
-      setPage("settings")
-    } else if (path.startsWith("/diemrenluyen")) {
-      setPage("diemrenluyen")
-    } else if (path.startsWith("/thuvien")) {
-      setPage("thuvien")
-    } else if (path.startsWith("/toollhu")) {
-      setPage("toollhu")
-    } else if (path.startsWith("/chisaAI")) {
-      setPage("chisaAI")
-    }
-     else {
-      setPage("home");
-    }
-  }, [location.pathname || currentStudentId]);
 
   useEffect(() => {
     const fetchCurrentWeather = async () => {
@@ -157,29 +114,27 @@ export const StudentSchedule: React.FC = () => {
     initAuth();
   }, []);
 
-    const quickNavigationItems: NavigationItem[] = [
+  const quickNavigationItems = [
     {
       id: "diemdanh",
       label: "Điểm danh",
       icon: PiExamDuotone,
       description: "Xem thông tin điểm danh (cần đăng nhập)",
-      authrequired: true,
-      forceshow: true
+      path: "/diemdanh"
     },
     {
       id: "mark",
       label: "Xem điểm thi", 
       icon: PiExamDuotone,
       description: "Xem điểm thi của bạn (cần đăng nhập)",
-      authrequired: true,
+      path: "/mark"
     },
     {
       id: "qrscan",
       label: "Quét QR",
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
-      authrequired: true,
-      forceshow: true
+      path: "/qrscan"
     }
   ];
 
@@ -349,307 +304,55 @@ export const StudentSchedule: React.FC = () => {
     }
   };
 
-  const handleBackToInput = () => {
-    setScheduleData(null);
-    setCurrentStudentId('');
-    setShowFullSchedule(false);
-    setError(null);
-    setPage("home");
-    navigate("/home");
-  };
-
-  const handleRefresh = () => {
-    if (currentStudentId) {
-      fetchSchedule(currentStudentId, false);
-      fetchPrivateExam(currentStudentId);
-    }
-  };
-
-  const handleChangeView = (newPage: string) => {
-    if (newPage === "home") {
-      setPage("home");
-      setShowFullSchedule(false);
-      navigate("/home");
-    } else if (newPage === "schedule") {
-      setPage("schedule");
-      setShowFullSchedule(true);
-      navigate("/schedule");
-    } else if (newPage === "timetable") {
-      setPage("timetable");
-      setShowFullSchedule(false);
-      navigate("/timetable");
-    } else if (newPage === "weather") {
-      setPage("weather");
-      setShowFullSchedule(false);
-      navigate("/weather");
-    } else if (newPage === "mark") {
-      setPage("mark")
-      setShowFullSchedule(false);
-      navigate("/mark")
-    } else if (newPage === "diemdanh") {
-      setPage("diemdanh")
-      setShowFullSchedule(false);
-      navigate("/diemdanh")
-    } else if (newPage === "qrscan") {
-      setPage("qrscan")
-      setShowFullSchedule(false)
-      navigate("/qrscan")
-    } else if (newPage === "parkinglhu") {
-      setPage("parkinglhu")
-      navigate("/parking")
-    } else if (newPage === "settings") {
-      setPage("settings")
-      navigate("/settings")
-    } else if (newPage === "diemrenluyen") {
-      setPage("diemrenluyen")
-      navigate("/diemrenluyen")
-    } else if (newPage === "thuvien") {
-      setPage("thuvien")
-      navigate("/thuvien")
-    } else if (newPage === "toollhu") {
-      setPage("toollhu")
-      navigate("/toollhu")
-    } else if (newPage === "chisaAI") {
-      setPage("chisaAI")
-      navigate("/chisaAI")
-    }
-  };
-
-  // Ưu tiên hiển thị trang Điểm để không bị chặn bởi các nhánh !scheduleData hoặc error
-  if (page === "mark") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title="Điểm thi"
-      >
-        <div className="min-h-screen py-6 sm:py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <Suspense fallback={<LoadingScreen loading={true} />}>
-              <MarkPage onBackToSchedule={() => handleChangeView('schedule')} />
-            </Suspense>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-  if (page === "diemdanh") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title="Điểm danh"
-      >
-        <div className="min-h-screen py-6 sm:py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <Suspense fallback={<LoadingScreen loading={true} />}>
-              <LmsDiemDanhPage />
-            </Suspense>
-          </div>
-        </div>
-      </Layout>
-    )
-  } 
-
-  if (page === "qrscan") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title="Quét mã điểm danh"
-      >
-        <div className="flex justify-center items-start px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <QRScanner />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "parkinglhu") {
-    return (
-      <Layout 
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Quản lý đỗ xe LHU'
-      >
-        <div className="flex justify-center items-start w-full">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <ParkingLHUPage />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "settings") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Cài đặt'
-      >
-        <div className="min-h-screen py-8 px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <SettingsPage />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "diemrenluyen") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Điểm rèn luyện'
-      >
-        <div className="min-h-screen py-8 px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <DiemRL />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "thuvien") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Quản lý thư viện'
-      >
-        <div className="min-h-screen py-8 px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <Elib />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "toollhu") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Công cụ LHU'
-      >
-        <div className="min-h-screen py-8 px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <ToolLHU />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
-  if (page === "chisaAI") {
-    return (
-      <Layout
-        showBack={true}
-        onBack={() => handleChangeView('schedule')}
-        page={page}
-        onPageChange={handleChangeView}
-        title='Chisa AI'
-      >
-        <div className="py-8 px-4">
-          <Suspense fallback={<LoadingScreen loading={true} />}>
-            <ChisaAI />
-          </Suspense>
-        </div>
-      </Layout>
-    )
-  }
-
   if (error) {
     return (
-      <Layout
-        showBack={true}
-        onBack={handleBackToInput}
-        page={page}
-        onPageChange={handleChangeView}
-        title="Đã xảy ra sự cố"
-      >
-        <div className="min-h-screen py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-8">
-              <Button
-                onClick={handleBackToInput}
-                variant="ghost"
-                className="mb-4 flex items-center gap-2 hover:bg-blue-50 dark:hover:bg-blue-950/50"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Quay lại
-              </Button>
-            </div>
-            <ErrorMessage message={error} onRetry={handleRetry} />
-          </div>
+      <div className="min-h-screen py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <ErrorMessage message={error} onRetry={handleRetry} />
         </div>
-      </Layout>
+      </div>
     );
   }
 
-  
-
-  if (!scheduleData ) {
+  if (!scheduleData) {
     return (
-      <Layout
-        page={page}
-        onPageChange={handleChangeView}
-        title="Home"
-      >
-        <div className="min-h-screen py-6 sm:py-8 px-4">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-10 sm:mb-12">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
-                <GraduationCap className="h-10 w-10 text-white" />
-              </div>
-              <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
-                <GradientText
-                  yoyo={false}
-                  animationSpeed={0.8}
-                  colors={["#F6B1CE", "#1581BF", "#3DB6B1", "#CCE5CF"]}
-                  >
-                    LHU Dashboard
-                </GradientText>
-              </h1>
-              <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
-                Tra cứu lịch học nhanh chóng
-              </p>
+      <div className="min-h-screen py-6 sm:py-8 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10 sm:mb-12">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
+              <GraduationCap className="h-10 w-10 text-white" />
             </div>
-
-            {loading ? (
-              <div className="flex justify-center">
-                <LoadingScreen loading={loading} />
-              </div>
-            ) : (
-              <div className="max-w-2xl mx-auto">
-                <StudentIdInput onSubmit={async (id) => { await fetchSchedule(id); await fetchPrivateExam(id); }} loading={loading} />
-              </div>
-            )}
+            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
+              <GradientText
+                yoyo={false}
+                animationSpeed={0.8}
+                colors={["#F6B1CE", "#1581BF", "#3DB6B1", "#CCE5CF"]}
+              >
+                LHU Dashboard
+              </GradientText>
+            </h1>
+            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+              Tra cứu lịch học nhanh chóng
+            </p>
           </div>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="text-lg text-gray-600 dark:text-gray-300">Đang tải...</div>
+            </div>
+          ) : (
+            <div className="max-w-2xl mx-auto">
+              <StudentIdInput 
+                onSubmit={async (id) => { 
+                  await fetchSchedule(id); 
+                  await fetchPrivateExam(id); 
+                }} 
+                loading={loading} 
+              />
+            </div>
+          )}
         </div>
-      </Layout>
+      </div>
     );
   }
 
@@ -743,17 +446,8 @@ export const StudentSchedule: React.FC = () => {
   };
 
   return (
-    <Layout
-      showBack={true}
-      showRefresh={true}
-      onBack={handleBackToInput}
-      onRefresh={handleRefresh}
-      page={page}
-      onPageChange={handleChangeView}
-      title="Lịch học"
-    >
-      <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen py-6 sm:py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
 
         {/* Student Info Card */}
         <Card className="mb-8 overflow-hidden border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-900">
@@ -803,7 +497,7 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </CardHeader>
           
-            <CardContent className={`relative text-center ${page!=="home" && page!=="schedule" && ("hidden")}`}>
+            <CardContent className="relative text-center">
               <span className="relative text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
                 Quick Actions
                 <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
@@ -817,7 +511,7 @@ export const StudentSchedule: React.FC = () => {
                     key={item.id}
                     variant="outline"
                     size="sm"
-                    onClick={() => handleChangeView(item.id)}
+                    onClick={() => navigate(item.path)}
                     className="w-full hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex flex-col items-center justify-center gap-1 p-2 min-h-[80px] md:p-4 md:min-h-[100px] md:size-lg"
                     >
                     <item.icon className="h-5 w-5 md:h-6 md:w-6" />
@@ -853,25 +547,8 @@ export const StudentSchedule: React.FC = () => {
         </Card>
 
         {/* Schedule Display */}
-        {page === "timetable" ? (
-          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
-            <Timetable 
-              schedules={schedules} 
-              studentName={studentInfo?.HoTen}
-              exams={exams || []}
-              examDurationMinutes={120}
-            />
-        </Suspense>
-        ) : page === "weather" ? (
-          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
-            <WeatherPage onBackToSchedule={() => handleChangeView('schedule')} />
-          </Suspense>
-        ) : page === "mark" ? (
-          <Suspense fallback={<div className="flex justify-center"><LoadingSpinner /></div>}>
-            <MarkPage />
-          </Suspense>
-        ) : !hasUpcomingClasses && !showFullSchedule ? (
-          <EmptySchedule onViewFullSchedule={handleChangeView} />
+        {!hasUpcomingClasses && !showFullSchedule ? (
+          <EmptySchedule onViewFullSchedule={() => navigate('/schedule')} />
         ) : (
           <>
             {/* Exam section */}
@@ -883,7 +560,9 @@ export const StudentSchedule: React.FC = () => {
                 </Button>
               </div>
               {loadingExam ? (
-                <div className="flex justify-center mb-4"><LoadingSpinner /></div>
+                <div className="flex justify-center mb-4">
+                  <div className="text-gray-600 dark:text-gray-300">Đang tải...</div>
+                </div>
               ) : examError ? (
                 <ErrorMessage message={examError} onRetry={() => currentStudentId && fetchPrivateExam(currentStudentId)} />
               ) : exams && exams.length > 0 ? (
@@ -910,7 +589,7 @@ export const StudentSchedule: React.FC = () => {
 
               <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap sm:flex-nowrap gap-y-2">
                 <Button
-                  onClick={() => handleChangeView(showFullSchedule ? "home" : "schedule")}
+                  onClick={() => navigate(showFullSchedule ? "/" : "/schedule")}
                   variant="outline"
                   size="lg"
                   className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
@@ -971,8 +650,7 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </>
         )}
-        </div>
       </div>
-    </Layout>
+    </div>
   );
 };

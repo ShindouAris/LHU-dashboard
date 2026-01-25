@@ -3,34 +3,20 @@ import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AuthStorage } from '@/types/user';
-import { NavigationInstruction } from '@/types/settings';
 import GradientText from './ui/GradientText';
 // import { Snowfall } from 'react-snowfall'; // Out of winter season
 
 interface LayoutProps {
   children: React.ReactNode;
-  onBack?: () => void;
-  onRefresh?: () => void;
-  showBack?: boolean;
-  showRefresh?: boolean;
-  page: string;
-  onPageChange?: (page: NavigationInstruction) => void;
   title?: string;
-  isDark?: boolean;
 }
 
 export const Layout: React.FC<LayoutProps> = ({
   children,
-  onBack,
-  onRefresh,
-  showBack = false,
-  showRefresh = false,
-  page,
-  onPageChange,
   title,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const loggedInUser = AuthStorage.isLoggedIn()
+  const loggedInUser = AuthStorage.isLoggedIn();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -95,12 +81,6 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="relative z-10 flex w-full flex-1 min-h-0">
         {/* Sidebar */}
         <Sidebar
-          onBack={onBack}
-          onRefresh={onRefresh}
-          showBack={showBack}
-          showRefresh={showRefresh}
-          page={page}
-          onPageChange={onPageChange}
           title={title}
           isOpen={sidebarOpen}
           isAuth={loggedInUser}
