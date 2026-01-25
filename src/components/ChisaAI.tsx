@@ -119,7 +119,7 @@ const EmptyState = memo(function EmptyState({
   );
 });
 
-const Message = (message: any, index: number, Part: any) => {
+const Message = memo(({message, index, Part}: {message: any, index: number, Part: any}) => {
   return (
     <ReactMarkdown key={`${message.id}-streaming-${index}`} 
       remarkPlugins={[remarkGfm, remarkMath, remarkBreak, remarkToc]}
@@ -217,7 +217,9 @@ const Message = (message: any, index: number, Part: any) => {
       {Part.text}
     </ReactMarkdown>
   )
-}
+}, (prevProps, nextProps) => {
+  return prevProps.Part.text === nextProps.Part.text && prevProps.message.id === nextProps.message.id;
+})
 
 
 const ChatbotUI = () => {
@@ -245,6 +247,9 @@ const ChatbotUI = () => {
 
   const [chatSummaries, setChatSummaries] = useState<ChisaAIChatSummary[]>([]);
   const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+  const [chatListNextToken, setChatListNextToken] = useState<string | null>(null);
+  const [chatHistoryNextToken, setChatHistoryNextToken] = useState<string | null>(null);
+  const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
   const didHydrateRef = useRef(false);
   const persistTimerRef = useRef<number | null>(null);
@@ -309,6 +314,7 @@ const ChatbotUI = () => {
           messageCount: chat.messageCount
         }));
         setChatSummaries(summaries);
+        setChatListNextToken(response.next_token);
       } catch (error) {
         console.error('Failed to load chat list:', error);
       } finally {
@@ -331,6 +337,7 @@ const ChatbotUI = () => {
         if (history?.messages && Array.isArray(history.messages) && history.messages.length > 0) {
           // @ts-ignore runtime shape matches the UI messages from useChat
           setMessages(history.messages);
+          setChatHistoryNextToken(history.next_token);
         }
       } catch (error) {
         console.error('Failed to load chat history:', error);
@@ -370,6 +377,7 @@ const ChatbotUI = () => {
             messageCount: chat.messageCount
           }));
           setChatSummaries(summaries);
+          setChatListNextToken(response.next_token);
         } catch (error) {
           console.error('Failed to refresh chat list:', error);
         }
@@ -394,12 +402,60 @@ const ChatbotUI = () => {
       minute: '2-digit',
     });
 
+  const loadMoreChats = async () => {
+    if (!chatListNextToken || isLoadingMore) return;
+    
+    const token = AuthStorage.getUserToken();
+    const userId = user?.UserID;
+    if (!token || !userId) return;
+
+    setIsLoadingMore(true);
+    try {
+      const response = await chisaAIService.getChatList(token, chatListNextToken);
+      const newSummaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
+        chatId: chat.chatUUID,
+        userId: userId,
+        timestamp: new Date(chat.updatedAt).getTime(),
+        updatedAt: new Date(chat.updatedAt).getTime(),
+        messageCount: chat.messageCount
+      }));
+      setChatSummaries(prev => [...prev, ...newSummaries]);
+      setChatListNextToken(response.next_token);
+    } catch (error) {
+      console.error('Failed to load more chats:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMoreMessages = async () => {
+    if (!chatHistoryNextToken || isLoadingMore || !id) return;
+    
+    const token = AuthStorage.getUserToken();
+    if (!token) return;
+
+    setIsLoadingMore(true);
+    try {
+      const history = await chisaAIService.getChatHistory(token, id, chatHistoryNextToken);
+      if (history?.messages && Array.isArray(history.messages) && history.messages.length > 0) {
+        // @ts-ignore
+        setMessages(prev => [...history.messages, ...prev]);
+        setChatHistoryNextToken(history.next_token);
+      }
+    } catch (error) {
+      console.error('Failed to load more messages:', error);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
   const beginChatSwitch = (label: string) => {
     setChatSwitchLabel(label);
     setChatSwitchLoading(true);
     setExpandedReasoning({});
     setExpandedToolCalls({});
     setInputValue('');
+    setChatHistoryNextToken(null);
     // Clear current messages immediately so the UI doesn't flash old chat content.
     // @ts-ignore runtime shape matches the UI messages from useChat
     setMessages([]);
@@ -479,7 +535,6 @@ const ChatbotUI = () => {
   };
 
   const isGenerating = status === 'streaming';
-  const lastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
 
    const TOOL_NAME_VI_MAP = {
     GETNEXTCLASSTOOL: "Công cụ lấy lớp học tiếp theo",
@@ -580,29 +635,43 @@ const ChatbotUI = () => {
                     Chưa có lịch sử.
                   </div>
                 ) : (
-                  chatSummaries.map((c) => (
-                    <DropdownMenuItem
-                      key={c.chatId}
-                      onSelect={(e) => {
-                        e.preventDefault();
-                        openChat(c.chatId);
-                      }}
-                      className={
-                        c.chatId === id
-                          ? 'bg-accent text-accent-foreground'
-                          : undefined
-                      }
-                    >
-                      <div className="flex flex-col gap-0.5 min-w-0">
-                        <div className="text-sm font-medium truncate">
-                          {c.chatId.slice(0, 12)}
+                  <>
+                    {chatSummaries.map((c) => (
+                      <DropdownMenuItem
+                        key={c.chatId}
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          openChat(c.chatId);
+                        }}
+                        className={
+                          c.chatId === id
+                            ? 'bg-accent text-accent-foreground'
+                            : undefined
+                        }
+                      >
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="text-sm font-medium truncate">
+                            {c.chatId.slice(0, 12)}
+                          </div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {c.messageCount} tin • {formatTime(c.updatedAt)}
+                          </div>
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          {c.messageCount} tin • {formatTime(c.updatedAt)}
-                        </div>
-                      </div>
-                    </DropdownMenuItem>
-                  ))
+                      </DropdownMenuItem>
+                    ))}
+                    {chatListNextToken && (
+                      <DropdownMenuItem
+                        onSelect={(e) => {
+                          e.preventDefault();
+                          loadMoreChats();
+                        }}
+                        disabled={isLoadingMore}
+                        className="justify-center text-sm text-blue-600 dark:text-blue-400"
+                      >
+                        {isLoadingMore ? 'Đang tải...' : 'Tải thêm chat'}
+                      </DropdownMenuItem>
+                    )}
+                  </>
                 )}
 
                 <DropdownMenuSeparator />
@@ -642,6 +711,19 @@ const ChatbotUI = () => {
           />
         ) : (
           <div className="max-w-screen-md sm:max-w-7xl mx-auto space-y-6">
+            {chatHistoryNextToken && (
+              <div className="text-center">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={loadMoreMessages}
+                  disabled={isLoadingMore}
+                  className="text-xs sm:text-sm"
+                >
+                  {isLoadingMore ? 'Đang tải...' : 'Tải tin nhắn cũ hơn'}
+                </Button>
+              </div>
+            )}
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -743,11 +825,7 @@ const ChatbotUI = () => {
                     <div className="text-gray-800 leading-relaxed  break-words dark:text-gray-100">
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
-                          (isGenerating && message.role === 'assistant' && message.id === lastMessageId) ? (
-                              Message(message, index, Part)
-                          ) : (
-                              Message(message, index, Part)
-                          )
+                          <Message key={index} message={message} index={index} Part={Part} />
                         ) : null
                       )}
                     </div>
