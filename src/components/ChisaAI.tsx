@@ -31,7 +31,7 @@ import {
   ModelSelectorLogoGroup,
   ModelSelectorName,
 } from './ai-elements/model-selector';
-import { Construction } from './LHU_UI/Contruction';
+import { NotAvailable } from './LHU_UI/Contruction';
 import { chisaAIService } from '@/services/chisaAIService';
 import type { IModel } from '@/types/chisaAI';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,14 @@ import {
 import { VscDebugRestart } from "react-icons/vsc";
 import { Table, TableCell, TableHead, TableRow } from './ui/table';
 import GradientText from './ui/GradientText';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 const API = import.meta.env.VITE_API_URL;
 
 type ChisaAIChatSummary = {
@@ -329,6 +337,9 @@ const ChatbotUI = () => {
   const shouldAutoScrollRef = useRef(true);
   const pendingScrollRafRef = useRef<number | null>(null);
   const [access, setAccess] = useState<boolean>(false);
+  const [userExists, setUserExists] = useState<boolean | null>(null);
+  const [showTermsDialog, setShowTermsDialog] = useState<boolean>(false);
+  const [isCreatingUser, setIsCreatingUser] = useState<boolean>(false);
   const user = AuthStorage.getUser();
 
   const initialHashRef = useRef<string>(window.location.hash.replace('#', '').trim());
@@ -571,8 +582,52 @@ const ChatbotUI = () => {
     window.location.hash = targetChatId;
   };
 
+  const handleAgreeToTerms = async () => {
+    const token = AuthStorage.getUserToken();
+    if (!token) {
+      setError("Phiên đã hết hạn, vui lòng đăng nhập lại");
+      return;
+    }
+
+    setIsCreatingUser(true);
+    try {
+      await chisaAIService.createUserV3(token);
+      setUserExists(true);
+      setShowTermsDialog(false);
+      setAccess(true);
+    } catch (error: any) {
+      console.error('Failed to create user:', error);
+      setError(error.message || "Không thể tạo tài khoản ChisaAI");
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
   useEffect(() => {
-    setAccess(true)
+    const checkUser = async () => {
+      const token = AuthStorage.getUserToken();
+      if (!token) {
+        setError("Phiên đã hết hạn, vui lòng đăng nhập lại");
+        setUserExists(false);
+        return;
+      }
+
+      try {
+        const exists = await chisaAIService.checkUserV3(token);
+        setUserExists(exists);
+        
+        if (exists) {
+          setAccess(true);
+        } else {
+          setShowTermsDialog(true);
+        }
+      } catch (error) {
+        console.error('Failed to check user:', error);
+        setError("Không thể kiểm tra trạng thái người dùng");
+      }
+    };
+
+    checkUser();
   }, [])
 
   useEffect(() => {
@@ -708,13 +763,15 @@ const ChatbotUI = () => {
     setInputValue('');
   };
 
-  if (loading) {
+  if (loading || userExists === null) {
     return (
       <div className="flex h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-white">
         <Card className="w-full max-w-md rounded-2xl shadow-lg">
           <CardContent className="p-6 text-center">
             <LoaderIcon />
-            <p className="text-sm sm:text-base">Đang kiểm tra kết nối đến máy chủ...</p>
+            <p className="text-sm sm:text-base">
+              {userExists === null ? 'Đang kiểm tra trạng thái tài khoản...' : 'Đang kiểm tra kết nối đến máy chủ...'}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -736,7 +793,111 @@ const ChatbotUI = () => {
 
   if (!access) {
     return (
-      <Construction />
+      <>
+        <Dialog open={showTermsDialog} onOpenChange={(open) => !isCreatingUser && setShowTermsDialog(open)}>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">Điều khoản sử dụng ChisaAI</DialogTitle>
+              <DialogDescription>
+                Vui lòng đọc và đồng ý với các điều khoản dưới đây để sử dụng ChisaAI
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <section>
+                <h3 className="font-semibold text-lg mb-2">1. Giới thiệu</h3>
+                <p className="text-sm text-muted-foreground">
+                  ChisaAI là trợ lý AI được phát triển độc lập bởi đội ngũ LHU Dashboard nhằm hỗ trợ sinh viên 
+                  trong việc tra cứu thông tin, quản lý thời khóa biểu và các tiện ích học tập khác.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">2. Thu thập và sử dụng dữ liệu</h3>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Khi sử dụng ChisaAI, chúng tôi sẽ thu thập và lưu trữ:
+                </p>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>Lịch sử trò chuyện của bạn với ChisaAI</li>
+                  <li>Thông tin tài khoản cơ bản (UserID, tên)</li>
+                  <li>Các truy vấn và yêu cầu của bạn</li>
+                </ul>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Dữ liệu này được sử dụng để cải thiện chất lượng dịch vụ và cá nhân hóa trải nghiệm của bạn.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">3. Bảo mật thông tin</h3>
+                <p className="text-sm text-muted-foreground">
+                  Chúng tôi cam kết bảo vệ thông tin cá nhân của bạn. Dữ liệu được mã hóa và lưu trữ an toàn. 
+                  Chúng tôi không chia sẻ thông tin của bạn với bên thứ ba mà không có sự đồng ý.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">4. Trách nhiệm người dùng</h3>
+                <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1 ml-4">
+                  <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp</li>
+                  <li>Không cố gắng phá hoại hoặc xâm nhập hệ thống</li>
+                  <li>Không chia sẻ thông tin đăng nhập của bạn</li>
+                  <li>Thông tin từ AI có thể không chính xác 100%, hãy xác minh trước khi sử dụng</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">5. Giới hạn trách nhiệm</h3>
+                <p className="text-sm text-muted-foreground">
+                  ChisaAI được cung cấp "nguyên trạng". Chúng tôi không đảm bảo rằng dịch vụ sẽ hoạt động liên tục 
+                  và không có lỗi. Chúng tôi không chịu trách nhiệm cho bất kỳ thiệt hại nào phát sinh từ việc sử dụng dịch vụ.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">6. Thay đổi điều khoản</h3>
+                <p className="text-sm text-muted-foreground">
+                  Chúng tôi có quyền thay đổi các điều khoản này bất kỳ lúc nào. Việc tiếp tục sử dụng dịch vụ 
+                  sau khi có thay đổi đồng nghĩa với việc bạn chấp nhận các điều khoản mới.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-semibold text-lg mb-2">7. Liên hệ</h3>
+                <p className="text-sm text-muted-foreground">
+                  Nếu bạn có bất kỳ câu hỏi nào về điều khoản này, vui lòng liên hệ với đội ngũ phát triển qua các kênh hỗ trợ.
+                </p>
+              </section>
+            </div>
+
+            <DialogFooter className="flex flex-col sm:flex-row gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowTermsDialog(false)}
+                disabled={isCreatingUser}
+                className="w-full sm:w-auto"
+              >
+                Hủy
+              </Button>
+              <Button
+                onClick={handleAgreeToTerms}
+                disabled={isCreatingUser}
+                className="w-full sm:w-auto"
+              >
+                {isCreatingUser ? (
+                  <>
+                    <LoaderIcon className="mr-2" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  "Đồng ý và tiếp tục"
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {!showTermsDialog && <NotAvailable page_name="ChisaAI" />}
+      </>
     );
   }
 

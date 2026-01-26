@@ -19,3 +19,19 @@ export const Construction: React.FC = () => {
 
 // Backwards-compatible export for existing imports.
 export const Contruction = Construction;
+
+export const NotAvailable: React.FC<{ page_name: string }> = ({ page_name }) => {
+    return (
+        <div className="flex min-h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-pink-300 to-cyan-300 dark:from-pink-500 dark:to-sky-600 rounded-lg">
+            <Card_11>
+                <CardContent className="p-6 text-center">
+                    <div className='text-pink-400 text-2xl font-bold'>⛔ Trang không khả dụng</div>
+                    <p className="text-sm text-gray-600 dark:text-white sm:text-base">
+                    Bạn đã bị chặn truy cập vào {page_name}. <br />
+                    Hãy làm mới trang.
+                    </p>
+                </CardContent>
+            </Card_11>
+        </div>
+    );
+}
