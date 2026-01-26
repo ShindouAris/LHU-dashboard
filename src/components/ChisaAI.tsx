@@ -169,9 +169,9 @@ const EmptyState = memo(function EmptyState({
                     {providerModels.map((model) => (
                       <ModelSelectorItem
                         key={model.modelId}
-                        value={model.modelId}
+                        value={model.safeName}
                         onSelect={() => {
-                          onModelChange(model.modelId);
+                          onModelChange(model.safeName);
                           onModelSelectorOpenChange(false);
                         }}
                       >
@@ -584,9 +584,9 @@ const ChatbotUI = () => {
         // Set default model
         const defaultModel = response.models.find(m => m.isDefault);
         if (defaultModel) {
-          setSelectedModel(defaultModel.modelId);
+          setSelectedModel(defaultModel.safeName);
         } else if (response.models.length > 0) {
-          setSelectedModel(response.models[0].modelId);
+          setSelectedModel(response.models[0].safeName);
         }
       } catch (error) {
         console.error('Failed to fetch models:', error);
@@ -596,7 +596,7 @@ const ChatbotUI = () => {
           modelId: 'openai/gpt-4o-mini',
           isDefault: true
         }]);
-        setSelectedModel('openai/gpt-4o-mini');
+        setSelectedModel('ChisaAI Mini');
       } finally {
         setModelsLoading(false);
       }
@@ -1047,9 +1047,9 @@ const ChatbotUI = () => {
                             {providerModels.map((model) => (
                               <ModelSelectorItem
                                 key={model.modelId}
-                                value={model.modelId}
+                                value={model.safeName}
                                 onSelect={() => {
-                                  setSelectedModel(model.modelId);
+                                  setSelectedModel(model.safeName);
                                   setIsModelSelectorOpen(false);
                                 }}
                               >
