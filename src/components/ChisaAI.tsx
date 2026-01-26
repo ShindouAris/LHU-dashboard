@@ -765,7 +765,7 @@ const ChatbotUI = () => {
 
   if (loading || userExists === null) {
     return (
-      <div className="flex h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-white">
+      <div className="flex h-screen w-full items-center justify-center p-4">
         <Card className="w-full max-w-md rounded-2xl shadow-lg">
           <CardContent className="p-6 text-center">
             <LoaderIcon />
@@ -780,7 +780,7 @@ const ChatbotUI = () => {
 
   if (error) {
     return (
-      <div className="flex h-screen w-full items-center justify-center p-4 bg-gradient-to-b from-amber-50 to-white">
+      <div className="flex h-screen w-full items-center justify-center p-4">
         <Card className="w-full max-w-md rounded-2xl shadow-lg">
           <CardContent className="p-6 text-center">
             <img src='bruh.png' className="mx-auto mb-4" />
