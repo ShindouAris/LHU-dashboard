@@ -14,7 +14,6 @@ const ToolLHU = lazy(() => import('./components/ToolLHU'));
 const ChisaAI = lazy(() => import('./components/ChisaAI'));
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
-import { Chat } from './components/Chat';
 import { Layout } from './components/Layout';
 import { LoadingScreen } from './components/LHU_UI/LoadingScreen';
 
@@ -192,7 +191,6 @@ function App() {
           <LoginPage />
         </Suspense>
       } />
-      <Route path="/chat" element={<Chat />} />
     </Routes>
   );
 }
