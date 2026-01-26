@@ -56,5 +56,21 @@ export const chisaAIService = {
             }
         }
         return await res.json();
+    },
+    checkUserV3: async (access_token: string): Promise<boolean> => {
+        const res = await fetch(`${API_ENDPOINT}/chisaAI/v3/user/check`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: access_token
+            })
+        })
+        if (!res.ok) {
+            return false;
+        }
+        const data = await res.json();
+        return data.exists;
     }
 }

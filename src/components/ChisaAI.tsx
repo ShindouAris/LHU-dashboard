@@ -1086,7 +1086,7 @@ const ChatbotUI = () => {
               </div>
               {/* Footer */}
               <div className="text-center text-xs text-gray-500 mt-2">
-                <span>AI có thể sai, kiểm chứng trước khi sử dụng. Hỏi toán hơi ngu vì AI render latex không tốt lắm.</span>
+                <span>AI có thể sai, kiểm chứng trước khi sử dụng.</span>
               </div>
             </div>
     </div>
