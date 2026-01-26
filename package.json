@@ -78,7 +78,6 @@
     "react-snowfall": "^2.4.0",
     "react-syntax-highlighter": "^16.1.0",
     "react-turnstile": "^1.1.4",
-    "react-use-websocket": "^4.13.0",
     "recharts": "^2.12.7",
     "rehype-katex": "^7.0.1",
     "rehype-raw": "^7.0.0",
