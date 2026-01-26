@@ -12,6 +12,7 @@ const DiemRL = lazy(() => import('./components/DiemRL'));
 const Elib = lazy(() => import('./components/Elib'));
 const ToolLHU = lazy(() => import('./components/ToolLHU'));
 const ChisaAI = lazy(() => import('./components/ChisaAI'));
+const ChisaAIPrivacy = lazy(() => import('./components/ChisaAIPrivacy'));
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
@@ -69,6 +70,7 @@ const pageTitles: Record<string, string> = {
   '/thuvien': 'Quản lý thư viện',
   '/toollhu': 'Công cụ LHU',
   '/chisaAI': 'Chisa AI',
+  '/chisaAI/privacy': 'Chính sách Bảo mật - ChisaAI',
   '/chat': 'Trò chuyện',
   '/login': 'Đăng nhập',
 };
@@ -86,6 +88,7 @@ function App() {
   const getCurrentTitle = () => {
     const path = location.pathname;
     if (path.startsWith('/toollhu')) return 'Công cụ LHU';
+    if (path === '/chisaAI/privacy') return 'Chính sách Bảo mật - ChisaAI';
     if (path.startsWith('/chisaAI')) return 'Chisa AI';
     return pageTitles[path] || 'CalendarLHU';
   };
@@ -172,6 +175,11 @@ function App() {
             <div className="min-h-screen py-8 px-4">
               <ToolLHU />
             </div>
+          </Suspense>
+        } />
+        <Route path="/chisaAI/privacy" element={
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <ChisaAIPrivacy />
           </Suspense>
         } />
         <Route path="/chisaAI/*" element={

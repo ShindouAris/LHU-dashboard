@@ -1085,8 +1085,20 @@ const ChatbotUI = () => {
                 </PromptInput>
               </div>
               {/* Footer */}
-              <div className="text-center text-xs text-gray-500 mt-2">
+              <div className="text-center text-xs text-gray-500 mt-2 space-y-1">
                 <span>AI có thể sai, kiểm chứng trước khi sử dụng.</span>
+                <div>
+                  <a 
+                    href="/chisaAI/privacy" 
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      window.location.href = '/chisaAI/privacy';
+                    }}
+                  >
+                    Chính sách Bảo mật
+                  </a>
+                </div>
               </div>
             </div>
     </div>
