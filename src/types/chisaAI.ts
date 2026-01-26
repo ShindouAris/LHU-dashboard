@@ -26,3 +26,13 @@ interface ChatListInterface {
     updatedAt: string; // ISO string
     messageCount: number;
 }
+
+export interface IModel {
+    safeName: string;
+    modelId: string;
+    isDefault?: boolean;
+}
+
+export interface IModelsResponse {
+    models: IModel[];
+}

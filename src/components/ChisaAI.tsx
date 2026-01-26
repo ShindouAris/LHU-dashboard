@@ -18,8 +18,22 @@ import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import remarkMath from 'remark-math'
 import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
+import {
+  ModelSelector,
+  ModelSelectorTrigger,
+  ModelSelectorContent,
+  ModelSelectorInput,
+  ModelSelectorList,
+  ModelSelectorEmpty,
+  ModelSelectorGroup,
+  ModelSelectorItem,
+  ModelSelectorLogo,
+  ModelSelectorLogoGroup,
+  ModelSelectorName,
+} from './ai-elements/model-selector';
 import { Construction } from './LHU_UI/Contruction';
 import { chisaAIService } from '@/services/chisaAIService';
+import type { IModel } from '@/types/chisaAI';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -31,6 +45,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { VscDebugRestart } from "react-icons/vsc";
 import { Table, TableCell, TableHead, TableRow } from './ui/table';
+import GradientText from './ui/GradientText';
 const API = import.meta.env.VITE_API_URL;
 
 type ChisaAIChatSummary = {
@@ -78,6 +93,13 @@ type EmptyStateProps = {
   status: string;
   onChangeInput: (value: string) => void;
   onSubmit: () => void;
+  models: IModel[];
+  selectedModel: string;
+  modelsLoading: boolean;
+  isModelSelectorOpen: boolean;
+  onModelChange: (modelId: string) => void;
+  onModelSelectorOpenChange: (open: boolean) => void;
+  isGenerating: boolean;
 };
 
 const EmptyState = memo(function EmptyState({
@@ -86,18 +108,86 @@ const EmptyState = memo(function EmptyState({
   status,
   onChangeInput,
   onSubmit,
+  models,
+  selectedModel,
+  modelsLoading,
+  isModelSelectorOpen,
+  onModelChange,
+  onModelSelectorOpenChange,
+  isGenerating,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full  px-4 py-12">
-      <h1 className="text-3xl font-normal mb-3 text-pink-600 dark:text-yellow-300 font-loveHouse">
+    <div className="flex flex-col items-center justify-center h-full px-6 py-12">
+      <GradientText className="text-2xl font-normal mb-3 font-loveHouse" colors={["#ffdcff", "#A8DF8E", "#1581BF"]} yoyo={false} animationSpeed={0.8}>
       Ciallo, {fullName || 'Người vô danh'}!
-      </h1>
-      <p className="text-gray-600 dark:text-pink-400 mb-8 max-w-md">
-      Tôi là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
+      </GradientText>
+      <p className="text-gray-600 dark:text-pink-400 backdrop-blur-sm mb-8 max-w-md">
+      Em là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
       </p>
-      <p className="text-red-600 dark:text-red-400 mb-8 max-w-md">
-      Lưu ý: Lịch sử chat được lưu trên máy chủ. Bạn có thể truy cập từ bất kỳ thiết bị nào.
-      </p>
+
+      {/* Model Selector */}
+      <div className="w-full max-w-md mb-4">
+        <ModelSelector open={isModelSelectorOpen} onOpenChange={onModelSelectorOpenChange}>
+          <ModelSelectorTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full gap-2"
+              disabled={isGenerating || modelsLoading}
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="text-sm">
+                {modelsLoading ? 'Đang tải models...' : (models.find(m => m.modelId === selectedModel)?.safeName || 'Chọn model')}
+              </span>
+            </Button>
+          </ModelSelectorTrigger>
+          <ModelSelectorContent>
+            <ModelSelectorInput placeholder="Tìm model..." />
+            <ModelSelectorList>
+              <ModelSelectorEmpty>
+                {modelsLoading ? 'Đang tải models...' : 'Không tìm thấy model.'}
+              </ModelSelectorEmpty>
+              {!modelsLoading && (() => {
+                const groupedModels = models.reduce((acc, model) => {
+                  const provider = model.modelId.split('/')[0];
+                  if (!acc[provider]) acc[provider] = [];
+                  acc[provider].push(model);
+                  return acc;
+                }, {} as Record<string, IModel[]>);
+
+                const providerNames: Record<string, string> = {
+                  'openai': 'OpenAI',
+                  'anthropic': 'Anthropic',
+                  'google': 'Google',
+                  'deepseek': 'DeepSeek',
+                  'meta-llama': 'Meta',
+                  'mistral': 'Mistral',
+                  'perplexity': 'Perplexity',
+                };
+
+                return Object.entries(groupedModels).map(([provider, providerModels]) => (
+                  <ModelSelectorGroup key={provider} heading={providerNames[provider] || provider}>
+                    {providerModels.map((model) => (
+                      <ModelSelectorItem
+                        key={model.modelId}
+                        value={model.modelId}
+                        onSelect={() => {
+                          onModelChange(model.modelId);
+                          onModelSelectorOpenChange(false);
+                        }}
+                      >
+                        <ModelSelectorLogoGroup>
+                          <ModelSelectorLogo provider={provider} />
+                        </ModelSelectorLogoGroup>
+                        <ModelSelectorName>{model.safeName}</ModelSelectorName>
+                      </ModelSelectorItem>
+                    ))}
+                  </ModelSelectorGroup>
+                ));
+              })()}
+            </ModelSelectorList>
+          </ModelSelectorContent>
+        </ModelSelector>
+      </div>
 
       {/* Input chat */}
       <div className="w-full max-w-md">
@@ -224,6 +314,10 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
 
 const ChatbotUI = () => {
   const [inputValue, setInputValue] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
+  const [isModelSelectorOpen, setIsModelSelectorOpen] = useState(false);
+  const [models, setModels] = useState<IModel[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(true);
   const [expandedReasoning, setExpandedReasoning] = useState<Record<string, boolean>>({});
   const [expandedToolCalls, setExpandedToolCalls] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
@@ -263,6 +357,7 @@ const ChatbotUI = () => {
       body: {
         access_token: AuthStorage.getUserToken() || '',
         user_id: user?.UserID || '',
+        model: selectedModel,
       }
     }),
     onError: (err) => {
@@ -478,6 +573,36 @@ const ChatbotUI = () => {
 
   useEffect(() => {
     setAccess(true)
+  }, [])
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      setModelsLoading(true);
+      try {
+        const response = await chisaAIService.getModels();
+        setModels(response.models);
+        // Set default model
+        const defaultModel = response.models.find(m => m.isDefault);
+        if (defaultModel) {
+          setSelectedModel(defaultModel.modelId);
+        } else if (response.models.length > 0) {
+          setSelectedModel(response.models[0].modelId);
+        }
+      } catch (error) {
+        console.error('Failed to fetch models:', error);
+        // Set fallback model
+        setModels([{
+          safeName: 'ChisaAI Mini',
+          modelId: 'openai/gpt-4o-mini',
+          isDefault: true
+        }]);
+        setSelectedModel('openai/gpt-4o-mini');
+      } finally {
+        setModelsLoading(false);
+      }
+    };
+
+    fetchModels();
   }, [])
 
   useEffect(() => {
@@ -719,6 +844,13 @@ const ChatbotUI = () => {
             status={status}
             onChangeInput={setInputValue}
             onSubmit={handleSend}
+            models={models}
+            selectedModel={selectedModel}
+            modelsLoading={modelsLoading}
+            isModelSelectorOpen={isModelSelectorOpen}
+            onModelChange={setSelectedModel}
+            onModelSelectorOpenChange={setIsModelSelectorOpen}
+            isGenerating={isGenerating}
           />
         ) : (
           <div className="max-w-screen-md sm:max-w-7xl mx-auto space-y-6">
@@ -870,6 +1002,70 @@ const ChatbotUI = () => {
       {/* Input Area */}
       <div className="px-3 sm:px-4 py-3 sm:py-4">
               <div className={`max-w-screen-md sm:max-w-3xl mx-auto flex gap-2 items-center` + (messages.length === 0 ? ' hidden' : '')}>
+                <ModelSelector open={isModelSelectorOpen} onOpenChange={setIsModelSelectorOpen}>
+                  <ModelSelectorTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-shrink-0 gap-2 px-3"
+                      disabled={isGenerating || modelsLoading}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                      <span className="hidden sm:inline text-xs">
+                        {modelsLoading ? 'Đang tải...' : (models.find(m => m.modelId === selectedModel)?.safeName || selectedModel)}
+                      </span>
+                    </Button>
+                  </ModelSelectorTrigger>
+                  <ModelSelectorContent>
+                    <ModelSelectorInput placeholder="Tìm model..." />
+                    <ModelSelectorList>
+                      <ModelSelectorEmpty>
+                        {modelsLoading ? 'Đang tải models...' : 'Không tìm thấy model.'}
+                      </ModelSelectorEmpty>
+                      {!modelsLoading && (() => {
+                        // Group models by provider
+                        const groupedModels = models.reduce((acc, model) => {
+                          const provider = model.modelId.split('/')[0];
+                          if (!acc[provider]) acc[provider] = [];
+                          acc[provider].push(model);
+                          return acc;
+                        }, {} as Record<string, IModel[]>);
+
+                        // Provider display names
+                        const providerNames: Record<string, string> = {
+                          'openai': 'OpenAI',
+                          'anthropic': 'Anthropic',
+                          'google': 'Google',
+                          'deepseek': 'DeepSeek',
+                          'meta-llama': 'Meta',
+                          'mistral': 'Mistral',
+                          'perplexity': 'Perplexity',
+                        };
+
+                        return Object.entries(groupedModels).map(([provider, providerModels]) => (
+                          <ModelSelectorGroup key={provider} heading={providerNames[provider] || provider}>
+                            {providerModels.map((model) => (
+                              <ModelSelectorItem
+                                key={model.modelId}
+                                value={model.modelId}
+                                onSelect={() => {
+                                  setSelectedModel(model.modelId);
+                                  setIsModelSelectorOpen(false);
+                                }}
+                              >
+                                <ModelSelectorLogoGroup>
+                                  <ModelSelectorLogo provider={provider} />
+                                </ModelSelectorLogoGroup>
+                                <ModelSelectorName>{model.safeName}</ModelSelectorName>
+                              </ModelSelectorItem>
+                            ))}
+                          </ModelSelectorGroup>
+                        ));
+                      })()}
+                    </ModelSelectorList>
+                  </ModelSelectorContent>
+                </ModelSelector>
+                
                 <PromptInput
                   onSubmit={handleSend}
                   className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500 min-w-0 dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"

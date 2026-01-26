@@ -1,5 +1,5 @@
 
-import { IchatHistory, IchisaAIChatList } from "@/types/chisaAI"
+import { IchatHistory, IchisaAIChatList, IModelsResponse } from "@/types/chisaAI"
 const API_ENDPOINT = import.meta.env.VITE_API_URL
 
 export const chisaAIService = {
@@ -35,6 +35,26 @@ export const chisaAIService = {
             throw new Error(`Lỗi khi lấy lịch sử chat: ${res.status} ${res.statusText}`)
         }
         
+        return await res.json();
+    },
+    getModels: async (): Promise<IModelsResponse> => {
+        const res = await fetch(`${API_ENDPOINT}/chisaAI/v2/models`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            }
+        })
+        if (!res.ok) {
+            return {
+                models: [
+                    {
+                        "safeName": "ChisaAI Mini",
+                        "modelId": "openai/gpt-4o-mini",
+                        "isDefault": true
+                    },
+                ]
+            }
+        }
         return await res.json();
     }
 }
