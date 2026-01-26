@@ -59,7 +59,7 @@ const ChisaAIPrivacy = () => {
             <div>
               <h3 className="font-semibold mb-2">1. Thông tin tài khoản</h3>
               <ul className="list-disc list-inside text-muted-foreground ml-4 space-y-1">
-                <li>Tên người dùng, mã sinh viên và khoa sinh viên đang học từ hệ thống LHU</li>
+                <li>Tên người dùng, mã sinh viên, lớp và khoa của bạn đang học từ hệ thống LHU</li>
               </ul>
             </div>
             <div>
@@ -159,7 +159,7 @@ const ChisaAIPrivacy = () => {
                 <div>
                   <h4 className="font-semibold">Giám sát liên tục</h4>
                   <p className="text-sm text-muted-foreground">
-                    Hệ thống được giám sát 24/7 để phát hiện và ngăn chặn các mối đe dọa
+                    Hệ thống được giám sát liên tục để phát hiện và ngăn chặn các mối đe dọa
                   </p>
                 </div>
               </div>
