@@ -72,5 +72,21 @@ export const chisaAIService = {
         }
         const data = await res.json();
         return data.exists;
+    },
+    createUserV3: async (access_token: string): Promise<boolean> => {
+        const res = await fetch(`${API_ENDPOINT}/chisaAI/v3/user/create`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: access_token
+            })
+        })
+        if (!res.ok) {
+            const data = await res.json();
+            throw new Error(data.message || 'Lỗi khi tạo người dùng ChisaAI V3');
+        }
+        return true;
     }
 }
