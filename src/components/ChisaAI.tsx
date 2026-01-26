@@ -830,7 +830,7 @@ const ChatbotUI = () => {
 
                   {/* Message Content */}
                   <div
-                    className={`px-4 py-3 overflow-auto rounded-md border ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : 'bg-white border-gray-200 dark:bg-slate-800 dark:border-slate-700'}`} 
+                    className={`px-4 py-3 overflow-auto rounded-md  ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : ''}`} 
                     style={{ wordBreak: 'break-word' }}
                   >
                     <div className="text-gray-800 leading-relaxed  break-words dark:text-gray-100">
