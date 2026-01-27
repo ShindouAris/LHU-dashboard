@@ -8,7 +8,7 @@ import { LuClockAlert, LuPowerOff } from "react-icons/lu";
 import { PiWarningDiamondFill } from "react-icons/pi";
 import { ELIB_SERVICE } from '@/services/elibService';
 import { vi } from 'date-fns/locale';
-import { format, getDay, startOfWeek, parse, set } from 'date-fns';
+import { format, getDay, startOfWeek, parse } from 'date-fns';
 import dayjs from 'dayjs';
 import { ToolbarProps } from "react-big-calendar";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
