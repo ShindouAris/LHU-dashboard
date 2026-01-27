@@ -3,13 +3,12 @@ import { Calendar as Calen, dateFnsLocalizer } from 'react-big-calendar';
 import { DangKy, RoomData, ThongSo } from '@/types/elib';
 import { AuthStorage } from '@/types/user';
 import { Clock, Users, ChevronDown, ChevronUp, UserPlus, MoreVertical, QrCode, Copy, Edit, Trash2, Eye, Calendar } from 'lucide-react';
-import { Construction } from './LHU_UI/Contruction';
 import { MdNoFood } from "react-icons/md";
 import { LuClockAlert, LuPowerOff } from "react-icons/lu";
 import { PiWarningDiamondFill } from "react-icons/pi";
 import { ELIB_SERVICE } from '@/services/elibService';
 import { vi } from 'date-fns/locale';
-import { format, getDay, startOfWeek, parse } from 'date-fns';
+import { format, getDay, startOfWeek, parse, set } from 'date-fns';
 import dayjs from 'dayjs';
 import { ToolbarProps } from "react-big-calendar";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
@@ -17,7 +16,8 @@ import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
 import toast from 'react-hot-toast';
 // @ts-ignore
-import RoomBookingForm from './Elib_register';
+import RoomBookingForm from './LHU_UI/Elib_register';
+import StudentManager from './LHU_UI/Elib_manage_room';
 import "./Timetable.css";
 // ============== TYPES ==============
 
@@ -365,6 +365,23 @@ const Elib: React.FC = () => {
       setRoomConfiguration(roomConfiguration?.data || []);
       setMaxRoomBookingLimit(thongSo?.MaxRoomBookingLimit || 0)
 
+      // Load user's personal bookings
+      const lichCaNhanResponse = await ELIB_SERVICE.get_user_booking_list();
+      if (lichCaNhanResponse) {
+        // Note: API returns Reservation[] but we need to fetch details for each to get DangKy
+        // For now, we'll convert what we can
+        setDataLuotDaDangKy(lichCaNhanResponse.data[1][0]?.SoLuotDaDangKy || 0);
+        
+        // Fetch full details for personal calendar
+        const init_date = dayjs().format("YYYY-MM-DD")
+        const booked_list = await ELIB_SERVICE.get_reservation_by_day(init_date);
+        if (booked_list) {
+          // Filter to only show current user's bookings
+          const myBookings = booked_list.data.filter(b => b.DocGiaDangKy === user?.UserID);
+          setDataLichCaNhan(myBookings);
+        }
+      }
+
       const init_date = dayjs().format("YYYY-MM-DD")
 
       if (eventCache.current[init_date]) {
@@ -502,39 +519,78 @@ const Elib: React.FC = () => {
   };
 
 
-  const handleAction = (actionType: ActionType, bookingId: string): void => {
-    toast.error("Đang được phát triển dần, sẽ có trong bản cập nhật gần nhất")
-    return
-
+  const handleAction = async (actionType: ActionType, bookingId: string): Promise<void> => {
     switch(actionType) {
       case 'invite':
-        toast.success('Chức năng mời thành viên đang được phát triển');
+        setSelectedBookingNumber(bookingId);
+        setIsModificationRoomDialogOpen(true);
         break;
+        
       case 'qr':
         setSelectedBookingId(bookingId);
         setShowQRModal(true);
         break;
+        
       case 'edit':
-        toast.success('Mở form chỉnh sửa đặt phòng');
+        toast('Chức năng chỉnh sửa đang được phát triển', { icon: 'ℹ️' });
+        // TODO: Implement edit mode - load booking by ID and open form
         break;
+        
       case 'cancel':
         if (confirm('Bạn có chắc muốn hủy đăng ký này?')) {
-          setDataLichCaNhan(prev => prev.filter(b => b.DangKyID !== bookingId));
-          setDataLuotDaDangKy(prev => prev - 1);
-          toast.success('Đã hủy đăng ký thành công');
+          const result = await ELIB_SERVICE.cancel_booking(bookingId);
+          if (result.success) {
+            toast.success('Đã hủy đăng ký thành công');
+            
+            // Refresh personal bookings
+            const init_date = dayjs().format("YYYY-MM-DD");
+            const booked_list = await ELIB_SERVICE.get_reservation_by_day(init_date);
+            if (booked_list && user) {
+              const myBookings = booked_list.data.filter(b => b.DocGiaDangKy === user.UserID);
+              setDataLichCaNhan(myBookings);
+            }
+            
+            // Refresh count
+            const lichCaNhan = await ELIB_SERVICE.get_user_booking_list();
+            if (lichCaNhan) {
+              setDataLuotDaDangKy(lichCaNhan.data[1][0]?.SoLuotDaDangKy || 0);
+            }
+            
+            // Refresh calendar
+            if (booked_list) {
+              const events = booked_list.data.map(e => ({
+                ...e,
+                title: `${e.FirstName} ${e.LastName}`,
+                start: new Date(e.ThoiGianBD),
+                end: new Date(e.ThoiGianKT),
+                resourceId: e.TenPhong,
+              })).filter(e => Presenter.getStatusColor(e.TrangThai, e.ThoiGianKT).style !== 'hidden');
+              
+              // Update cache
+              eventCache.current[init_date] = events;
+              setEvent(events);
+            }
+          } else {
+            toast.error(result.message);
+          }
         }
         break;
+        
       case 'detail':
-        toast.success('Hiển thị chi tiết đặt phòng');
+        const detailBooking = dataLichCaNhan.find(b => b.DangKyID === bookingId);
+        if (detailBooking) {
+          setCurrentViewedEvent(detailBooking);
+          setShowFocusedEvent(true);
+        }
         break;
+        
       case 'expired':
         setDataLichCaNhan(prev => prev.map(b => 
           b.DangKyID === bookingId ? { ...b, TrangThai: 3 as const } : b
         ));
-        toast.success('Đăng ký đã hết hạn và bị hủy');
+        toast('Đăng ký đã hết hạn', { icon: 'ℹ️' });
         break;
     }
-
   };
 
   useEffect(() => {
@@ -545,7 +601,6 @@ const Elib: React.FC = () => {
     setIsBookingOpen(true);
   };
 
-  // @ts-expect-error
   const handleBookingSuccess = (madatcho: string) => {
     setIsBookingOpen(false);
     setSelectedBookingNumber(madatcho);
@@ -553,14 +608,19 @@ const Elib: React.FC = () => {
 
   if (is_booking_open) {
     return (
-      // <RoomBookingForm onBookingSuccess={handleBookingSuccess} onClose={() => setIsBookingOpen(false)} />
-      <Construction />
+      <RoomBookingForm onBookingSuccess={handleBookingSuccess} onClose={() => setIsBookingOpen(false)} />
     )
   }
 
   if (is_modification_room_dialog_open && selectedBookingNumber) {
     return (
-      <Construction />
+      <StudentManager 
+        dangKyID={selectedBookingNumber} 
+        onClose={() => {
+          setSelectedBookingNumber(null);
+          setIsModificationRoomDialogOpen(false);
+        }} 
+      />
     )
   }
 

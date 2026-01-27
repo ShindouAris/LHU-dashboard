@@ -5,17 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { ELIB_SERVICE } from '@/services/elibService';
+import { UserObjFromDK_DocGia_SelectByDangKyID, UserSearch } from '@/types/elib';
+import toast from 'react-hot-toast';
 
-interface Student {
-  id: string;
-  name: string;
-  class: string;
-  email: string;
+interface StudentManagerProps {
+  dangKyID: string;
+  onClose: () => void;
 }
 
-const StudentManager = () => {
-  const [addedStudents, setAddedStudents] = useState<Student[]>([]);
-  const [searchResults, setSearchResults] = useState<Student[]>([]);
+const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
+  const [addedStudents, setAddedStudents] = useState<UserObjFromDK_DocGia_SelectByDangKyID[]>([]);
+  const [searchResults, setSearchResults] = useState<UserSearch[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
@@ -24,7 +25,7 @@ const StudentManager = () => {
   // Fetch danh sách học sinh đã thêm ban đầu
   useEffect(() => {
     fetchInitialStudents();
-  }, []);
+  }, [dangKyID]);
 
   // Tìm kiếm khi người dùng nhập
   useEffect(() => {
@@ -42,18 +43,12 @@ const StudentManager = () => {
   const fetchInitialStudents = async () => {
     try {
       setLoading(true);
-      // Thay thế URL này bằng API endpoint lấy danh sách học sinh đã thêm
-      const response = await fetch('https://jsonplaceholder.typicode.com/users');
-      const data = await response.json();
+      const response = await ELIB_SERVICE.get_members_by_dangky_id(dangKyID);
       
-      const transformedStudents: Student[] = data.slice(0, 3).map((user: any) => ({
-        id: user.id.toString(),
-        name: user.name,
-        class: `Lớp ${Math.floor(Math.random() * 12) + 1}A`,
-        email: user.email
-      }));
+      if (response && response.data) {
+        setAddedStudents(response.data);
+      }
       
-      setAddedStudents(transformedStudents);
       setError('');
     } catch (err) {
       setError('Không thể tải danh sách học sinh');
@@ -66,23 +61,17 @@ const StudentManager = () => {
   const searchStudents = async (query: string) => {
     try {
       setSearching(true);
-      // Thay thế URL này bằng API endpoint tìm kiếm học sinh
-      const response = await fetch(`https://jsonplaceholder.typicode.com/users?q=${query}`);
-      const data = await response.json();
+      const response = await ELIB_SERVICE.search_user(query);
       
-      const transformedResults: Student[] = data.slice(0, 5).map((user: any) => ({
-        id: user.id.toString(),
-        name: user.name,
-        class: `Lớp ${Math.floor(Math.random() * 12) + 1}A`,
-        email: user.email
-      }));
+      if (response && response.data) {
+        // Lọc ra những học sinh chưa được thêm
+        const filteredResults = response.data.filter(
+          result => !addedStudents.some(student => student.StudentID === result.ObjectID)
+        );
+        
+        setSearchResults(filteredResults);
+      }
       
-      // Lọc ra những học sinh chưa được thêm
-      const filteredResults = transformedResults.filter(
-        result => !addedStudents.some(student => student.id === result.id)
-      );
-      
-      setSearchResults(filteredResults);
       setError('');
     } catch (err) {
       setError('Không thể tìm kiếm học sinh');
@@ -92,42 +81,45 @@ const StudentManager = () => {
     }
   };
 
-  const addStudentFromSearch = async (student: Student) => {
+  const addStudentFromSearch = async (student: UserSearch) => {
     try {
-      // Thay thế URL này bằng API endpoint thêm học sinh
-      const response = await fetch('https://jsonplaceholder.typicode.com/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(student)
-      });
+      const result = await ELIB_SERVICE.add_member_to_room(dangKyID, student.ObjectID);
 
-      if (!response.ok) throw new Error('Thêm học sinh thất bại');
+      if (!result.success) {
+        throw new Error(result.message);
+      }
 
-      // Thêm vào danh sách đã thêm
-      setAddedStudents(prev => [...prev, student]);
+      toast.success('Thêm thành viên thành công');
+      
+      // Refresh danh sách
+      await fetchInitialStudents();
       
       // Xóa khỏi kết quả tìm kiếm
-      setSearchResults(prev => prev.filter(s => s.id !== student.id));
+      setSearchResults(prev => prev.filter(s => s.ObjectID !== student.ObjectID));
       
       setError('');
     } catch (err) {
-      setError('Không thể thêm học sinh');
+      const errorMsg = err instanceof Error ? err.message : 'Không thể thêm học sinh';
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error(err);
     }
   };
 
-  const removeStudent = async (id: string) => {
+  const removeStudent = async (studentId: string) => {
     try {
-      // Thay thế URL này bằng API endpoint xóa học sinh
-      await fetch(`https://jsonplaceholder.typicode.com/users/${id}`, {
-        method: 'DELETE'
-      });
+      const result = await ELIB_SERVICE.remove_member_from_room(dangKyID, studentId);
+      
+      if (!result.success) {
+        throw new Error(result.message);
+      }
 
-      setAddedStudents(prev => prev.filter(student => student.id !== id));
+      toast.success('Xóa thành viên thành công');
+      setAddedStudents(prev => prev.filter(student => student.StudentID !== studentId));
     } catch (err) {
-      setError('Không thể xóa học sinh');
+      const errorMsg = err instanceof Error ? err.message : 'Không thể xóa học sinh';
+      setError(errorMsg);
+      toast.error(errorMsg);
       console.error(err);
     }
   };
@@ -136,9 +128,15 @@ const StudentManager = () => {
     <div className="max-w-4xl mx-auto p-6 space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl font-bold text-center">
-            Quản lý Học sinh
-          </CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl font-bold">
+              Quản lý Thành viên
+            </CardTitle>
+            <Button variant="outline" onClick={onClose}>
+              <X className="w-4 h-4 mr-2" />
+              Đóng
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Tìm kiếm */}
@@ -147,7 +145,7 @@ const StudentManager = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <Input
                 type="text"
-                placeholder="Tìm kiếm học sinh để thêm..."
+                placeholder="Tìm kiếm học sinh để thêm (nhập tên hoặc MSSV)..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2"
@@ -171,16 +169,16 @@ const StudentManager = () => {
                     <div className="space-y-2">
                       {searchResults.map((student) => (
                         <div
-                          key={student.id}
+                          key={student.ObjectID}
                           className="flex items-center justify-between p-3 bg-white rounded-lg hover:shadow-md transition-shadow"
                         >
                           <div className="flex-1">
-                            <h4 className="font-semibold">{student.name}</h4>
+                            <h4 className="font-semibold">{student.ObjectName}</h4>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="secondary" className="text-xs">
-                                {student.class}
+                                {student.ObjectNickName}
                               </Badge>
-                              <span className="text-sm text-gray-600">{student.email}</span>
+                              <span className="text-sm text-gray-600">{student.Description}</span>
                             </div>
                           </div>
                           <Button
@@ -210,33 +208,45 @@ const StudentManager = () => {
           {/* Danh sách học sinh đã thêm */}
           <div>
             <h3 className="text-lg font-semibold mb-3">
-              Học sinh đã thêm ({addedStudents.length})
+              Thành viên đã thêm ({addedStudents.length})
             </h3>
             
             {loading ? (
               <div className="text-center py-8 text-gray-500">
-                Đang tải danh sách học sinh...
+                Đang tải danh sách thành viên...
               </div>
             ) : addedStudents.length === 0 ? (
               <div className="text-center py-8 text-gray-500">
-                Chưa có học sinh nào. Sử dụng ô tìm kiếm để thêm học sinh.
+                Chưa có thành viên nào. Sử dụng ô tìm kiếm để thêm thành viên.
               </div>
             ) : (
               <div className="space-y-3">
                 {addedStudents.map((student) => (
-                  <Card key={student.id} className="hover:shadow-md transition-shadow">
+                  <Card key={student.StudentID} className="hover:shadow-md transition-shadow">
                     <CardContent className="flex items-center justify-between p-4">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-lg">{student.name}</h4>
+                        <h4 className="font-semibold text-lg">
+                          {student.FirstName} {student.LastName}
+                        </h4>
                         <div className="flex items-center gap-3 mt-1">
-                          <Badge variant="secondary">{student.class}</Badge>
-                          <span className="text-sm text-gray-600">{student.email}</span>
+                          <Badge variant="secondary">{student.StudentID}</Badge>
+                          {student.Email && (
+                            <span className="text-sm text-gray-600">{student.Email}</span>
+                          )}
+                          {student.DepartmentName && (
+                            <span className="text-sm text-gray-600">{student.DepartmentName}</span>
+                          )}
                         </div>
+                        {student.ThoiGianXacNhan && (
+                          <div className="text-xs text-green-600 mt-1">
+                            ✓ Đã xác nhận lúc {new Date(student.ThoiGianXacNhan).toLocaleString('vi-VN')}
+                          </div>
+                        )}
                       </div>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => removeStudent(student.id)}
+                        onClick={() => removeStudent(student.StudentID)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
                       >
                         <X className="w-5 h-5" />

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Lock, Check, Calendar, Clock, ChevronDownIcon } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from './ui/popover';
-import { Button } from './ui/button';
-import { Calendar as Calen } from './ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Button } from '../ui/button';
+import { Calendar as Calen } from '../ui/calendar';
 import dayjs from 'dayjs';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -10,11 +10,11 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker'
 import toast from 'react-hot-toast';
 import { ELIB_SERVICE } from '@/services/elibService';
 import { DANGKY_PhongHocNhomForRegSelectResponse, DANGKY_ThietBiForRegSelectResponse, ToolForReg, DangKiThietBi, DangKyPayload } from '@/types/elib';
-import { Input } from './ui/input';
-import { Dialog, DialogContent, DialogDescription } from './ui/dialog';
-import { DialogHeader } from './ui/dialog';
+import { Input } from '../ui/input';
+import { Dialog, DialogContent, DialogDescription } from '../ui/dialog';
+import { DialogHeader } from '../ui/dialog';
 import { DialogTitle } from '@radix-ui/react-dialog';
-import PowerOffSlide from './smoothui/power-off-slide';
+import PowerOffSlide from '../smoothui/power-off-slide';
 import { MdClose } from "react-icons/md";
 
 
