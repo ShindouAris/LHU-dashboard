@@ -532,8 +532,8 @@ const Elib: React.FC = () => {
         break;
         
       case 'edit':
-        toast('Chức năng chỉnh sửa đang được phát triển', { icon: 'ℹ️' });
-        // TODO: Implement edit mode - load booking by ID and open form
+        setSelectedBookingNumber(bookingId);
+        setIsModificationRoomDialogOpen(true);
         break;
         
       case 'cancel':
