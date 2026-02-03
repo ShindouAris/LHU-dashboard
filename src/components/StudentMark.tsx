@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 import { PiChalkboardSimpleDuotone, PiDiceThreeDuotone } from "react-icons/pi";
 import { LuBookKey } from "react-icons/lu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip';
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from './ui/dialog';
 
 interface MarkPageProps {
   onBackToSchedule?: () => void;
@@ -22,6 +23,11 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   // const [is_maintenance, setIsMaintenance] = useState<boolean>(false)
   const [hediem, setHeDiem] = useState<string>("he10")
   const [imgsrc, setImgsrc] = useState<string>("")
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [selectedMonHoc, setSelectedMonHoc] = useState<string | null>(null);
+  const [selectedKithiID, setSelectedKiThiID] = useState<number | null>(null);
+  const [errorDialog, setErrorDialog] = useState<string | null>(null);
   const user = AuthStorage.getUser();
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
@@ -111,6 +117,21 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
     load();
   }, [user?.UserID]);
 
+  const handleDangKiThiLai = async (kiThiID: number) => {
+    if (!marks) return;
+    if (!kiThiID) return;
+
+    try {
+      const success = await authService.dangkithilai(kiThiID);
+      if (success) {
+        toast.success("Đăng ký thi lại thành công");
+      }
+    } catch (e) {
+      if (e instanceof Error) {
+        setErrorDialog(e.message);
+        setDialogOpen(true);
+      }
+  }};
   const semesters = useMemo(() => {
     if (!marks?.data) return {} as Record<number, MonHocAPI[]>;
     return marks.data.reduce((acc: Record<number, MonHocAPI[]>, item) => {
@@ -291,7 +312,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           <Card className="border-0 shadow-lg">
             <CardContent className="py-6 text-center">
               <span className="text-white text-md font-loveHouse">
-                Lưu ý: Điểm nào được tô đỏ tức là bạn rớt cmnr!, hoặc là chưa lên điểm
+                Lưu ý: Điểm nào được tô đỏ tức là bạn rớt môn!, hoặc là chưa lên đủ điểm
               </span>
             </CardContent>
           </Card>
@@ -321,6 +342,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               <th className="px-4 py-2">Tín chỉ</th>
                               <th className="px-4 py-2">Điểm TP</th>
                               <th className="px-4 py-2">Điểm TB</th>
+                              <th className='px-4 py-2'>Thao tác</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -328,13 +350,24 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               monHocs.map((mh: MonHocAPI, idx: number) => (
                                 <tr
                                   key={mh.MonHocID || `${hocKy}-${idx}`}
-                                  className={`border-b text-center ${mh.Dau ? '' : 'text-red-500'} border-gray-200 dark:border-gray-700`}
+                                  className={`border-b text-center ${( mh.DiemThanhPhan === null) ? '' : !mh.Dau && 'text-red-500'} border-gray-200 dark:border-gray-700`}
                                 >
                                   <td className="px-4 py-2 font-mono break-words">{String(mh.MonHocID)}</td>
                                   <td className="px-4 py-2 break-words">{safeText(mh.TenMH)}</td>
                                   <td className="px-4 py-2">{formatScore(mh.HeSo, 0)}</td>
                                   <td className="px-4 py-2">{renderThanhPhan(mh.DiemThanhPhan)}</td>
                                   <td className="px-4 py-2 font-semibold">{caculateDiem(formatScore(mh.DiemTBMon), hediem)}</td>
+                                  {mh.KyThiID && mh.Dau === false && mh.DiemThanhPhan !== null &&  (
+                                    <td className="px-4 py-2">
+                                      <Button
+                                        size="sm"
+                                        variant={'outline'}
+                                        onClick={() => {setConfirmDialogOpen(true); setSelectedKiThiID(mh.KyThiID); setSelectedMonHoc(mh.TenMH || null)}}
+                                      >
+                                        Đăng ký thi lại
+                                      </Button>
+                                    </td>
+                                  )}
                                 </tr>
                               ))
                             ) : (
@@ -363,6 +396,37 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           </CardContent>
         </Card>
       )}
+
+      <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+        <DialogContent>
+          <DialogHeader>Xác nhận đăng ký thi lại</DialogHeader>
+          <div className="p-4">
+            <div className='flex justify-center mb-2'>Bạn có chắc chắn muốn đăng ký thi lại cho môn học này?</div>
+            <strong className="text-xl text-blue-500 font-semibold font-loveHouse flex items-center justify-center">{selectedMonHoc}</strong>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setConfirmDialogOpen(false)}>Hủy</Button>
+            <Button onClick={() => {
+              if (selectedKithiID) {
+                handleDangKiThiLai(selectedKithiID);
+                setConfirmDialogOpen(false);
+              }}}>Xác nhận</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+            <DialogHeader>Lỗi đăng ký thi lại</DialogHeader>
+          <div className="p-4">
+            <strong className='text-red-500 font-semibold text-xl'>{errorDialog}</strong>
+          </div>
+        </DialogContent>
+        <DialogFooter>
+          <Button variant="ghost" onClick={() => setDialogOpen(false)}>Đóng</Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 };

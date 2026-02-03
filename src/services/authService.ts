@@ -113,6 +113,33 @@ export const authService = {
       throw error;
     }
   },
+  async dangkithilai(kiThiID: number): Promise<boolean> {
+    const access_token = auth.getUserToken();
+    try {
+      const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_DangKyThi`, {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+          authorization: `Bearer ${access_token}`
+        },
+        body: JSON.stringify({
+          KyThiID: kiThiID,
+          UserID: auth.getUser()?.UserID
+        })
+      })
+
+      if (!response.ok) {
+        let data = await response.json();
+        throw new Error(data.Message || "Đăng ký thi lại thất bại");
+      }
+
+      return true;
+
+    } catch (error) {
+      throw error;
+    }
+
+  },
   async send_login(qr_code_data: string): Promise<UserResponse> {
     const access_token = AuthStorage.getUserToken();
     const current_loggedin_user = AuthStorage.getUser()
