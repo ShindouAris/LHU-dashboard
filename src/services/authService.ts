@@ -113,7 +113,7 @@ export const authService = {
       throw error;
     }
   },
-  async dangkithilai(kiThiID: number): Promise<boolean> {
+  async dangkithilai(kiThiID: number): Promise<number> {
     const access_token = auth.getUserToken();
     try {
       const response = await fetch(`${SCHOOL_TAPI}/mark/MarkViewer_DangKyThi`, {
@@ -128,12 +128,28 @@ export const authService = {
         })
       })
 
-      if (!response.ok) {
-        let data = await response.json();
-        throw new Error(data.Message || "Đăng ký thi lại thất bại");
+      let data: any = null;
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
       }
 
-      return true;
+      if (!response.ok) {
+        const msg = data?.Message || data?.message || "Đăng ký thi lại thất bại";
+        throw new Error(msg);
+      }
+
+      const statusRaw =
+        data?.data?.[0]?.trangthai ??
+        data?.data?.[0]?.TrangThai ??
+        data?.trangthai ??
+        data?.TrangThai;
+      const status = Number(statusRaw);
+      if (Number.isFinite(status) && status > 0) return status;
+
+      // Fallback: assume success if backend doesn't return status
+      return 1;
 
     } catch (error) {
       throw error;

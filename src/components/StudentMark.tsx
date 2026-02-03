@@ -27,8 +27,14 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [selectedMonHoc, setSelectedMonHoc] = useState<string | null>(null);
   const [selectedKithiID, setSelectedKiThiID] = useState<number | null>(null);
+  const [selectedDangKyThiLaiState, setSelectedDangKyThiLaiState] = useState<number | null>(null);
   const [errorDialog, setErrorDialog] = useState<string | null>(null);
   const user = AuthStorage.getUser();
+
+  const canOperateReRegister = useMemo(() => {
+    // Client-side guard: only allow action when the viewed transcript belongs to current login.
+    return Boolean(user?.UserID && marks?.StudentID && String(marks.StudentID) === String(user.UserID));
+  }, [marks?.StudentID, user?.UserID]);
 
   const formatScore = (value: string | number | null | undefined, fixed: number = 2) => {
     if (value === null || value === undefined) return '—';
@@ -117,15 +123,26 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
     load();
   }, [user?.UserID]);
 
+  const refreshMarks = async () => {
+    const data = await authService.getMark();
+    setMarks(data ?? null);
+  };
+
   const handleDangKiThiLai = async (kiThiID: number) => {
     if (!marks) return;
     if (!kiThiID) return;
+    if (!canOperateReRegister) {
+      toast.error('Bạn không có quyền thao tác trên bảng điểm này');
+      return;
+    }
 
     try {
-      const success = await authService.dangkithilai(kiThiID);
-      if (success) {
-        toast.success("Đăng ký thi lại thành công");
-      }
+      const trangthai = await authService.dangkithilai(kiThiID);
+      if (trangthai === 1) toast.success('Đăng ký thi lại thành công');
+      else if (trangthai === 2) toast.error('Hủy đăng ký thi lại thành công');
+      else if (trangthai === 3) toast('Không thể hủy (đã chốt danh sách thi)', { icon: 'ℹ️' } as any);
+      else toast.success('Thao tác thành công');
+      await refreshMarks();
     } catch (e) {
       if (e instanceof Error) {
         setErrorDialog(e.message);
@@ -199,9 +216,6 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
               className="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               value={selectedSemester ?? ''}
               onChange={(e) => setSelectedSemester(Number(e.target.value))}
-            {
-              ...(undefined as any)
-            }
             >
               {Object.keys(semesters)
                 .map((k) => Number(k))
@@ -357,14 +371,23 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                                   <td className="px-4 py-2">{formatScore(mh.HeSo, 0)}</td>
                                   <td className="px-4 py-2">{renderThanhPhan(mh.DiemThanhPhan)}</td>
                                   <td className="px-4 py-2 font-semibold">{caculateDiem(formatScore(mh.DiemTBMon), hediem)}</td>
-                                  {mh.KyThiID && mh.Dau === false && mh.DiemThanhPhan !== null &&  (
+                                  {canOperateReRegister &&
+                                    mh.KyThiID &&
+                                    mh.Dau === false &&
+                                    mh.DiemThanhPhan !== null &&
+                                    (mh.DangKyThiLai === 1 || mh.DangKyThiLai === 2) && (
                                     <td className="px-4 py-2">
                                       <Button
                                         size="sm"
                                         variant={'outline'}
-                                        onClick={() => {setConfirmDialogOpen(true); setSelectedKiThiID(mh.KyThiID); setSelectedMonHoc(mh.TenMH || null)}}
+                                        onClick={() => {
+                                          setConfirmDialogOpen(true);
+                                          setSelectedKiThiID(mh.KyThiID);
+                                          setSelectedMonHoc(mh.TenMH || null);
+                                          setSelectedDangKyThiLaiState(Number(mh.DangKyThiLai ?? null));
+                                        }}
                                       >
-                                        Đăng ký thi lại
+                                        {mh.DangKyThiLai === 2 ? 'Hủy đăng ký' : 'Đăng ký thi lại'}
                                       </Button>
                                     </td>
                                   )}
@@ -399,9 +422,13 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
 
       <Dialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <DialogContent>
-          <DialogHeader>Xác nhận đăng ký thi lại</DialogHeader>
+          <DialogHeader>{selectedDangKyThiLaiState === 2 ? 'Xác nhận hủy đăng ký' : 'Xác nhận đăng ký thi lại'}</DialogHeader>
           <div className="p-4">
-            <div className='flex justify-center mb-2'>Bạn có chắc chắn muốn đăng ký thi lại cho môn học này?</div>
+            <div className='flex justify-center mb-2'>
+              {selectedDangKyThiLaiState === 2
+                ? 'Bạn có chắc chắn muốn hủy đăng ký thi lại cho môn học này?'
+                : 'Bạn có chắc chắn muốn đăng ký thi lại cho môn học này?'}
+            </div>
             <strong className="text-xl text-blue-500 font-semibold font-loveHouse flex items-center justify-center">{selectedMonHoc}</strong>
           </div>
           <DialogFooter>
