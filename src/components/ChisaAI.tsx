@@ -947,9 +947,10 @@ const ChatbotUI = () => {
                         }}
                         className={
                           c.chatId === id
-                            ? 'bg-accent text-accent-foreground'
+                            ? 'bg-accent text-accent-foreground cursor-not-allowed'
                             : undefined
                         }
+                        disabled={c.chatId === id}
                       >
                         <div className="flex flex-col gap-0.5 min-w-0">
                           <div className="text-sm font-medium truncate">
