@@ -445,6 +445,9 @@ const ChatbotUI = () => {
           setMessages(history.messages);
           setChatHistoryNextToken(history.next_token);
         }
+        else {
+          setChatHistoryNextToken(null)
+        }
       } catch (error) {
         console.error('Failed to load chat history:', error);
         // If chat doesn't exist on server yet, that's okay - it's a new chat
@@ -547,6 +550,8 @@ const ChatbotUI = () => {
         // @ts-ignore
         setMessages(prev => [...history.messages, ...prev]);
         setChatHistoryNextToken(history.next_token);
+      } else {
+        setChatHistoryNextToken(null)
       }
     } catch (error) {
       console.error('Failed to load more messages:', error);
