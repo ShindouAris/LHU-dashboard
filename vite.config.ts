@@ -15,6 +15,19 @@ export default defineConfig({
       ],
       workbox: {
         navigateFallbackDenylist: [/^\/api\//],
+        runtimeCaching: [
+          {
+            urlPattern: /\.(?:woff2?|ttf|otf)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'font-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              }
+            }
+          }
+        ]
       },
       manifest: {
         name: 'Tra cứu lịch học',
@@ -59,5 +72,6 @@ export default defineConfig({
         }
       }
     }
-  }
+  },
+  
 });
