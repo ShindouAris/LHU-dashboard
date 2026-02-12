@@ -224,6 +224,14 @@ export const QRScanner: React.FC = () => {
       // Hanlde event từ react native
       if (msg.type === "QR_SCANNED") {
         setScanned((msg.code))
+        if (isReactNativeWebView) {
+          window.ReactNativeWebView.postMessage(
+            JSON.stringify({
+              type: "LOG",
+              payload: `Received QR code from React Native: ${msg.code}`
+            })
+          )
+        }
       }
     });
     load();
