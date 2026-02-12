@@ -48,6 +48,7 @@ const SettingsPage: React.FC = () => {
   const user = AuthStorage.getUser();
   const isLoggedIn = AuthStorage.isLoggedIn();
   const isElectronApp = window?.electron?.isElectron || false;
+  const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
   const [settings, setSettings] = useState<{ autoStart: boolean, minimizeToTray: boolean, 
     checkForUpdatesOnStart: boolean, notifyNextClassStartedSoon: boolean, 
     minimizeOnClose: boolean, hardwareAcceleration: boolean, useDiscordRpc: boolean } | null>(null);
@@ -761,6 +762,25 @@ const SettingsPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {isReactNativeWebView && (
+                <>
+                  <Separator />
+                  <div className="flex items-center justify-between py-4">
+                    <div className="flex items-center gap-4 flex-1">
+                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                        <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <Label className="text-base font-medium">Ứng dụng điện thoại</Label>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                          Đang chạy trong React Native
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
               <Separator />
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">

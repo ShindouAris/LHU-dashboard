@@ -17,7 +17,6 @@ export const Layout: React.FC<LayoutProps> = ({
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const loggedInUser = AuthStorage.isLoggedIn();
-  const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -92,11 +91,6 @@ export const Layout: React.FC<LayoutProps> = ({
         <div className="flex-1 w-full min-w-0 lg:ml-0 flex flex-col min-h-0">
           {/* Mobile Header */}
           <div className="lg:hidden sticky top-0 z-40 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
-            {isReactNativeWebView && (
-              <div className="px-4 py-2 text-xs font-medium text-gray-700 dark:text-gray-200 border-b border-gray-200 dark:border-gray-800">
-                Đang chạy trong Ứng dụng điện thoại (React Native WebView)
-              </div>
-            )}
             <div className="flex items-center justify-between p-4">
               <Button
                 variant="ghost"
