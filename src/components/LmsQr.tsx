@@ -36,6 +36,55 @@ export const QRScanner: React.FC = () => {
   const nav = useNavigate()
   const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
 
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null;
+
+  const extractQrFromMessage = useCallback((data: unknown): { type?: string; code?: string } => {
+    if (!data) return {};
+
+    // ReactNativeWebView.postMessage usually sends a string
+    if (typeof data === "string") {
+      try {
+        const parsed: unknown = JSON.parse(data);
+        if (isRecord(parsed)) {
+          const payload = parsed.payload;
+          return {
+            type: typeof parsed.type === "string" ? parsed.type : undefined,
+            code:
+              typeof parsed.code === "string"
+                ? parsed.code
+                : isRecord(payload) && typeof payload.code === "string"
+                  ? payload.code
+                  : typeof payload === "string"
+                    ? payload
+                    : undefined,
+          };
+        }
+      } catch {
+        // Not JSON; ignore
+      }
+      return {};
+    }
+
+    if (typeof data === "object") {
+      const anyData = data as Record<string, unknown>;
+      const payload = anyData.payload;
+      return {
+        type: typeof anyData.type === "string" ? anyData.type : undefined,
+        code:
+          typeof anyData.code === "string"
+            ? anyData.code
+            : isRecord(payload) && typeof payload.code === "string"
+              ? payload.code
+              : typeof payload === "string"
+                ? payload
+                : undefined,
+      };
+    }
+
+    return {};
+  }, []);
+
   const openReactNativeCamrera = () => {
     if (!isReactNativeWebView) return;
     window.ReactNativeWebView.postMessage(
@@ -219,23 +268,39 @@ export const QRScanner: React.FC = () => {
     const load = async () => {
         await loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
     };
-    window.addEventListener('message', (event) => {
-      const msg = event.data;
-      // Hanlde event từ react native
-      if (msg.type === "QR_SCANNED") {
-        setScanned((msg.code))
+
+    const onMessage = (event: MessageEvent) => {
+      const { type, code } = extractQrFromMessage(event.data);
+
+      // Handle event qr scan từ React Native
+      if (type === "QR_SCANNED" && typeof code === "string" && code.trim() !== "") {
+        setScanned(code);
+
         if (isReactNativeWebView) {
-          window.ReactNativeWebView.postMessage(
-            JSON.stringify({
-              type: "LOG",
-              payload: `Received QR code from React Native: ${msg.code}`
-            })
-          )
+          try {
+            window.ReactNativeWebView.postMessage(
+              JSON.stringify({
+                type: "LOG",
+                payload: `Received QR code from React Native: ${code}`,
+              })
+            );
+          } catch (e) {
+            console.warn("Failed to post LOG back to ReactNativeWebView", e);
+          }
         }
       }
-    });
+    };
+
+    // In React Native WebView, messages may arrive on `document` instead of `window`.
+    window.addEventListener("message", onMessage as EventListener);
+    document.addEventListener("message", onMessage as EventListener);
     load();
-  }, []);
+
+    return () => {
+      window.removeEventListener("message", onMessage as EventListener);
+      document.removeEventListener("message", onMessage as EventListener);
+    };
+  }, [extractQrFromMessage, isReactNativeWebView]);
 
   useEffect(() => {
 
