@@ -275,19 +275,6 @@ export const QRScanner: React.FC = () => {
       // Handle event qr scan từ React Native
       if (type === "QR_SCANNED" && typeof code === "string" && code.trim() !== "") {
         setScanned(code);
-
-        if (isReactNativeWebView) {
-          try {
-            window.ReactNativeWebView.postMessage(
-              JSON.stringify({
-                type: "LOG",
-                payload: `Received QR code from React Native: ${code}`,
-              })
-            );
-          } catch (e) {
-            console.warn("Failed to post LOG back to ReactNativeWebView", e);
-          }
-        }
       }
     };
 
