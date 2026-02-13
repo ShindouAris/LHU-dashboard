@@ -85,7 +85,7 @@ export const QRScanner: React.FC = () => {
     return {};
   }, []);
 
-  const openReactNativeCamrera = () => {
+  const openReactNativeCamera = () => {
     if (!isReactNativeWebView) return;
     window.ReactNativeWebView.postMessage(
       JSON.stringify({
@@ -96,10 +96,11 @@ export const QRScanner: React.FC = () => {
   }
 
   const getCamera = async () => {
-    // We tried to open the camera via React Native WebView first
+    // Try to open the camera via React Native WebView first
+    // Falls through to web camera as a fallback if React Native doesn't respond
     if (isReactNativeWebView) {
-      openReactNativeCamrera();
-      // return;
+      openReactNativeCamera();
+      // return; // Intentionally commented: allows fallback to web camera
     }
 
       try {
