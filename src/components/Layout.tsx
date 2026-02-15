@@ -36,7 +36,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            © {new Date().getFullYear()} CalendarLHU. All rights reserved.
+            © {new Date().getFullYear()} LHU dashboard. All rights reserved.
           </p>
           <Button
             variant="outline"
