@@ -42,7 +42,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 
 const SettingsPage: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [cacheSize, setCacheSize] = useState<string>('0 KB');
+  const [cacheSize, setCacheSize] = useState<string>('-- KB');
   const [hediem, setHeDiem] = useState<string>('he10');
   const [isClearingCache, setIsClearingCache] = useState(false);
   const user = AuthStorage.getUser();
