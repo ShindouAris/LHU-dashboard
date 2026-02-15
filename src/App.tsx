@@ -90,7 +90,7 @@ function App() {
     if (path.startsWith('/toollhu')) return 'Công cụ LHU';
     if (path === '/chisaAI/privacy') return 'Chính sách Bảo mật - ChisaAI';
     if (path.startsWith('/chisaAI')) return 'Chisa AI';
-    return pageTitles[path] || 'CalendarLHU';
+    return pageTitles[path] || 'LHU Dashboard';
   };
 
   // Routes that don't need Layout wrapper

@@ -34,8 +34,74 @@ export const QRScanner: React.FC = () => {
   const [snapshotData, setSnapshotData] = useState<DiemDanhOut[] | null>(null)
   const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
   const nav = useNavigate()
-1
+  const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
+
+  const isRecord = (value: unknown): value is Record<string, unknown> =>
+    typeof value === "object" && value !== null;
+
+  const extractQrFromMessage = useCallback((data: unknown): { type?: string; code?: string } => {
+    if (!data) return {};
+
+    // ReactNativeWebView.postMessage usually sends a string
+    if (typeof data === "string") {
+      try {
+        const parsed: unknown = JSON.parse(data);
+        if (isRecord(parsed)) {
+          const payload = parsed.payload;
+          return {
+            type: typeof parsed.type === "string" ? parsed.type : undefined,
+            code:
+              typeof parsed.code === "string"
+                ? parsed.code
+                : isRecord(payload) && typeof payload.code === "string"
+                  ? payload.code
+                  : typeof payload === "string"
+                    ? payload
+                    : undefined,
+          };
+        }
+      } catch {
+        // Not JSON; ignore
+      }
+      return {};
+    }
+
+    if (typeof data === "object") {
+      const anyData = data as Record<string, unknown>;
+      const payload = anyData.payload;
+      return {
+        type: typeof anyData.type === "string" ? anyData.type : undefined,
+        code:
+          typeof anyData.code === "string"
+            ? anyData.code
+            : isRecord(payload) && typeof payload.code === "string"
+              ? payload.code
+              : typeof payload === "string"
+                ? payload
+                : undefined,
+      };
+    }
+
+    return {};
+  }, []);
+
+  const openReactNativeCamera = () => {
+    if (!isReactNativeWebView) return;
+    window.ReactNativeWebView.postMessage(
+      JSON.stringify({
+        type: "DASHBOARD_REQUEST_CAMERA_ACCESS",
+        payload: "",
+    })
+    )
+  }
+
   const getCamera = async () => {
+    // Try React Native camera first, then attempt web camera regardless of React Native response.
+    // This provides a graceful fallback if React Native camera is unavailable or fails.
+    if (isReactNativeWebView) {
+      openReactNativeCamera();
+    }
+
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: "environment"}, audio: false});
         if (videoRef.current) {
@@ -115,51 +181,53 @@ export const QRScanner: React.FC = () => {
   }, []);
 
   useEffect(() => {
-  let cancelled = false;
-  
-  const handleZoom = async () => {
-    const track = trackRef.current;
-    if (!track) return;
+    let cancelled = false;
     
-    const capabilities = track.getCapabilities?.();
-   // @ts-expect-error Zoom can be unavailable on some devices
-    if (!capabilities?.zoom) {
-      console.warn('Zoom not supported');
-      return;
-    }
-    
-    // Clamp scale to camera's min/max zoom capabilities
-   // @ts-expect-error Zoom can be unavailable on some devices
-    const { min, max } = capabilities.zoom;
-    const clampedScale = Math.min(Math.max(scale, min), max);
-    
-    if (clampedScale !== scale) {
-      console.warn(`Scale ${scale} out of range [${min}, ${max}], clamped to ${clampedScale}`);
-    }
-    
-    try {
-      console.log(`Zooming to ${clampedScale} (range: ${min}-${max})`);
-      await track.applyConstraints({
-       // @ts-expect-error Zoom can be unavailable on some devices
-        advanced: [{ zoom: clampedScale }]
-      });
+    const handleZoom = async () => {
+      const track = trackRef.current;
+      if (!track) return;
       
-      if (!cancelled) {
-        console.log("Zoom applied successfully");
+      const capabilities = track.getCapabilities?.();
+    // @ts-expect-error Zoom can be unavailable on some devices
+      if (!capabilities?.zoom) {
+        console.warn('Zoom not supported');
+        return;
       }
-    } catch (error) {
-      if (!cancelled) {
-        console.error("Failed to apply zoom:", error);
+      
+      // Clamp scale to camera's min/max zoom capabilities
+    // @ts-expect-error Zoom can be unavailable on some devices
+      const { min, max } = capabilities.zoom;
+      const clampedScale = Math.min(Math.max(scale, min), max);
+      
+      if (clampedScale !== scale) {
+        console.warn(`Scale ${scale} out of range [${min}, ${max}], clamped to ${clampedScale}`);
       }
-    }
-  };
-  
-  handleZoom();
-  
-  return () => {
-    cancelled = true;
-  };
-}, [scale]);
+      
+      try {
+        console.log(`Zooming to ${clampedScale} (range: ${min}-${max})`);
+        await track.applyConstraints({
+        // @ts-expect-error Zoom can be unavailable on some devices
+          advanced: [{ zoom: clampedScale }]
+        });
+        
+        if (!cancelled) {
+          console.log("Zoom applied successfully");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error("Failed to apply zoom:", error);
+        }
+      }
+    };
+    
+    handleZoom();
+    
+    return () => {
+      cancelled = true;
+    };
+  }, [scale]);
+
+
   useEffect(() => {
     if (!videoRef.current) return;
 
@@ -200,154 +268,172 @@ export const QRScanner: React.FC = () => {
     const load = async () => {
         await loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
     };
+
+    const onMessage = (event: MessageEvent) => {
+      const { type, code } = extractQrFromMessage(event.data);
+
+      // Handle event qr scan từ React Native
+      if (type === "QR_SCANNED" && typeof code === "string" && code.trim() !== "") {
+        setScanned(code);
+      }
+    };
+
+    // In React Native WebView, messages may arrive on `document` instead of `window`.
+    window.addEventListener("message", onMessage as EventListener);
+    document.addEventListener("message", onMessage as EventListener);
     load();
-  }, []);
+
+    return () => {
+      window.removeEventListener("message", onMessage as EventListener);
+      document.removeEventListener("message", onMessage as EventListener);
+    };
+  }, [extractQrFromMessage, isReactNativeWebView]);
 
   useEffect(() => {
 
     const useScanned = async () => {
 
-          setError(null)
-    setIsExpiredQR(false)
-    setDialogExpiredQROpen(false)
+      setError(null)
+      setIsExpiredQR(false)
+      setDialogExpiredQROpen(false)
 
-    if (scanned === "") return
+      if (scanned === "") return
 
-    if (scanned.startsWith("http")) {
-      window.open(scanned)
-      return
-    }
-
-    const access_token = localStorage.getItem("access_token")
-    if (!access_token) {setError("Đăng nhập để sử dụng"); return}
-    // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) hoặc LIB (điểm danh sử dụng phòng thư viện) thì nổ lỗi
-    const SUBSTR = scanned.substring(0,3)
-    if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN" && SUBSTR !== "LIB") {
-      setError("QR này không được hỗ trợ...")
-      return
-    }
-
-    qrScanner?.pause()
-    .then(() => {console.log("Tạm dừng camera vì đã tìm thấy QR phù hợp")})
-    .catch((error) => {
-      console.log("Thất bại trong việc nỗ lực dừng camera" + error)
-    })
-
-    if (SUBSTR === "STB") {
-      try {
-        const res = await ApiService.send_diem_danh(scanned, access_token);
-        if (!res) return;
-
-        if (!res.success) {
-          const errorMessage = String(res.error);
-          setError(errorMessage);
-          // Check if it's an expired QR code error
-          if (
-            errorMessage.includes("Mã QR điểm danh đã hết hạn") ||
-            errorMessage.includes("hết hạn")
-          ) {
-            setIsExpiredQR(true);
-            setDialogExpiredQROpen(true);
-            toast.error("⚠️ Mã QR điểm danh đã hết hạn!", {
-              duration: 5000,
-              style: {
-                background: "#ef4444",
-                color: "#fff",
-                fontWeight: "bold",
-              },
-            });
-          } else {
-            setIsExpiredQR(false);
-            setDialogExpiredQROpen(false);
-          }
-        } else {
-          setIsSuccess(true);
-          setIsExpiredQR(false);
-          const nowSnapShot = await ApiService.get_lms_diem_danh(access_token); // Fetch latest data for snapshot comparison
-          const changedItem = filterData(snapshotData || [], nowSnapShot.data || []);
-          try {
-              if (changedItem) {
-              toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
-              setMonHocDaDiemDanh(changedItem.TenMonHoc)
-            } else {
-              toast.success(
-                `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-              );
-          }
-
-          } catch (e) {
-            toast.success(
-                `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-              );
-              console.log("Lỗi khi hiển thị thông báo môn học đã điểm danh: ", e);
-          }
-          
-        }
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.toLowerCase() === "failed to fetch") {
-            toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối");
-          } else {
-            toast.error(
-              "Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME"
-            );
-          }
-        }
+      if (scanned.startsWith("http")) {
+        window.open(scanned)
+        return
       }
-    } else if (SUBSTR === "LGN") {
-      // Fetch users before login
-      multiSessionService.getAllUsers().then(async (existingUsers) => {
-        setUsersList(existingUsers)
-        
-        // Perform login
-        const newUser = await authService.send_login(scanned)
-        
-        if (newUser) {
-          // Fetch updated users list after login
-          const updatedUsers = await multiSessionService.getAllUsers()
-          setUsersList(updatedUsers)
-          setNewlyAddedUser(newUser)
-          setShowUserListAnimation(true)
-          setIsSuccess(true)
-          setIsLoginQR(true)
-          
-          // Hide animation after 4 seconds
-          setTimeout(() => {
-            setShowUserListAnimation(false)
-            setNewlyAddedUser(null)
-          }, 4000)
-          
-          toast.success("Đăng nhập thành công")
-        }
-      }).catch((error) => {
-        if (error instanceof Error) {
-          setError(error.message)
-        }
+
+      const access_token = localStorage.getItem("access_token")
+      if (!access_token) {setError("Đăng nhập để sử dụng"); return}
+      // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) hoặc LIB (điểm danh sử dụng phòng thư viện) thì nổ lỗi
+      const SUBSTR = scanned.substring(0,3)
+      if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN" && SUBSTR !== "LIB") {
+        setError("QR này không được hỗ trợ...")
+        return
+      }
+
+      qrScanner?.pause()
+      .then(() => {console.log("Tạm dừng camera vì đã tìm thấy QR phù hợp")})
+      .catch((error) => {
+        console.log("Thất bại trong việc nỗ lực dừng camera" + error)
       })
-    } else if (SUBSTR === "LIB") {
-      try {
-        const res = await ApiService.elib_scanCode(scanned, access_token)
-        if (!res) return
 
-        if (!res.success) {
-          const errorMessage = String(res.error)
-          setError(errorMessage)
-        }
-        else { 
-          setIsSuccess(true)
-          toast.success(`Quét mã thư viện thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
-        }
+      if (SUBSTR === "STB") {
+        try {
+          const res = await ApiService.send_diem_danh(scanned, access_token);
+          if (!res) return;
 
-      } catch (error) {
-        if (error instanceof Error) {
-          if (error.message.toLowerCase() === "failed to fetch") {
-            toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
+          if (!res.success) {
+            const errorMessage = String(res.error);
+            setError(errorMessage);
+            // Check if it's an expired QR code error
+            if (
+              errorMessage.includes("Mã QR điểm danh đã hết hạn") ||
+              errorMessage.includes("hết hạn")
+            ) {
+              setIsExpiredQR(true);
+              setDialogExpiredQROpen(true);
+              toast.error("⚠️ Mã QR điểm danh đã hết hạn!", {
+                duration: 5000,
+                style: {
+                  background: "#ef4444",
+                  color: "#fff",
+                  fontWeight: "bold",
+                },
+              });
+            } else {
+              setIsExpiredQR(false);
+              setDialogExpiredQROpen(false);
+            }
+          } else {
+            setIsSuccess(true);
+            setIsExpiredQR(false);
+            const nowSnapShot = await ApiService.get_lms_diem_danh(access_token); // Fetch latest data for snapshot comparison
+            const changedItem = filterData(snapshotData || [], nowSnapShot.data || []);
+            try {
+                if (changedItem) {
+                toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
+                setMonHocDaDiemDanh(changedItem.TenMonHoc)
+              } else {
+                toast.success(
+                  `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+                );
+            }
+
+            } catch (e) {
+              toast.success(
+                  `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
+                );
+                console.log("Lỗi khi hiển thị thông báo môn học đã điểm danh: ", e);
+            }
+            
           }
-          else {
-            toast.error("Đã xảy ra lỗi không mong muốn, hãy thử lại")
+        } catch (error) {
+          if (error instanceof Error) {
+            if (error.message.toLowerCase() === "failed to fetch") {
+              toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối");
+            } else {
+              toast.error(
+                "Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME"
+              );
+            }
           }
         }
-      }
+      } else if (SUBSTR === "LGN") {
+        // Fetch users before login
+        multiSessionService.getAllUsers().then(async (existingUsers) => {
+          setUsersList(existingUsers)
+          
+          // Perform login
+          const newUser = await authService.send_login(scanned)
+          
+          if (newUser) {
+            // Fetch updated users list after login
+            const updatedUsers = await multiSessionService.getAllUsers()
+            setUsersList(updatedUsers)
+            setNewlyAddedUser(newUser)
+            setShowUserListAnimation(true)
+            setIsSuccess(true)
+            setIsLoginQR(true)
+            
+            // Hide animation after 4 seconds
+            setTimeout(() => {
+              setShowUserListAnimation(false)
+              setNewlyAddedUser(null)
+            }, 4000)
+            
+            toast.success("Đăng nhập thành công")
+          }
+        }).catch((error) => {
+          if (error instanceof Error) {
+            setError(error.message)
+          }
+        })
+      } else if (SUBSTR === "LIB") {
+        try {
+          const res = await ApiService.elib_scanCode(scanned, access_token)
+          if (!res) return
+
+          if (!res.success) {
+            const errorMessage = String(res.error)
+            setError(errorMessage)
+          }
+          else { 
+            setIsSuccess(true)
+            toast.success(`Quét mã thư viện thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`)
+          }
+
+        } catch (error) {
+          if (error instanceof Error) {
+            if (error.message.toLowerCase() === "failed to fetch") {
+              toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
+            }
+            else {
+              toast.error("Đã xảy ra lỗi không mong muốn, hãy thử lại")
+            }
+          }
+        }
     }}
 
     useScanned();
