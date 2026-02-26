@@ -228,7 +228,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
       ]}
       components={{
         pre({ children }) {
-          return <pre className="bg-muted p-2 rounded overflow-auto dark:bg-muted/20">{children}</pre>;
+          return <pre className="bg-muted p-2 rounded overflow-x-auto text-xs sm:text-sm dark:bg-muted/20">{children}</pre>;
         },
         code( props ) {
           const {children, className, node, ...rest} = props
@@ -242,7 +242,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
             setTimeout(() => setCopied(false), 1500);
           }
           return match ? (
-            <div className="relative group rounded-xl overflow-hidden border border-zinc-200 dark:border-zinc-700 bg-zinc-900/90 dark:bg-zinc-900 shadow-md">
+            <div className="relative group rounded-xl overflow-x-auto border border-zinc-200 dark:border-zinc-700 bg-zinc-900/90 dark:bg-zinc-900 shadow-md">
 
               <div className="flex items-center justify-between px-4 py-2 text-xs 
                               bg-zinc-800/80 backdrop-blur border-b rounded-md border-zinc-700">
@@ -268,7 +268,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
                 children={code}
                 language={match[1]}
                 style={atomDark}
-                className="!bg-transparent !p-4 text-sm"
+                className="!bg-transparent !p-3 sm:!p-4 text-xs sm:text-sm"
               />
             </div>
             
@@ -280,9 +280,11 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
         },                              
         table({ children }) {
           return (
-              <Table className="w-full">
+            <div className="overflow-x-auto w-full my-2">
+              <Table className="w-full min-w-[400px]">
                 {children}
               </Table>
+            </div>
           );
         },
         thead({ children }) {
@@ -290,14 +292,14 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
         },
         th({ children }) {
           return (
-            <TableHead className="px-4 py-2 border font-semibold  bg-purple-400 dark:bg-green-600 text-black dark:text-white">
+            <TableHead className="px-3 py-2 border font-semibold text-xs sm:text-sm bg-purple-400 dark:bg-green-600 text-black dark:text-white">
               {children}
             </TableHead>
           );
         },
         td({ children }) {
           return (
-            <TableCell className="px-4 py-2 border align-top">
+            <TableCell className="px-3 py-2 border align-top text-xs sm:text-sm">
               {children}
             </TableCell>
           );
@@ -306,7 +308,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
           return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
         },
         h2: ({ children }) => (
-          <h2 className="mt-8 mb-4 text-2xl font-bold tracking-tight border-b pb-2">
+          <h2 className="mt-5 mb-3 text-lg sm:text-2xl font-bold tracking-tight border-b pb-2">
             {children}
           </h2>
         ),
@@ -1105,7 +1107,7 @@ const ChatbotUI = () => {
                         </span>
                       </button>
                       {expandedToolCalls[message.id] && (
-                        <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-sm">
+                        <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-xs sm:text-sm">
                           {message.parts.map((part, idx) =>
                             part.type.startsWith('tool-') ? (
                               <div key={idx}>
@@ -1116,7 +1118,7 @@ const ChatbotUI = () => {
                                     Sử dụng công cụ {' '}
                                     {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() ||
                                       part.type}
-                                    <pre>{/* @ts-expect-error "This work btw" */
+                                    <pre className="mt-1 overflow-x-auto text-xs bg-muted/40 rounded p-2">{/* @ts-expect-error "This work btw" */
                                     JSON.stringify(part.output, null, 2)}</pre>
                                   </div>
                                 )}
@@ -1139,10 +1141,10 @@ const ChatbotUI = () => {
 
                   {/* Message Content */}
                   <div
-                    className={`px-4 py-3 overflow-auto rounded-md  ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : ''}`} 
+                    className={`px-3 py-2.5 sm:px-4 sm:py-3 overflow-auto rounded-md ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : ''}`} 
                     style={{ wordBreak: 'break-word' }}
                   >
-                    <div className="text-gray-800 leading-relaxed break-words dark:text-gray-100">
+                    <div className="text-sm sm:text-base text-gray-800 leading-relaxed break-words dark:text-gray-100">
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
                           <Message key={index} message={message} index={index} Part={Part} />
