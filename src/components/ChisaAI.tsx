@@ -1003,7 +1003,7 @@ const ChatbotUI = () => {
       </div>
 
       {/* Messages Container */}
-      <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto px-4 py-6">
+      <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {chatSwitchLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm dark:bg-slate-950/60">
             <Card className="w-full max-w-sm rounded-2xl shadow-lg">
