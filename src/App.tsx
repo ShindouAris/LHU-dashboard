@@ -184,7 +184,7 @@ function App() {
         } />
         <Route path="/chisaAI/*" element={
           <Suspense fallback={<LoadingScreen loading={true} />}>
-            <div className="py-8 px-4">
+            <div className="md:py-8 md:px-4">
               <ChisaAI />
             </div>
           </Suspense>
