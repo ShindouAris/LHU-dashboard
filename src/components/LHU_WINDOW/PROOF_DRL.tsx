@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Progress } from '@/components/ui/progress';
 import { drlService } from '@/services/diemrenluyenService';
 import { FileItem, LinkItem } from '@/types/drl';
 import toast from 'react-hot-toast';
@@ -22,7 +23,6 @@ import { Empty,  EmptyContent,
   EmptyTitle, } from '../ui/empty';
 import { Link } from 'react-router-dom';
 import { LoadingScreen } from '../LHU_UI/LoadingScreen';
-
 export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | null; onClose: () => void;}) => {
   const [files, setFiles] = useState<FileItem[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([]);
@@ -40,6 +40,9 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
   const [STT, setSTT] = useState<number | null>(null);
 
   const [loading, setLoading] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadingFileName, setUploadingFileName] = useState<string>("");
   const inputRef = useRef<HTMLInputElement>(null);
 
 
@@ -87,19 +90,40 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
     }
   }, []);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = event.target.files;
     if (uploadedFiles && hoatdongID !== null) {
-      Array.from(uploadedFiles).forEach(async (file) => {
-        try {
-          await drlService.uploadFile(file, hoatdongID);
-          toast.success(`Tải lên tập tin ${file.name} thành công`);
-          await fetchData(); // Làm mới danh sách tập tin sau khi tải lên
-        } catch (error) {
-          console.error("Error uploading file:", error);
-          toast.error(`Tải lên tập tin ${file.name} thất bại`);
+      const fileList = Array.from(uploadedFiles);
+      try {
+        setIsUploading(true);
+        setUploadProgress(0);
+        for (let index = 0; index < fileList.length; index++) {
+          const file = fileList[index];
+          setUploadingFileName(file.name);
+          try {
+            await drlService.uploadFile(file, hoatdongID, (fileProgress) => {
+              const totalProgress = Math.round(((index + (fileProgress / 100)) / fileList.length) * 100);
+              setUploadProgress(totalProgress);
+            });
+            toast.success(`Tải lên tập tin ${file.name} thành công`);
+          } catch (error) {
+            console.error("Error uploading file:", error);
+            toast.error(`Tải lên tập tin ${file.name} thất bại`);
+          }
         }
-      });
+
+        setUploadingFileName("");
+        setUploadProgress(100);
+        await fetchData();
+      } finally {
+        setIsUploading(false);
+        setUploadProgress(0);
+        setUploadingFileName("");
+
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
+      }
     }
   };
 
@@ -296,6 +320,16 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
               />
             </div>
           </div>
+
+          {isUploading && (
+            <div className="px-6 py-3 border-b dark:border-gray-800">
+              <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 mb-2">
+                <span className="truncate mr-4">Đang tải lên: {uploadingFileName}</span>
+                <span>{uploadProgress}%</span>
+              </div>
+              <Progress value={uploadProgress} className="h-2" />
+            </div>
+          )}
 
           <Table>
             <TableHeader>

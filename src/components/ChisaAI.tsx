@@ -14,9 +14,7 @@ import remarkBreak from 'remark-breaks'
 import remarkToc from 'remark-toc'
 import "katex/dist/katex.min.css";
 import { Avatar } from './ui/avatar';
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
 import remarkMath from 'remark-math'
-import {atomDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
 import { PromptInput, PromptInputSubmit, PromptInputTextarea } from './ai-elements/prompt-input';
 import {
   ModelSelector,
@@ -54,6 +52,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { CodeBlock } from './infsh/code-block';
 const API = import.meta.env.VITE_API_URL;
 
 type ChisaAIChatSummary = {
@@ -233,44 +232,41 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
         code( props ) {
           const {children, className, node, ...rest} = props
           const match = /language-(\w+)/.exec(className || '')
-          const [copied, setCopied] = useState(false);
           const code = String(children).replace(/\n$/, '');
 
-          const handleCopy = () => {
-            navigator.clipboard.writeText(code);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 1500);
-          }
           return match ? (
-            <div className="relative group rounded-xl overflow-x-auto border border-zinc-200 dark:border-zinc-700 bg-zinc-900/90 dark:bg-zinc-900 shadow-md">
+            // <div className="relative group rounded-xl overflow-x-auto border border-zinc-200 dark:border-zinc-700 bg-zinc-900/90 dark:bg-zinc-900 shadow-md">
 
-              <div className="flex items-center justify-between px-4 py-2 text-xs 
-                              bg-zinc-800/80 backdrop-blur border-b rounded-md border-zinc-700">
-                <span className="font-mono text-zinc-300">
-                  {match[1]}
-                </span>
+            //   <div className="flex items-center justify-between px-4 py-2 text-xs 
+            //                   bg-zinc-800/80 backdrop-blur border-b rounded-md border-zinc-700">
+            //     <span className="font-mono text-zinc-300">
+            //       {match[1]}
+            //     </span>
 
-                <button
-                  onClick={handleCopy}
-                  type="button"
-                  className="px-2 py-1 rounded-sm text-xs font-medium
-                            bg-purple-600/80 hover:bg-purple-600
-                            transition-all duration-200
-                            text-white opacity-0 group-hover:opacity-100"
-                >
-                  {copied ? "✓ Đã sao chép!" : "Copy"}
-                </button>
-              </div>
+            //     <button
+            //       onClick={handleCopy}
+            //       type="button"
+            //       className="px-2 py-1 rounded-sm text-xs font-medium
+            //                 bg-purple-600/80 hover:bg-purple-600
+            //                 transition-all duration-200
+            //                 text-white opacity-0 group-hover:opacity-100"
+            //     >
+            //       {copied ? "✓ Đã sao chép!" : "Copy"}
+            //     </button>
+            //   </div>
 
-              {/* Code body */}
-              <SyntaxHighlighter
-                PreTag="div"
-                children={code}
-                language={match[1]}
-                style={atomDark}
-                className="!bg-transparent !p-3 sm:!p-4 text-xs sm:text-sm"
-              />
-            </div>
+            //   {/* Code body */}
+            //   <SyntaxHighlighter
+            //     PreTag="div"
+            //     children={code}
+            //     language={match[1]}
+            //     style={atomDark}
+            //     className="!bg-transparent !p-3 sm:!p-4 text-xs sm:text-sm"
+            //   />
+            // </div>
+            <CodeBlock language={match[1]}>
+              {code}
+            </CodeBlock>
             
           ) : (
             <code {...rest} className={className}>

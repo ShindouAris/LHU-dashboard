@@ -1,5 +1,6 @@
 import { FileResponseGeneralPublic, GeneralPublic_UserResponse, LinkResponseGeneralPublic, UserStatistics } from "@/types/drl";
 import { AuthStorage } from "@/types/user";
+import axios from "axios";
 
 const TAPI = import.meta.env.VITE_LHU_TAPI
 
@@ -217,7 +218,7 @@ export const drlService = {
             throw error
         }
     },
-    uploadFile: async (file: File, activityId: number) => {
+    uploadFile: async (file: File, activityId: number, onProgress?: (progress: number) => void) => {
         const access_token = AuthStorage.getUserToken()
         if (access_token === null) {
             throw new Error("Chứng thực của bạn đã hết hạn")
@@ -229,18 +230,22 @@ export const drlService = {
         formData.append("file", file);
         formData.append('name', file.name);
         try {
-            const res = await fetch(`https://file.lhu.edu.vn/GeneralPublic/upload/MinhChung/2/${activityId}`, {
-                method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${access_token}`,
-                    'Uploaddata': uploadMS.toString()
-                },
-                body: formData
-            })
-            if (!res.ok) {
-                throw new Error("Tải lên thất bại")
-            }
-            return await res.json()
+            const response = await axios.post(
+                `https://file.lhu.edu.vn/GeneralPublic/upload/MinhChung/2/${activityId}`,
+                formData,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${access_token}`,
+                        'Uploaddata': uploadMS.toString()
+                    },
+                    onUploadProgress: (progressEvent) => {
+                        if (!onProgress || !progressEvent.total) return;
+                        const progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        onProgress(progress);
+                    }
+                }
+            )
+            return response.data
         } catch (error) {
             throw error
         }
