@@ -272,7 +272,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     };
   
     return (
-      <div className={`${getPaddingClass()} hover:scale-105 transition-transform duration-200`}>
+      <div className={`${getPaddingClass()} transition-transform duration-200`}>
         <div className={`font-semibold mb-1 line-clamp-2 text-white ${getTitleClass()}`}>
           {(() => {
             if (isExam) {
