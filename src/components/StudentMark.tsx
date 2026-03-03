@@ -449,10 +449,10 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           <div className="p-4">
             <strong className='text-red-500 font-semibold text-xl'>{errorDialog}</strong>
           </div>
-        </DialogContent>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setDialogOpen(false)}>Đóng</Button>
         </DialogFooter>
+        </DialogContent>
       </Dialog>
     </div>
   );
