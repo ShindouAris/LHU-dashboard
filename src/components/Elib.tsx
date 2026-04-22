@@ -279,18 +279,33 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
             />
           )}
 
-          {booking.ThietBi && booking.ThietBi.length > 0 && (
-            <div className="mt-3">
-              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Thiết bị mượn:</div>
-              <div className="flex flex-wrap gap-2">
-                {booking.ThietBi.map((tb, idx) => (
-                  <span key={idx} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
-                    {tb.TenThietBi}
-                  </span>
-                ))}
+          {(() => {
+            const thietBiList: Array<{ TenThietBi: string }> = (() => {
+              if (!booking.ThietBi) return [];
+              if (Array.isArray(booking.ThietBi)) return booking.ThietBi as any;
+              try {
+                const parsed = JSON.parse(booking.ThietBi as unknown as string);
+                return Array.isArray(parsed) ? parsed : [];
+              } catch {
+                return [];
+              }
+            })();
+
+            if (thietBiList.length === 0) return null;
+
+            return (
+              <div className="mt-3">
+                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Thiết bị mượn:</div>
+                <div className="flex flex-wrap gap-2">
+                  {thietBiList.map((tb, idx) => (
+                    <span key={idx} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                      {tb.TenThietBi}
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         <div className="p-4 flex md:flex-col gap-2 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700">
