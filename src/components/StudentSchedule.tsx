@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { ExamCard } from './LHU_UI/ExamCard';
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
-import { CalendarDays, User, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode } from 'lucide-react';
+import { CalendarDays, User, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode, CloudSun, Car, Award, Library, Wrench, ClipboardList } from 'lucide-react';
 import GradientText from './ui/GradientText';
 
 
@@ -118,13 +118,13 @@ export const StudentSchedule: React.FC = () => {
     {
       id: "diemdanh",
       label: "Điểm danh",
-      icon: PiExamDuotone,
+      icon: ClipboardList,
       description: "Xem thông tin điểm danh (cần đăng nhập)",
       path: "/diemdanh"
     },
     {
       id: "mark",
-      label: "Xem điểm thi", 
+      label: "Điểm thi",
       icon: PiExamDuotone,
       description: "Xem điểm thi của bạn (cần đăng nhập)",
       path: "/mark"
@@ -135,6 +135,41 @@ export const StudentSchedule: React.FC = () => {
       icon: QrCode,
       description: "Quét QR điểm danh cho lớp của bạn (cần đăng nhập)",
       path: "/qrscan"
+    },
+    {
+      id: "diemrenluyen",
+      label: "Rèn luyện",
+      icon: Award,
+      description: "Xem điểm rèn luyện",
+      path: "/diemrenluyen"
+    },
+    {
+      id: "thuvien",
+      label: "Thư viện",
+      icon: Library,
+      description: "Truy cập thư viện",
+      path: "/thuvien"
+    },
+    {
+      id: "parking",
+      label: "Bãi xe",
+      icon: Car,
+      description: "Thông tin bãi xe",
+      path: "/parking"
+    },
+    {
+      id: "weather",
+      label: "Thời tiết",
+      icon: CloudSun,
+      description: "Xem thời tiết",
+      path: "/weather"
+    },
+    {
+      id: "toollhu",
+      label: "Tools",
+      icon: Wrench,
+      description: "Công cụ tiện ích",
+      path: "/toollhu"
     }
   ];
 
@@ -497,25 +532,28 @@ export const StudentSchedule: React.FC = () => {
             </div>
           </CardHeader>
           
-            <CardContent className="relative text-center">
-              <span className="relative text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
-                Quick Actions
-                <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6 mt-3">
+            <CardContent className="relative">
+              <div className="flex items-center justify-center mb-3">
+                <span className="relative text-xl sm:text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
+                  Quick Actions
+                  <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
+                </span>
+              </div>
+              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3">
                 {
-                user && user.UserID === currentStudentId && 
+                user && user.UserID === currentStudentId &&
                 quickNavigationItems.map((item) => {
                   return (
                   <Button
                     key={item.id}
                     variant="outline"
                     size="sm"
+                    title={item.description}
                     onClick={() => navigate(item.path)}
-                    className="w-full hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex flex-col items-center justify-center gap-1 p-2 min-h-[80px] md:p-4 md:min-h-[100px] md:size-lg"
+                    className="h-auto w-full hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex flex-col items-center justify-center gap-1 px-1 py-2 sm:py-3 aspect-square sm:aspect-auto"
                     >
-                    <item.icon className="h-5 w-5 md:h-6 md:w-6" />
-                    <span className="font-medium text-xs md:text-sm">{item.label}</span>
+                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                    <span className="font-medium text-[10px] sm:text-xs leading-tight text-center truncate w-full">{item.label}</span>
                     </Button>
                   )
                 })
