@@ -496,7 +496,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
                             label="Thời tiết"
                             value={
                                 <span className="text-muted-foreground italic">
-                                    Chưa có dữ liệu
+                                    —
                                 </span>
                             }
                         />
