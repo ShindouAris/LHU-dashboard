@@ -201,13 +201,13 @@ function MinhChungUploader({
                     {files.map((f) => (
                         <div
                             key={f.FileID}
-                            className="flex items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                            className="flex items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 min-w-0"
                         >
                             <a
                                 href={drlService.getMinhChungPreviewUrl(f.FileID)}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-2 min-w-0 text-blue-600 dark:text-blue-300 hover:underline"
+                                className="flex items-center gap-2 min-w-0 flex-1 text-blue-600 dark:text-blue-300 hover:underline"
                                 title={f.FileName}
                             >
                                 <FileText className="h-4 w-4 flex-shrink-0" />
@@ -216,7 +216,7 @@ function MinhChungUploader({
                             <button
                                 type="button"
                                 onClick={() => removeFile(f.FileID)}
-                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-300 rounded transition-colors"
+                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-300 rounded transition-colors shrink-0"
                                 title="Xoá"
                             >
                                 <X className="h-4 w-4" />
@@ -467,8 +467,8 @@ const DiemRL: React.FC = () => {
                     placeholder="Nhập tên tổ chức"
                 />
             </div>
-            <div className="flex flex-wrap gap-4">
-                <div className="flex-1 min-w-[180px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div className="min-w-0">
                     <label className="block text-sm font-medium mb-1">Từ ngày</label>
                     <DayPicker
                         open={fromOpen}
@@ -482,7 +482,7 @@ const DiemRL: React.FC = () => {
                         maxDate={periodMax}
                     />
                 </div>
-                <div className="flex-1 min-w-[180px]">
+                <div className="min-w-0">
                     <label className="block text-sm font-medium mb-1">Đến ngày</label>
                     <DayPicker
                         open={toOpen}
@@ -503,10 +503,10 @@ const DiemRL: React.FC = () => {
     );
 
     return (
-        <div className="min-h-screen p-4 sm:p-6">
+        <div className="min-h-screen p-3 sm:p-4 md:p-6">
             {/* ===== Create Dialog ===== */}
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
                         <DialogTitle>Khai báo hoạt động ngoài trường</DialogTitle>
                         <DialogDescription>
@@ -537,7 +537,7 @@ const DiemRL: React.FC = () => {
 
             {/* ===== Edit Dialog ===== */}
             <Dialog open={editOpen} onOpenChange={setEditOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="w-[calc(100vw-1.5rem)] max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
                     <DialogHeader>
                         <DialogTitle>Cập nhật hoạt động</DialogTitle>
                         <DialogDescription>
@@ -564,7 +564,7 @@ const DiemRL: React.FC = () => {
 
             {/* ===== Delete Dialog ===== */}
             <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
-                <DialogContent>
+                <DialogContent className="w-[calc(100vw-1.5rem)] max-w-md p-4 sm:p-6">
                     <DialogHeader>
                         <DialogTitle>Xác nhận xoá hoạt động</DialogTitle>
                     </DialogHeader>
@@ -585,37 +585,39 @@ const DiemRL: React.FC = () => {
             {/* ===== Main content ===== */}
             <div className="max-w-7xl mx-auto">
                 {/* Header card */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-none p-6 mb-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-none p-4 sm:p-6 mb-4 sm:mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                        <div className="min-w-0 flex-1">
+                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
                                 PHỤC VỤ CỘNG ĐỒNG
                             </h1>
-                            <p className="text-base text-gray-700 dark:text-gray-200">
+                            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-200 break-words">
                                 <span className="font-semibold">Họ tên:</span> {user?.FullName}
                             </p>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-all">
                                 <span className="font-semibold">Mã:</span> {user?.UserID}
                             </p>
                             {hocKyInfo?.HocKy && hocKyInfo?.Nam && (
-                                <p className="mt-2 text-sm text-blue-600 dark:text-blue-300 inline-flex items-center gap-1">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    Học kỳ {hocKyInfo.HocKy} | {hocKyInfo.Nam}
+                                <div className="mt-2 text-xs sm:text-sm text-blue-600 dark:text-blue-300 flex items-center flex-wrap gap-x-2 gap-y-1">
+                                    <span className="inline-flex items-center gap-1">
+                                        <CalendarIcon className="h-4 w-4" />
+                                        Học kỳ {hocKyInfo.HocKy} | {hocKyInfo.Nam}
+                                    </span>
                                     {periodMin && periodMax && (
-                                        <span className="text-gray-500 ml-2">
+                                        <span className="text-gray-500">
                                             ({fmt(hocKyInfo.TuNgay)} - {fmt(hocKyInfo.DenNgay)})
                                         </span>
                                     )}
-                                </p>
+                                </div>
                             )}
                         </div>
                         <button
                             onClick={openCreate}
                             disabled={!isPeriodOpen}
-                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-5 py-3 rounded-lg font-medium transition-colors"
+                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-colors w-full sm:w-auto shrink-0"
                         >
                             <Plus size={20} />
-                            <span className="hidden sm:block">Khai báo hoạt động</span>
+                            <span>Khai báo hoạt động</span>
                         </button>
                     </div>
                 </div>
@@ -631,22 +633,22 @@ const DiemRL: React.FC = () => {
                 )}
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Tổng điểm</div>
-                        <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tổng điểm</div>
+                        <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                             {tongDiem}
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Điểm trong trường</div>
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Trong trường</div>
+                        <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
                             {diemTrongTruong}
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4">
-                        <div className="text-sm text-gray-600 dark:text-gray-300">Điểm SV tự khai báo</div>
-                        <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tự khai báo</div>
+                        <div className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400">
                             {diemNgoaiTruong}
                         </div>
                     </div>
@@ -654,12 +656,18 @@ const DiemRL: React.FC = () => {
 
                 {/* Tabs */}
                 <Tabs value={tab} onValueChange={(v) => setTab(v as 'trong' | 'ngoai')}>
-                    <TabsList className="grid w-full grid-cols-2 mb-4">
-                        <TabsTrigger value="trong">
-                            Trong trường ({trongTruong.length} HĐ - {diemTrongTruong} điểm)
+                    <TabsList className="grid w-full grid-cols-2 mb-4 h-auto">
+                        <TabsTrigger value="trong" className="flex flex-col sm:flex-row sm:gap-1 py-2 text-xs sm:text-sm whitespace-normal">
+                            <span className="font-medium">Trong trường</span>
+                            <span className="text-[10px] sm:text-xs opacity-80">
+                                ({trongTruong.length} HĐ - {diemTrongTruong}đ)
+                            </span>
                         </TabsTrigger>
-                        <TabsTrigger value="ngoai">
-                            SV tự khai báo ({ngoaiTruong.length} HĐ - {diemNgoaiTruong} điểm)
+                        <TabsTrigger value="ngoai" className="flex flex-col sm:flex-row sm:gap-1 py-2 text-xs sm:text-sm whitespace-normal">
+                            <span className="font-medium">SV tự khai báo</span>
+                            <span className="text-[10px] sm:text-xs opacity-80">
+                                ({ngoaiTruong.length} HĐ - {diemNgoaiTruong}đ)
+                            </span>
                         </TabsTrigger>
                     </TabsList>
 
@@ -671,35 +679,35 @@ const DiemRL: React.FC = () => {
                                 <div>Chưa có hoạt động nào</div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                 {trongTruong.map((item) => (
                                     <div
                                         key={item.HoatDongID}
-                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
+                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1">
+                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0 break-words text-sm sm:text-base">
                                                 {item.TenChuongTrinh}
                                             </div>
-                                            <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-semibold">
+                                            <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-semibold shrink-0 whitespace-nowrap">
                                                 {item.Diem} điểm
                                             </Badge>
                                         </div>
                                         {item.TenToChuc && (
-                                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                                            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
                                                 🏢 {item.TenToChuc}
                                             </div>
                                         )}
                                         {item.ViTri && (
-                                            <div className="text-sm text-gray-600 dark:text-gray-300">
+                                            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
                                                 📍 {item.ViTri}
                                             </div>
                                         )}
-                                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
                                             📅 {fmt(item.TuNgay)} - {fmt(item.DenNgay)}
                                         </div>
                                         {item.HocKy && item.Nam && (
-                                            <div className="text-xs text-gray-500 mt-1">
+                                            <div className="text-[11px] sm:text-xs text-gray-500 mt-1">
                                                 🎓 HK{item.HocKy} - {item.Nam}
                                             </div>
                                         )}
@@ -712,10 +720,10 @@ const DiemRL: React.FC = () => {
                     {/* ===== Ngoài trường ===== */}
                     <TabsContent value="ngoai">
                         {/* Status filter */}
-                        <div className="flex flex-wrap gap-2 mb-4">
+                        <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 mb-4">
                             <button
                                 onClick={() => setStatusFilter('pending')}
-                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
                                     statusFilter === 'pending'
                                         ? 'bg-yellow-500 text-white'
                                         : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200'
@@ -725,7 +733,7 @@ const DiemRL: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => setStatusFilter('approved')}
-                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
                                     statusFilter === 'approved'
                                         ? 'bg-green-600 text-white'
                                         : 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200'
@@ -735,7 +743,7 @@ const DiemRL: React.FC = () => {
                             </button>
                             <button
                                 onClick={() => setStatusFilter('rejected')}
-                                className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
                                     statusFilter === 'rejected'
                                         ? 'bg-red-600 text-white'
                                         : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200'
@@ -751,25 +759,27 @@ const DiemRL: React.FC = () => {
                                 <div>Không có hoạt động nào</div>
                             </div>
                         ) : (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                 {filteredNgoai.map((item) => (
                                     <div
                                         key={item.HoatDongID}
-                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
+                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1">
+                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0 break-words text-sm sm:text-base">
                                                 {item.TenChuongTrinh}
                                             </div>
-                                            <NgoaiTruongStatusChip
-                                                status={item.TinhTrang}
-                                                label={item.TenTinhTrang}
-                                            />
+                                            <div className="shrink-0">
+                                                <NgoaiTruongStatusChip
+                                                    status={item.TinhTrang}
+                                                    label={item.TenTinhTrang}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="text-sm text-gray-600 dark:text-gray-300">
+                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
                                             🏢 {item.TenToChuc}
                                         </div>
-                                        <div className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
                                             📅 {fmt(item.TuNgay)} - {fmt(item.DenNgay)}
                                         </div>
                                         <div className="flex items-center gap-2 mt-2">
@@ -794,11 +804,11 @@ const DiemRL: React.FC = () => {
                                                                 )}
                                                                 target="_blank"
                                                                 rel="noreferrer"
-                                                                className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs text-blue-600 dark:text-blue-300"
+                                                                className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs text-blue-600 dark:text-blue-300 max-w-full"
                                                                 title={mc.FileName}
                                                             >
-                                                                <ExternalLink className="h-3 w-3" />
-                                                                <span className="truncate max-w-[160px]">
+                                                                <ExternalLink className="h-3 w-3 shrink-0" />
+                                                                <span className="truncate max-w-[140px] sm:max-w-[160px]">
                                                                     {mc.FileName}
                                                                 </span>
                                                             </a>
@@ -812,7 +822,7 @@ const DiemRL: React.FC = () => {
                                             <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
                                                 <button
                                                     onClick={() => openEdit(item)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-lg text-sm font-medium transition-colors"
+                                                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-lg text-sm font-medium transition-colors"
                                                     title="Chỉnh sửa"
                                                 >
                                                     <Edit2 size={14} />
@@ -820,7 +830,7 @@ const DiemRL: React.FC = () => {
                                                 </button>
                                                 <button
                                                     onClick={() => openDelete(item.HoatDongID)}
-                                                    className="flex items-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-lg text-sm font-medium transition-colors"
+                                                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-lg text-sm font-medium transition-colors"
                                                     title="Xoá"
                                                 >
                                                     <Trash2 size={14} />
