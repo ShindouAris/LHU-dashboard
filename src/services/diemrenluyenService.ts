@@ -211,7 +211,7 @@ export const drlService = {
 
         try {
             const response = await axios.post(
-                `https://file.lhu.edu.vn/GeneralPublic/upload/MinhChung/2/0`,
+                `https://file.lhu.edu.vn/GeneralPublic/UPLOAD/v2_FileMinhChung/3`,
                 formData,
                 {
                     headers: {
