@@ -4,6 +4,12 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { ScheduleItem, ExamInfo } from '@/types/schedule';
 import { getRealtimeStatus } from '@/utils/dateUtils';
 import { 
@@ -103,6 +109,8 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
   const isMobile = screenSize === 'mobile';
   const isTablet = screenSize === 'tablet';
   const isDesktop = screenSize === 'desktop';
+
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   const events: CalendarEvent[] = useMemo(() => {
     // Tùy theo includeCancelled mà lọc hay không
@@ -437,6 +445,23 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     );
   });
 
+  // Màu theo trạng thái dùng cho dialog header
+  const getEventColors = (event: CalendarEvent): [string, string] => {
+    const isExam = (event.resource as any).__isExam === true;
+    const status = getRealtimeStatus(event.start.toISOString(), event.end.toISOString());
+    const tinhTrangInfo = !isExam ? getTinhTrangInfo((event.resource as ScheduleWithMetadata).TinhTrang) : null;
+    const colorKey = isExam ? 'pastel-exam' : getStatusColor(status, tinhTrangInfo);
+    const colorMap: Record<string, [string, string]> = {
+      'pastel-ongoing':   ['#bbf7d0', '#14532d'],
+      'pastel-upcoming':  ['#bfdbfe', '#1e3a5f'],
+      'pastel-done':      ['#e5e7eb', '#374151'],
+      'pastel-cancelled': ['#fecaca', '#7f1d1d'],
+      'pastel-holiday':   ['#fbcfe8', '#831843'],
+      'pastel-exam':      ['#e0e7ff', '#1e1b4b'],
+    };
+    return colorMap[colorKey] ?? ['#ddd6fe', '#2e1065'];
+  };
+
   if (schedules.length === 0) {
     return (
       <Card className="text-center py-8 sm:py-16 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
@@ -525,8 +550,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
                 toolbar: ToolbarComponent,
               }}
               onSelectEvent={(event) => {
-                // Handle event selection for accessibility
-                console.log('Event selected:', event);
+                setSelectedEvent(event as CalendarEvent);
               }}
               onSelectSlot={(slotInfo) => {
                 // Handle slot selection for accessibility
@@ -573,6 +597,104 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           </div>
         </CardContent>
       </Card>
+
+      {/* Event Detail Dialog */}
+      <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}>
+        <DialogContent className="max-w-md w-[calc(100vw-2rem)] sm:w-full rounded-xl p-0 overflow-hidden gap-0">
+          {selectedEvent && (() => {
+            const isExam = (selectedEvent.resource as any).__isExam === true;
+            const schedule = selectedEvent.resource as ScheduleWithMetadata;
+            const exam = selectedEvent.resource as ExamInfo & { __isExam: true };
+            const status = getRealtimeStatus(selectedEvent.start.toISOString(), selectedEvent.end.toISOString());
+            const tinhTrangInfo = !isExam ? getTinhTrangInfo(schedule.TinhTrang) : null;
+            const statusText = isExam ? 'Kỳ thi' : getStatusText(status, tinhTrangInfo);
+            const [bgColor, textColor] = getEventColors(selectedEvent);
+
+            const formatDateTime = (date: Date) =>
+              date.toLocaleString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            const rows: { label: string; value: string | undefined; icon: string }[] = isExam ? [
+              { icon: '🏫', label: 'Phòng thi',    value: exam.PhongThi || exam.CSS },
+              { icon: '📋', label: 'Số báo danh',  value: exam.SoBaoDanh },
+              { icon: '📅', label: 'Ngày thi',     value: `${exam.NgayThi} — ${exam.GioThi}` },
+            ] : [
+              { icon: '👤', label: 'Giảng viên',   value: schedule.GiaoVien },
+              { icon: '🏫', label: 'Phòng học',    value: schedule.TenPhong || schedule.OnlineLink },
+              { icon: '📍', label: 'Cơ sở',        value: schedule.TenCoSo },
+              { icon: '🔗', label: 'Link online',  value: schedule.OnlineLink },
+            ];
+
+            return (
+              <>
+                {/* Header có màu theo trạng thái */}
+                <DialogHeader
+                  className="px-5 pt-5 pb-4"
+                  style={{ backgroundColor: bgColor, color: textColor }}
+                >
+                  <div className="flex items-start justify-between gap-3 pr-6">
+                    <div className="flex-1 min-w-0">
+                      <Badge
+                        className="mb-2 text-xs font-medium border-0"
+                        style={{ backgroundColor: `${textColor}20`, color: textColor }}
+                      >
+                        {statusText}
+                      </Badge>
+                      <DialogTitle
+                        className="text-base sm:text-lg font-bold leading-snug"
+                        style={{ color: textColor }}
+                      >
+                        {isExam ? exam.TenKT : `${schedule.TenMonHoc}`}
+                      </DialogTitle>
+                      {!isExam && (
+                        <p className="text-sm mt-1 font-medium opacity-80" style={{ color: textColor }}>
+                          {schedule.TenNhom}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </DialogHeader>
+
+                {/* Body */}
+                <div className="px-5 py-4 space-y-3">
+                  {/* Thời gian */}
+                  <div className="flex gap-3 items-start text-sm">
+                    <span className="text-base mt-0.5">🕐</span>
+                    <div>
+                      <p className="text-muted-foreground text-xs mb-0.5">Thời gian</p>
+                      <p className="font-medium text-foreground">{formatDateTime(selectedEvent.start)}</p>
+                      <p className="text-muted-foreground text-xs">đến {selectedEvent.end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</p>
+                    </div>
+                  </div>
+
+                  {/* Các trường thông tin */}
+                  {rows.filter(r => r.value).map(row => (
+                    <div key={row.label} className="flex gap-3 items-start text-sm">
+                      <span className="text-base mt-0.5">{row.icon}</span>
+                      <div className="min-w-0">
+                        <p className="text-muted-foreground text-xs mb-0.5">{row.label}</p>
+                        <p className="font-medium text-foreground break-words">{row.value}</p>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Google Maps link */}
+                  {!isExam && schedule.GoogleMap && (
+                    <a
+                      href={schedule.GoogleMap}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-1"
+                    >
+                      <span>🗺️</span>
+                      <span>Xem trên Google Maps</span>
+                    </a>
+                  )}
+                </div>
+              </>
+            );
+          })()}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 });
