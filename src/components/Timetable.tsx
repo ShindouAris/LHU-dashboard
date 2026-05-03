@@ -48,17 +48,17 @@ interface CalendarEvent {
 const getStatusColor = (status: number, tinhTrangInfo?: TinhTrangInfo | null) => {
   if (tinhTrangInfo) {
     if (tinhTrangInfo.type === 'holiday') {
-      return 'bg-pink-500';
+      return 'pastel-holiday';
     }
     if (tinhTrangInfo.type === 'cancelled' || tinhTrangInfo.type === 'special') {
-      return 'bg-red-500';
+      return 'pastel-cancelled';
     }
   }
   switch (status) {
-    case 1: return 'bg-green-500'; // Đang diễn ra
-    case 2: return 'bg-yellow-500'; // Sắp diễn ra
-    case 3: return 'bg-gray-400'; // Đã kết thúc
-    default: return 'bg-blue-500';
+    case 1: return 'pastel-ongoing';  // Đang diễn ra
+    case 2: return 'pastel-upcoming'; // Sắp diễn ra
+    case 3: return 'pastel-done';     // Đã kết thúc
+    default: return 'pastel-default';
   }
 };
 
@@ -188,24 +188,25 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     const scheduleResource = event.resource as ScheduleWithMetadata;
     const tinhTrangInfo = !isExam ? getTinhTrangInfo(scheduleResource.TinhTrang) : null;
     const is_duplicate = !isExam && scheduleResource.isDuplicate;
-    const color = isExam ? 'bg-indigo-600' : getStatusColor(status, tinhTrangInfo);
+    const color = isExam ? 'pastel-exam' : getStatusColor(status, tinhTrangInfo);
     
-    const getColorValue = (colorClass: string) => {
+    // [bg, textColor]
+    const getColorValue = (colorClass: string): [string, string] => {
       switch (colorClass) {
-        case 'bg-green-500': return '#10b981';
-        case 'bg-yellow-500': return '#f59e0b';
-        case 'bg-gray-400': return '#9ca3af';
-        case 'bg-red-500': return '#E62727';
-        case 'bg-indigo-600': return '#4f46e5';
-        case 'bg-pink-500': return '#FF8FB7'
-        default: return '#C47BE4';
+        case 'pastel-ongoing':   return ['#bbf7d0', '#14532d']; // xanh lá nhạt — đang diễn ra
+        case 'pastel-upcoming':  return ['#bfdbfe', '#1e3a5f']; // xanh dương nhạt — sắp diễn ra
+        case 'pastel-done':      return ['#e5e7eb', '#374151']; // xám nhạt — đã kết thúc
+        case 'pastel-cancelled': return ['#fecaca', '#7f1d1d']; // đỏ nhạt — báo nghỉ
+        case 'pastel-holiday':   return ['#fbcfe8', '#831843']; // hồng nhạt — nghỉ lễ
+        case 'pastel-exam':      return ['#e0e7ff', '#1e1b4b']; // tím nhạt — kỳ thi
+        default:                 return ['#ddd6fe', '#2e1065']; // tím mặc định
       }
     };
     
     const getFontSize = () => {
-      if (isMobile) return '10px';
-      if (isTablet) return '11px';
-      return '12px';
+      if (isMobile) return '12px';
+      if (isTablet) return '12px';
+      return '13px';
     };
     
     const getPadding = () => {
@@ -220,18 +221,19 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       return '6px';
     };
     
+    const [bgColor, textColor] = getColorValue(color);
     return {
       style: {
-        backgroundColor: getColorValue(color),
+        backgroundColor: bgColor,
         borderRadius: getBorderRadius(),
-        opacity: is_duplicate ? 0.8 : 0.9,
-        color: 'white',
-        border: is_duplicate ? '2px solid #f59e0b' : '0px',
+        opacity: is_duplicate ? 0.85 : 1,
+        color: textColor,
+        border: is_duplicate ? `2px solid ${textColor}` : `1px solid ${bgColor}`,
         display: 'block',
         fontSize: getFontSize(),
         fontWeight: '500',
         padding: getPadding(),
-        boxShadow: is_duplicate ? '0 2px 6px rgba(245, 158, 11, 0.3)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.08)',
         transition: 'all 0.2s ease-in-out',
       }
     };
@@ -247,15 +249,27 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     const tinhTrangInfo = !isExam ? getTinhTrangInfo(scheduleResource.TinhTrang) : null;
     const is_duplicate = !isExam && scheduleResource.isDuplicate;
     const statusText = isExam ? 'Kỳ thi' : getStatusText(status, tinhTrangInfo);
+
+    // Lấy màu text từ eventStyleGetter để đồng nhất
+    const colorKey = isExam ? 'pastel-exam' : getStatusColor(status, tinhTrangInfo);
+    const colorMap: Record<string, [string, string]> = {
+      'pastel-ongoing':   ['#bbf7d0', '#14532d'],
+      'pastel-upcoming':  ['#bfdbfe', '#1e3a5f'],
+      'pastel-done':      ['#e5e7eb', '#374151'],
+      'pastel-cancelled': ['#fecaca', '#7f1d1d'],
+      'pastel-holiday':   ['#fbcfe8', '#831843'],
+      'pastel-exam':      ['#e0e7ff', '#1e1b4b'],
+    };
+    const [bgColor, textColor] = colorMap[colorKey] ?? ['#ddd6fe', '#2e1065'];
     
     const getPaddingClass = () => {
-      if (isMobile) return 'p-0.5 text-xs';
-      if (isTablet) return 'p-0.75 text-xs';
+      if (isMobile) return 'p-1 text-xs';
+      if (isTablet) return 'p-1 text-xs';
       return 'p-1 text-sm';
     };
     
     const getTitleClass = () => {
-      if (isMobile) return 'text-xs leading-tight';
+      if (isMobile) return 'text-xs leading-snug';
       if (isTablet) return 'text-xs leading-snug';
       return 'text-sm leading-normal';
     };
@@ -266,14 +280,14 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     };
     
     const getMaxLength = () => {
-      if (isMobile) return 15;
-      if (isTablet) return 25;
+      if (isMobile) return 20;
+      if (isTablet) return 30;
       return 50;
     };
   
     return (
-      <div className={`${getPaddingClass()} transition-transform duration-200`}>
-        <div className={`font-semibold mb-1 line-clamp-2 text-white ${getTitleClass()}`}>
+      <div className={`${getPaddingClass()} transition-transform duration-200`} style={{ color: textColor }}>
+        <div className={`font-semibold mb-1 line-clamp-2 ${getTitleClass()}`}>
           {(() => {
             if (isExam) {
               const name = (event.resource as any).TenKT as string;
@@ -289,7 +303,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
             }
           })()}
         </div>
-        <div className="opacity-90 text-white space-y-0.5">
+        <div className="opacity-80 space-y-0.5">
           {!isMobile && (
             <div className="line-clamp-1 text-xs">
               {(() => {
@@ -302,7 +316,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               })()}
             </div>
           )}
-          <div className={`line-clamp-1 ${isMobile ? 'text-xs' : 'text-xs'}`}>
+          <div className="line-clamp-1 text-xs">
             {(() => {
               if (isExam) return '';
               const teacher = scheduleResource.GiaoVien;
@@ -312,10 +326,8 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           <div className="mt-1">
             <Badge
               variant="secondary"
-              className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} ${isExam ? 'bg-indigo-600' : getStatusColor(
-                status,
-                tinhTrangInfo
-              )} text-white border-0 shadow-sm`}
+              className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} border-0`}
+              style={{ backgroundColor: `${bgColor}cc`, color: textColor }}
             >
               {statusText}
             </Badge>
@@ -339,9 +351,10 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     };
 
     const viewNames = {
-      month: isMobile ? 'M' : isTablet ? 'Tháng' : 'Tháng',
-      week: isMobile ? 'W' : isTablet ? 'Tuần' : 'Tuần',
-      day: isMobile ? 'D' : isTablet ? 'Ngày' : 'Ngày'
+      agenda: isMobile ? 'DS' : 'Danh sách',
+      month: isMobile ? 'M' : 'Tháng',
+      week: isMobile ? 'T' : 'Tuần',
+      day: isMobile ? 'N' : 'Ngày',
     };
 
     const getButtonSize = () => {
@@ -489,7 +502,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
         <CardContent className={`${isMobile ? 'p-2' : isTablet ? 'p-3' : 'p-2 sm:p-3 md:p-6'}`}>
           <div 
             className={`${
-              isMobile ? 'h-[calc(100vh-150px)]' : 
+              isMobile ? 'h-[70vh] min-h-[400px]' : 
               isTablet ? 'h-[calc(100vh-120px)]' : 
               'h-[calc(100vh-100px)]'
             }`}
@@ -502,8 +515,8 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
               startAccessor="start"
               endAccessor="end"
               style={{ height: '100%' }}
-              views={['month', 'week', 'day']}
-              defaultView={isMobile ? 'day' : isTablet ? 'week' : 'week'}
+              views={['agenda', 'month', 'week', 'day']}
+              defaultView={isMobile ? 'agenda' : isTablet ? 'week' : 'week'}
               step={30}
               timeslots={4}
               eventPropGetter={eventStyleGetter}
@@ -526,6 +539,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
                 month: "Tháng",
                 week: "Tuần",
                 day: "Ngày",
+                agenda: "Danh sách",
                 date: "Ngày",
                 time: "Thời gian",
                 event: "Sự kiện",

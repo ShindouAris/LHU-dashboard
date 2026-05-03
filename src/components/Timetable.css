@@ -37,6 +37,7 @@
 }
 
 .rbc-timeslot-group {
+  min-height: 30px;
   border-color: hsl(var(--border));
 }
 
@@ -244,27 +245,41 @@
 
 .rbc-agenda-view table.rbc-agenda-table {
   border-color: hsl(var(--border));
+  border-collapse: collapse;
 }
 
 .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
   border-color: hsl(var(--border));
-  padding: 8px;
+  padding: 14px 10px;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+/* Tạo gap giữa các row bằng border-top dày */
+.rbc-agenda-view table.rbc-agenda-table tbody > tr + tr {
+  border-top: 12px solid transparent;
+}
+
+.rbc-agenda-view table.rbc-agenda-table tbody > tr + tr > td {
+  box-shadow: 0 -1px 0 hsl(var(--border));
 }
 
 .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
   border-color: hsl(var(--border));
   background-color: hsl(var(--muted));
-  padding: 8px;
+  padding: 10px 10px;
   font-weight: 600;
 }
 
 .rbc-agenda-time-cell {
   color: hsl(var(--muted-foreground));
+  white-space: nowrap;
 }
 
 .rbc-agenda-date-cell {
   font-weight: 600;
   color: hsl(var(--foreground));
+  white-space: nowrap;
 }
 
 .rbc-agenda-event-cell {
@@ -386,13 +401,15 @@
   }
   
   .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
-    padding: 6px 4px;
-    font-size: 12px;
+    padding: 12px 8px;
+    font-size: 13px;
+    vertical-align: middle;
+    line-height: 1.5;
   }
   
   .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
-    padding: 6px 4px;
-    font-size: 12px;
+    padding: 10px 8px;
+    font-size: 13px;
   }
 }
 
@@ -411,32 +428,58 @@
   }
   
   .rbc-btn-group button {
-    font-size: 11px;
-    padding: 3px 6px;
+    font-size: 12px;
+    padding: 5px 8px;
   }
   
   .rbc-event {
-    font-size: 9px;
-    padding: 1px 2px;
+    font-size: 12px;
+    padding: 2px 4px;
     border-radius: 4px;
   }
   
   .rbc-header {
-    padding: 4px 2px;
-    font-size: 11px;
+    padding: 6px 3px;
+    font-size: 12px;
   }
   
   .rbc-time-slot {
-    font-size: 9px;
+    font-size: 11px;
   }
   
   .rbc-time-gutter {
-    font-size: 9px;
+    font-size: 11px;
+    min-width: 48px;
   }
   
   .rbc-show-more {
-    font-size: 9px;
-    padding: 2px 4px;
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+
+  /* Agenda view mobile */
+  .rbc-agenda-view table.rbc-agenda-table tbody > tr > td {
+    padding: 12px 8px;
+    font-size: 13px;
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+
+  .rbc-agenda-view table.rbc-agenda-table thead > tr > th {
+    padding: 10px 8px;
+    font-size: 12px;
+  }
+
+  .rbc-agenda-date-cell,
+  .rbc-agenda-time-cell {
+    white-space: nowrap;
+    min-width: 64px;
+    font-size: 12px;
+  }
+
+  .rbc-agenda-event-cell {
+    font-size: 13px;
+    line-height: 1.6;
   }
 }
 
