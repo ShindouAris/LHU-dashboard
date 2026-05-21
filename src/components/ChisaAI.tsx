@@ -235,35 +235,6 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
           const code = String(children).replace(/\n$/, '');
 
           return match ? (
-            // <div className="relative group rounded-xl overflow-x-auto border border-zinc-200 dark:border-zinc-700 bg-zinc-900/90 dark:bg-zinc-900 shadow-md">
-
-            //   <div className="flex items-center justify-between px-4 py-2 text-xs 
-            //                   bg-zinc-800/80 backdrop-blur border-b rounded-md border-zinc-700">
-            //     <span className="font-mono text-zinc-300">
-            //       {match[1]}
-            //     </span>
-
-            //     <button
-            //       onClick={handleCopy}
-            //       type="button"
-            //       className="px-2 py-1 rounded-sm text-xs font-medium
-            //                 bg-purple-600/80 hover:bg-purple-600
-            //                 transition-all duration-200
-            //                 text-white opacity-0 group-hover:opacity-100"
-            //     >
-            //       {copied ? "✓ Đã sao chép!" : "Copy"}
-            //     </button>
-            //   </div>
-
-            //   {/* Code body */}
-            //   <SyntaxHighlighter
-            //     PreTag="div"
-            //     children={code}
-            //     language={match[1]}
-            //     style={atomDark}
-            //     className="!bg-transparent !p-3 sm:!p-4 text-xs sm:text-sm"
-            //   />
-            // </div>
             <CodeBlock language={match[1]}>
               {code}
             </CodeBlock>
@@ -319,7 +290,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
           </li>
         ),
         
-      }} skipHtml={true}>
+      }}>
       {Part.text}
     </ReactMarkdown>
   )
