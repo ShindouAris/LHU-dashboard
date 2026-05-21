@@ -627,7 +627,7 @@ const DiemRL: React.FC = () => {
                     <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 flex items-center gap-3">
                         <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-300" />
                         <span className="text-red-700 dark:text-red-200 font-medium">
-                            Chưa đến kỳ khai báo hoạt động
+                            Chưa đến kỳ / đã kết thúc khai báo hoạt động
                         </span>
                     </div>
                 )}
@@ -637,7 +637,9 @@ const DiemRL: React.FC = () => {
                     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
                         <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tổng điểm</div>
                         <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            {tongDiem}
+                            <span className={tongDiem >= 40 ? 'text-green-500' : 'text-red-500'}>
+                                {tongDiem}
+                            </span> / 45
                         </div>
                     </div>
                     <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
