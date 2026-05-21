@@ -216,11 +216,13 @@ const EmptyState = memo(function EmptyState({
   );
 });
 
+const preprocessLatex = (text: string): string =>
+  text.replace(/\\\[/g, '$$').replace(/\\\]/g, '$$').replace(/\\\(/g, '$').replace(/\\\)/g, '$');
+
 const Message = memo(({message, index, Part}: {message: any, index: number, Part: any}) => {
   return (
     <ReactMarkdown key={`${message.id}-streaming-${index}`} 
       remarkPlugins={[remarkGfm, remarkMath, remarkBreak, remarkToc]}
-      remarkRehypeOptions={{ passThrough: ['math', 'inlineMath'] }}
       rehypePlugins={[
         rehypeRaw,
         [rehypeKatex, { output: 'html' }],
@@ -292,7 +294,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
         ),
         
       }}>
-      {Part.text}
+      {preprocessLatex(Part.text)}
     </ReactMarkdown>
   )
 }, (prevProps, nextProps) => {
