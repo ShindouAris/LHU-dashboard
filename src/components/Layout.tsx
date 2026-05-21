@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
 import { AuthStorage } from '@/types/user';
 import GradientText from './ui/GradientText';
+import { HostnameBanner } from './LHU_UI/HostnameBanner';
 // import { Snowfall } from 'react-snowfall'; // Out of winter season
 
 interface LayoutProps {
@@ -109,6 +110,9 @@ export const Layout: React.FC<LayoutProps> = ({
 
           {/* Content */}
           <main className="relative w-full min-w-0 flex-1 min-h-0 overflow-y-auto">
+            <div className="px-4 pt-4">
+              <HostnameBanner />
+            </div>
             {children}
           </main>
 
