@@ -614,7 +614,7 @@ const DiemRL: React.FC = () => {
                         <button
                             onClick={openCreate}
                             disabled={!isPeriodOpen}
-                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-colors w-full sm:w-auto shrink-0"
+                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-400 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-colors w-full sm:w-auto shrink-0"
                         >
                             <Plus size={20} />
                             <span>Khai báo hoạt động</span>
