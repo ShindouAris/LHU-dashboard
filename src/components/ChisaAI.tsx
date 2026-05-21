@@ -220,6 +220,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
   return (
     <ReactMarkdown key={`${message.id}-streaming-${index}`} 
       remarkPlugins={[remarkGfm, remarkMath, remarkBreak, remarkToc]}
+      remarkRehypeOptions={{ passThrough: ['math', 'inlineMath'] }}
       rehypePlugins={[
         rehypeRaw,
         [rehypeKatex, { output: 'html' }],
