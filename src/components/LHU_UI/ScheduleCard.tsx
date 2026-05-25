@@ -78,14 +78,14 @@ const getStatusConfig = (
         return {
             label: 'Nghỉ lễ',
             icon: CircleSlash,
-            badgeClass: 'bg-emerald-500 text-white dark:bg-emerald-600',
+            badgeClass: 'bg-[#a6e3a1] text-[#1e1e2e] dark:bg-[#a6e3a1] dark:text-[#1e1e2e]',
         };
     }
     if (cancelType === 'cancelled') {
         return {
             label: 'Báo nghỉ',
             icon: CircleSlash,
-            badgeClass: 'bg-rose-500 text-white dark:bg-rose-600',
+            badgeClass: 'bg-[#f38ba8] text-[#1e1e2e] dark:bg-[#f38ba8] dark:text-[#1e1e2e]',
         };
     }
     switch (status) {
@@ -93,7 +93,7 @@ const getStatusConfig = (
             return {
                 label: 'Đang diễn ra',
                 icon: CheckCircle2,
-                badgeClass: 'bg-emerald-500 text-white dark:bg-emerald-600',
+                badgeClass: 'bg-[#a6e3a1] text-[#1e1e2e] dark:bg-[#a6e3a1] dark:text-[#1e1e2e]',
             };
         case 2:
             return {
@@ -133,13 +133,13 @@ const getCardAccent = (
     isExam: boolean
 ): string => {
     if (cancelType === 'holiday')
-        return 'border-l-4 border-l-emerald-500 bg-emerald-500/10 ring-1 ring-emerald-500/20';
+        return 'border-l-4 border-l-[#a6e3a1] bg-[#a6e3a1]/10 ring-1 ring-[#a6e3a1]/20';
     if (cancelType === 'cancelled')
-        return 'border-l-4 border-l-rose-500 bg-rose-500/10 ring-1 ring-rose-500/20';
+        return 'border-l-4 border-l-[#f38ba8] bg-[#f38ba8]/10 ring-1 ring-[#f38ba8]/20';
     if (isNext)
         return 'border-l-4 border-l-primary bg-primary/5 ring-1 ring-primary/20';
     if (isExam)
-        return 'border-l-4 border-l-amber-500 bg-amber-500/5 ring-1 ring-amber-500/20';
+        return 'border-l-4 border-l-[#fab387] bg-[#fab387]/5 ring-1 ring-[#fab387]/20';
     return 'border-l-4 border-l-border';
 };
 
@@ -405,12 +405,12 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
                         </Badge>
                     )}
                     {duplicate.isDuplicate && (
-                        <Badge className="bg-amber-500 text-white px-2 py-0.5 text-[11px] rounded-full">
+                        <Badge className="bg-[#fab387] text-[#1e1e2e] px-2 py-0.5 text-[11px] rounded-full">
                             {duplicate.schedules.length - 1} trùng
                         </Badge>
                     )}
                     {isExam && (
-                        <Badge className="bg-amber-500 text-white px-2 py-0.5 text-[11px] rounded-full">
+                        <Badge className="bg-[#cba6f7] text-[#1e1e2e] px-2 py-0.5 text-[11px] rounded-full">
                             Thi
                         </Badge>
                     )}
@@ -505,15 +505,15 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
                 {/* Duplicate warning */}
                 {duplicate.isDuplicate && (
-                    <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-xs">
-                        <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                    <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-[#fab387]/10 border border-[#fab387]/30 text-xs">
+                        <AlertTriangle className="h-4 w-4 text-[#fab387] flex-shrink-0 mt-0.5" />
                         <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-amber-700 dark:text-amber-300">
+                            <div className="font-semibold text-[#df8e1d] dark:text-[#fab387]">
                                 Cảnh báo lịch trùng (
                                 {duplicate.schedules.length - 1} lịch khác)
                             </div>
                             {duplicate.status?.statusText && (
-                                <div className="text-amber-600 dark:text-amber-400 mt-0.5">
+                                <div className="text-[#df8e1d] dark:text-[#fab387] mt-0.5">
                                     {duplicate.status.statusText}
                                 </div>
                             )}

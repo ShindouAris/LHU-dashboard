@@ -182,25 +182,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Mobile Overlay */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-[#1e1e2e]/60 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full w-80 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
+        "fixed top-0 left-0 z-50 h-full w-80 bg-background dark:bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between p-4 border-b border-border">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-white" />
+              <div className="w-8 h-8 bg-gradient-to-r from-[#cba6f7] to-[#89b4fa] rounded-lg flex items-center justify-center">
+                <GraduationCap className="h-5 w-5 text-[#1e1e2e]" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate font-loveHouse">
+                <h1 className="text-lg font-semibold text-foreground truncate font-loveHouse">
                   <GradientText
                   yoyo={false}
                   animationSpeed={0.8}
@@ -209,7 +209,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     LHU Dashboard
                   </GradientText>
                 </h1>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">
+                <p className="text-xs text-muted-foreground truncate text-left">
                   {title}
                 </p>
               </div>
@@ -230,7 +230,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="space-y-1">
               <button
                 onClick={() => toggleExpanded('navigation')}
-                className="flex items-center justify-between w-full p-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
+                className="flex items-center justify-between w-full p-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
               >
                 <span>Điều hướng</span>
                 {expandedItems.includes('navigation') ? (
@@ -270,23 +270,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         className={cn(
                           "flex items-center gap-3 w-full p-3 text-left rounded-lg transition-colors group",
                           isActive 
-                            ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800" 
-                            : "hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300",
+                            ? "bg-[#f5f0ff] dark:bg-[#cba6f7]/10 text-[#8839ef] dark:text-[#cba6f7] border border-[#cba6f7]/30 dark:border-[#cba6f7]/20" 
+                            : "hover:bg-muted text-foreground",
                             !isAuth && item.authrequired && "hidden"
                         )}
                       >
                         <Icon className={cn(
                           "h-5 w-5 flex-shrink-0",
-                          isActive ? "text-blue-600 dark:text-blue-400" : "text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300"
+                          isActive ? "text-[#8839ef] dark:text-[#cba6f7]" : "text-muted-foreground group-hover:text-foreground"
                         )} />
                         <div className="min-w-0 flex-1">
                           <div className="font-medium">{item.label}</div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                          <div className="text-xs text-muted-foreground truncate">
                             {item.description}
                           </div>
                         </div>
                         {isActive && (
-                          <div className="w-2 h-2 bg-blue-600 dark:bg-blue-400 rounded-full flex-shrink-0" />
+                          <div className="w-2 h-2 bg-[#8839ef] dark:bg-[#cba6f7] rounded-full flex-shrink-0" />
                         )}
                         {
                           (item.isBetaItem) && (
@@ -301,10 +301,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Status Section */}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-800">
-              <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-950/30 rounded-lg">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-sm font-medium text-green-700 dark:text-green-300">
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-center gap-2 p-3 bg-[#a6e3a1]/20 rounded-lg">
+                <div className="w-2 h-2 bg-[#a6e3a1] rounded-full"></div>
+                <span className="text-sm font-medium text-[#40a02b] dark:text-[#a6e3a1]">
                   Đang học
                 </span>
               </div>

@@ -201,13 +201,13 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     // [bg, textColor]
     const getColorValue = (colorClass: string): [string, string] => {
       switch (colorClass) {
-        case 'pastel-ongoing':   return ['#bbf7d0', '#14532d']; // xanh lá nhạt — đang diễn ra
-        case 'pastel-upcoming':  return ['#bfdbfe', '#1e3a5f']; // xanh dương nhạt — sắp diễn ra
-        case 'pastel-done':      return ['#e5e7eb', '#374151']; // xám nhạt — đã kết thúc
-        case 'pastel-cancelled': return ['#fecaca', '#7f1d1d']; // đỏ nhạt — báo nghỉ
-        case 'pastel-holiday':   return ['#fbcfe8', '#831843']; // hồng nhạt — nghỉ lễ
-        case 'pastel-exam':      return ['#e0e7ff', '#1e1b4b']; // tím nhạt — kỳ thi
-        default:                 return ['#ddd6fe', '#2e1065']; // tím mặc định
+        case 'pastel-ongoing':   return ['#bbf7d0', '#14532d'];
+        case 'pastel-upcoming':  return ['#bfdbfe', '#1e3a5f'];
+        case 'pastel-done':      return ['#e5e7eb', '#374151'];
+        case 'pastel-cancelled': return ['#fecaca', '#7f1d1d'];
+        case 'pastel-holiday':   return ['#fbcfe8', '#831843'];
+        case 'pastel-exam':      return ['#e0e7ff', '#1e1b4b'];
+        default:                 return ['#ddd6fe', '#2e1065'];
       }
     };
     
@@ -396,43 +396,43 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={goToToday}
-              className={`${getButtonSize()} bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors font-medium shadow-sm hover:shadow-md`}
+              className={`${getButtonSize()} bg-[#8839ef] text-white rounded-md hover:bg-[#6a1fd4] transition-colors font-medium shadow-sm hover:shadow-md`}
               aria-label="Đi đến hôm nay"
             >
               Hôm nay
             </button>
             <button
               onClick={goToPrev}
-              className={`${getNavButtonSize()} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              className={`${getNavButtonSize()} bg-muted hover:bg-muted/80 rounded-md transition-colors shadow-sm hover:shadow-md`}
               aria-label="Tuần trước"
             >
               ←
             </button>
             <button
               onClick={goToNext}
-              className={`${getNavButtonSize()} bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              className={`${getNavButtonSize()} bg-muted hover:bg-muted/80 rounded-md transition-colors shadow-sm hover:shadow-md`}
               aria-label="Tuần sau"
             >
               →
             </button>
           </div>
           
-          <div className={`${getTitleSize()} font-semibold text-gray-900 dark:text-white text-center`}>
+          <div className={`${getTitleSize()} font-semibold text-foreground text-center`}>
             {toolbar.label}
           </div>
         </div>
         
         {/* View Controls */}
         <div className="flex items-center justify-center">
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-700 rounded-md p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-muted rounded-md p-1 shadow-sm">
             {Object.entries(viewNames).map(([key, name]) => (
               <button
                 key={key}
                 onClick={() => toolbar.onView(key)}
                 className={`${getViewButtonSize()} rounded font-medium transition-colors ${
                   toolbar.view === key
-                    ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-400 shadow-sm'
-                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                    ? 'bg-background text-[#8839ef] dark:text-[#cba6f7] shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
                 aria-label={`Chuyển sang chế độ ${name}`}
               >
@@ -464,12 +464,12 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   if (schedules.length === 0) {
     return (
-      <Card className="text-center py-8 sm:py-16 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+      <Card className="text-center py-8 sm:py-16 border-0 shadow-lg bg-background/80 backdrop-blur-sm">
         <CardContent>
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-xl sm:text-2xl">📅</span>
           </div>
-          <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg">Không có lịch học nào để hiển thị</p>
+          <p className="text-muted-foreground text-base sm:text-lg">Không có lịch học nào để hiển thị</p>
         </CardContent>
       </Card>
     );
@@ -483,35 +483,35 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       )}
       
       {/* Thống kê nhanh */}
-      <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/50 dark:to-purple-950/50">
+      <Card className="border-0 shadow-lg bg-gradient-to-r from-[#e6e9ef] to-[#f5f0ff] dark:from-[#313244] dark:to-[#313244]">
         <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg text-gray-900 dark:text-white">
+          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">
             Thống kê lịch học
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            <div className="text-center p-2 sm:p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-600">{schedules.length}</div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Tổng số tiết</div>
+            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#89b4fa]">{schedules.length}</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Tổng số tiết</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-green-600">
+            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#a6e3a1]">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 2).length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Sắp diễn ra</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Sắp diễn ra</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-yellow-600">
+            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#fab387]">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 1).length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Đang diễn ra</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Đang diễn ra</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-600">
+            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
+              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#6c7086]">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 3).length}
               </div>
-              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Đã kết thúc</div>
+              <div className="text-xs sm:text-sm text-muted-foreground">Đã kết thúc</div>
             </div>
           </div>
         </CardContent>
@@ -520,7 +520,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       {/* Calendar */}
       <Card className="border-0 shadow-lg" role="main" aria-label="Lịch học">
         <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg text-gray-900 dark:text-white">
+          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">
             Lịch học {studentName ? `của ${studentName}` : ''}
           </CardTitle>
         </CardHeader>

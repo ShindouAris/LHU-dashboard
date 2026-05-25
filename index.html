@@ -22,7 +22,7 @@
   <body>
     <div id="root">
       <style>
-        @import url("https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@500;600&display=swap");
+        @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
         .boot-loading {
           position: fixed;
@@ -30,68 +30,141 @@
           display: flex;
           align-items: center;
           justify-content: center;
-          background: #0b1220;
-          color: #e5e7eb;
+          background: #1e1e2e;
+          color: #cdd6f4;
+          z-index: 9999;
         }
 
         .boot-loading-inner {
-          font-family:
-        "Be Vietnam Pro",
-        system-ui,
-        -apple-system,
-        "Segoe UI",
-        Roboto,
-        Arial,
-        sans-serif;
+          font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
           text-align: center;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
+          gap: 24px;
           padding: 24px;
         }
 
         .boot-loading-logo {
-          width: 64px;
-          height: 64px;
+          width: 72px;
+          height: 72px;
           display: block;
+          animation: boot-float 3s ease-in-out infinite;
+          filter: drop-shadow(0 0 20px rgba(203, 166, 247, 0.3));
+        }
+
+        .boot-loading-brand {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+
+        .boot-loading-title {
+          font-size: 22px;
+          font-weight: 700;
+          letter-spacing: -0.3px;
+          background: linear-gradient(135deg, #cba6f7, #89b4fa, #b4befe);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
         }
 
         .boot-loading-text {
-          font-size: 16px;
-          font-weight: 600;
-          letter-spacing: 0.2px;
+          font-size: 14px;
+          font-weight: 400;
+          color: #a6adc8;
         }
 
-        .loading-spinner {
-          width: 44px;
-          height: 44px;
+        .spinner-wrapper {
+          position: relative;
+          width: 48px;
+          height: 48px;
         }
 
-        .loading-spinner-circle {
-          width: 100%;
-          height: 100%;
-          box-sizing: border-box;
-          border: 4px solid rgba(229, 231, 235, 0.25);
-          border-top-color: #60a5fa;
+        .spinner-ring {
+          position: absolute;
+          inset: 0;
           border-radius: 999px;
-          animation: boot-spin 0.9s linear infinite;
+          border: 3px solid transparent;
+          animation: boot-spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+        }
+
+        .spinner-ring:nth-child(1) {
+          border-top-color: #cba6f7;
+          animation-delay: 0s;
+        }
+
+        .spinner-ring:nth-child(2) {
+          inset: 6px;
+          border-right-color: #89b4fa;
+          animation-duration: 1.6s;
+          animation-direction: reverse;
+        }
+
+        .spinner-ring:nth-child(3) {
+          inset: 12px;
+          border-bottom-color: #b4befe;
+          animation-duration: 2s;
+        }
+
+        .boot-loading-dots {
+          display: flex;
+          gap: 6px;
+          align-items: center;
+        }
+
+        .boot-loading-dots span {
+          width: 6px;
+          height: 6px;
+          border-radius: 999px;
+          background: #585b70;
+          animation: boot-dot 1.4s ease-in-out infinite;
+        }
+
+        .boot-loading-dots span:nth-child(1) { animation-delay: 0s; }
+        .boot-loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .boot-loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        .boot-loading-version {
+          font-size: 12px;
+          color: #585b70;
+          font-weight: 500;
+          letter-spacing: 0.5px;
         }
 
         @keyframes boot-spin {
-          to {
-        transform: rotate(360deg);
-          }
+          to { transform: rotate(360deg); }
+        }
+
+        @keyframes boot-float {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-8px); }
+        }
+
+        @keyframes boot-dot {
+          0%, 80%, 100% { background: #585b70; transform: scale(1); }
+          40% { background: #cba6f7; transform: scale(1.3); }
         }
       </style>
 
       <div class="boot-loading" role="status" aria-live="polite" aria-busy="true">
         <div class="boot-loading-inner">
           <img class="boot-loading-logo" src="/favicon.svg" alt="LHU" />
-          <div class="boot-loading-text">Đang tải LHU dashboard v3.6.0...</div>
-          <div class="loading-spinner" aria-hidden="true">
-        <div class="loading-spinner-circle"></div>
+          <div class="boot-loading-brand">
+            <div class="boot-loading-title">LHU Dashboard</div>
+            <div class="boot-loading-text">Đang tải ứng dụng</div>
           </div>
+          <div class="spinner-wrapper" aria-hidden="true">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+          </div>
+          <div class="boot-loading-dots" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <div class="boot-loading-version">v3.6.0</div>
         </div>
       </div>
     </div>

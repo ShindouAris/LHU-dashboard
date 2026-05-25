@@ -366,12 +366,12 @@ const SettingsPage: React.FC = () => {
   }> = ({ icon: Icon, title, description, action }) => (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-4 flex-1">
-        <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-          <Icon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+          <Icon className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
         </div>
         <div className="flex-1">
           <Label className="text-base font-medium cursor-pointer">{title}</Label>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{description}</p>
+          <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
       </div>
       <div className="ml-4">
@@ -385,8 +385,8 @@ const SettingsPage: React.FC = () => {
         <div className="mb-8">
           <div className="flex flex-col items-center gap-3 mb-2">
             <div className="text-center">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Cài đặt</h1>
-              <p className="text-gray-500 dark:text-gray-400">Quản lý tùy chọn và cấu hình ứng dụng</p>
+              <h1 className="text-3xl font-bold text-foreground">Cài đặt</h1>
+              <p className="text-muted-foreground">Quản lý tùy chọn và cấu hình ứng dụng</p>
             </div>
           </div>
         </div>
@@ -638,12 +638,12 @@ const SettingsPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                    <Database className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#a6e3a1]/10 rounded-lg">
+                    <Database className="h-5 w-5 text-[#40a02b] dark:text-[#a6e3a1]" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Dung lượng bộ nhớ đệm</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{cacheSize}</p>
+                    <p className="text-sm text-muted-foreground mt-1">{cacheSize}</p>
                   </div>
                 </div>
                 <Button
@@ -697,12 +697,12 @@ const SettingsPage: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                      <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                      <User className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                     </div>
                     <div className="flex-1">
                       <Label className="text-base font-medium">Mã sinh viên</Label>
-                      <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{user.UserID || 'N/A'}</p>
+                      <p className="text-sm text-muted-foreground mt-1">{user.UserID || 'N/A'}</p>
                     </div>
                   </div>
                 </div>
@@ -711,12 +711,12 @@ const SettingsPage: React.FC = () => {
                     <Separator />
                     <div className="flex items-center justify-between py-4">
                       <div className="flex items-center gap-4 flex-1">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          <User className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                    <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                      <User className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                         </div>
                         <div className="flex-1">
                           <Label className="text-base font-medium">Họ và tên</Label>
-                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{user.FullName}</p>
+                          <p className="text-sm text-muted-foreground mt-1">{user.FullName}</p>
                         </div>
                       </div>
                     </div>
@@ -753,12 +753,12 @@ const SettingsPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                    <Info className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Tên ứng dụng</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">LHU Calendar</p>
+                    <p className="text-sm text-muted-foreground mt-1">LHU Calendar</p>
                   </div>
                 </div>
               </div>
@@ -768,12 +768,12 @@ const SettingsPage: React.FC = () => {
                   <Separator />
                   <div className="flex items-center justify-between py-4">
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                        <Info className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                      <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                        <Info className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                       </div>
                       <div className="flex-1">
                         <Label className="text-base font-medium">Ứng dụng điện thoại</Label>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        <p className="text-sm text-muted-foreground mt-1">
                           Đang chạy trong React Native
                         </p>
                       </div>
@@ -784,36 +784,36 @@ const SettingsPage: React.FC = () => {
               <Separator />
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                    <Shield className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Phiên bản</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">1.0.0</p>
+                    <p className="text-sm text-muted-foreground mt-1">1.0.0</p>
                   </div>
                 </div>
               </div>
               <Separator />
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                    <Globe className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                    <Globe className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Ngôn ngữ</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Tiếng Việt</p>
+                    <p className="text-sm text-muted-foreground mt-1">Tiếng Việt</p>
                   </div>
                 </div>
               </div>
               <Separator />
               <div className="flex items-center justify-between py-4 overflow-hidden">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
                     <GitHub />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Mã nguồn trang web</Label>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 cursor-pointer overflow-hidden"
+                    <p className="text-sm text-muted-foreground mt-1 cursor-pointer overflow-hidden"
                     onClick={() => window.open('https://github.com/ShindouAris/Calendar-LHU.git', '_blank')}
                     >https://github.com/ShindouAris/Calendar-LHU.git</p>
                   </div>
