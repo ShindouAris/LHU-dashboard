@@ -9,9 +9,9 @@ import { AuthStorage } from '@/types/user';
 import { toast } from 'react-hot-toast';
 import { ClientJS } from 'clientjs';
 import { Loader2, LogIn } from 'lucide-react';
-import TurnStile, {useTurnstile} from 'react-turnstile';
+// import TurnStile, {useTurnstile} from 'react-turnstile';
 
-const sitekey = import.meta.env.VITE_TURNSTILE_SITE_KEY 
+// const sitekey = import.meta.env.VITE_TURNSTILE_SITE_KEY 
 
 function buildDeviceInfo(): string {
   try {
@@ -34,8 +34,8 @@ export default function LoginPage() {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const turnstile = useTurnstile();
-  const [cf_token, setCf_token] = useState<string | null>(null);
+  // const turnstile = useTurnstile();
+  // const [cf_token, setCf_token] = useState<string | null>(null);
 
   const deviceInfo = useMemo(() => {
     try {
@@ -50,7 +50,7 @@ export default function LoginPage() {
     if (!userId || !password) return;
     setLoading(true);
     try {
-      await authService.login({ DeviceInfo: deviceInfo, UserID: userId, Password: password, cf_verify_token: cf_token || "" }, turnstile);
+      await authService.login({ DeviceInfo: deviceInfo, UserID: userId, Password: password || "" });
       try {
         const user = await authService.getUserInfo();
         AuthStorage.setUser(user);
@@ -102,15 +102,15 @@ export default function LoginPage() {
                     className="mt-1"
                   />
                 </div>
-                <TurnStile
+                {/* <TurnStile
                 sitekey={sitekey}
                 theme={localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'}
                 onVerify={(token) => setCf_token(token)}
                 onExpire={() => setCf_token(null)}
-                />
+                /> */}
                 <Button
                   type="submit"
-                  disabled={loading || !userId || !password || !cf_token}
+                  disabled={loading || !userId || !password}
                   className="w-full flex items-center justify-center gap-2"
                 >
                   {loading ? (
