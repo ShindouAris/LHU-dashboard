@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@ai-sdk/react": "^3.0.193",
+    "@ai-sdk/react": "^3.0.5",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@gsap/react": "^2.1.2",
@@ -48,7 +48,7 @@
     "@radix-ui/react-use-controllable-state": "^1.2.2",
     "@vercel/analytics": "^1.5.0",
     "@xyflow/react": "^12.10.0",
-    "ai": "^6.0.191",
+    "ai": "^6.0.20",
     "axios": "^1.13.6",
     "class-variance-authority": "^0.7.0",
     "clientjs": "^0.2.1",
