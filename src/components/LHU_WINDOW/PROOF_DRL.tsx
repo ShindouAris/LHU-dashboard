@@ -211,14 +211,14 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
   }
 
   return (
-    <div className="w-full h-screen bg-gray-50 dark:bg-gray-950">
+    <div className="w-full h-screen bg-background">
       {/* Header */}
-      <div className="bg-blue-600 text-white px-6 py-3 flex items-center justify-between dark:bg-blue-700">
-        <h1 className="text-lg font-medium">Quản lý tập tin minh chứng</h1>
+      <div className="bg-section text-section-foreground border-b-2 border-border px-6 py-3 flex items-center justify-between">
+        <h1 className="text-lg font-display font-bold">Quản lý tập tin minh chứng</h1>
         <Button
           variant="ghost"
           size="icon"
-          className="text-white hover:bg-blue-700 dark:hover:bg-blue-800"
+          className="hover:bg-destructive hover:text-destructive-foreground"
           onClick={onClose}
         >
           <X className="h-5 w-5" />
@@ -232,7 +232,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => {setConfirmDeleteFileOpen(false); setSelectedFileId(null);}}>Huỷ</Button>
-            <Button className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteFile(selectedFileId)}>Xoá</Button>
+            <Button variant="destructive" onClick={() => handleDeleteFile(selectedFileId)}>Xoá</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -244,7 +244,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           </DialogDescription>
           <DialogFooter>
             <Button variant="outline" onClick={() => {setConfirmDeleteOpen(false); setSTT(null);}}>Huỷ</Button>
-            <Button className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteLink(STT)}>Xoá</Button>
+            <Button variant="destructive" onClick={() => handleDeleteLink(STT)}>Xoá</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -299,9 +299,9 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
 
       <div className="p-6">
         {/* Files Section */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm mb-6">
-          <div className="border-b dark:border-gray-800 px-6 py-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">File minh chứng</h2>
+        <div className="bg-card border-2 border-border rounded-md shadow-brutal mb-6">
+          <div className="border-b-2 border-border px-6 py-3 flex items-center justify-between">
+            <h2 className="text-sm font-display font-bold text-foreground">File minh chứng</h2>
             <div hidden={files.length < 1}>
               <Button
                 onClick={() => inputRef.current?.click()}
@@ -322,8 +322,8 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           </div>
 
           {isUploading && (
-            <div className="px-6 py-3 border-b dark:border-gray-800">
-              <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 mb-2">
+            <div className="px-6 py-3 border-b-2 border-border">
+              <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
                 <span className="truncate mr-4">Đang tải lên: {uploadingFileName}</span>
                 <span>{uploadProgress}%</span>
               </div>
@@ -334,8 +334,8 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="justify-center dark:text-gray-200">Tên tập tin</TableHead>
-                <TableHead className="text-right dark:text-gray-200">Cập nhật</TableHead>
+                <TableHead className="justify-center text-foreground">Tên tập tin</TableHead>
+                <TableHead className="text-right text-foreground">Cập nhật</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -345,10 +345,10 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                     <Empty className="w-full py-16">
                       <EmptyHeader>
                         <EmptyMedia>
-                          <LuFileQuestion className="h-12 w-12 text-black dark:text-gray-100" />
+                          <LuFileQuestion className="h-12 w-12 text-foreground" />
                         </EmptyMedia>
-                        <EmptyTitle className='text-black dark:text-gray-100'>Chưa có tập tin minh chứng</EmptyTitle>
-                        <EmptyDescription className='text-black dark:text-gray-300'>
+                        <EmptyTitle className='text-foreground'>Chưa có tập tin minh chứng</EmptyTitle>
+                        <EmptyDescription className='text-muted-foreground'>
                           Hãy tải lên tập tin minh chứng cho hoạt động này.
                         </EmptyDescription>
                       </EmptyHeader>
@@ -378,7 +378,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
               {files.map((file) => (
                 <TableRow key={file.FileID}>
                   <TableCell
-                      className="text-blue-600 hover:underline text-left cursor-pointer"
+                      className="text-foreground font-medium underline hover:no-underline text-left cursor-pointer"
                       onClick={() => loadImagePreview(file.BinaryContent)}
                     >
                       {file.FileName}
@@ -388,7 +388,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       variant="ghost"
                       size="icon"
                       onClick={() => {setConfirmDeleteOpen(true); setSelectedFileId(file.FileID);}}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -400,9 +400,9 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
         </div>
 
         {/* Links Section */}
-        <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm">
-          <div className="border-b dark:border-gray-800 px-6 py-3 flex items-center justify-between">
-            <h2 className="text-sm font-medium text-gray-700 dark:text-gray-200">Link</h2>
+        <div className="bg-card border-2 border-border rounded-md shadow-brutal">
+          <div className="border-b-2 border-border px-6 py-3 flex items-center justify-between">
+            <h2 className="text-sm font-display font-bold text-foreground">Link</h2>
             <Button
               variant="outline"
               size="icon"
@@ -416,28 +416,28 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40%] dark:text-gray-200">Link</TableHead>
-                <TableHead className="w-[40%] dark:text-gray-200">Ghi chú</TableHead>
-                <TableHead className="text-right dark:text-gray-200">Cập nhật</TableHead>
+                <TableHead className="w-[40%] text-foreground">Link</TableHead>
+                <TableHead className="w-[40%] text-foreground">Ghi chú</TableHead>
+                <TableHead className="text-right text-foreground">Cập nhật</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {links.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={3} className="text-center py-8 text-gray-400 dark:text-gray-500">
+                  <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
                     Không có dữ liệu...
                   </TableCell>
                 </TableRow>
               ) : (
                 links.map((link) => (
                   <TableRow key={link.STT}>
-                    <TableCell className="text-blue-600 hover:underline text-left cursor-pointer">
-                      <Link to={link.Link} target="_blank" className="text-blue-600 hover:underline">
+                    <TableCell className="text-foreground text-left cursor-pointer">
+                      <Link to={link.Link} target="_blank" className="text-foreground font-medium underline hover:no-underline">
                         {link.Link}
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <div className="text-left text-black dark:text-gray-100">
+                      <div className="text-left text-foreground">
                         {link.Note || "Không có ghi chú"}
                       </div>
                     </TableCell>
@@ -446,7 +446,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                         variant="ghost"
                         size="icon"
                         onClick={() => {setSTT(link.STT); setLink(link.Link); setNote(link.Note || ""); setEditLinkModalOpen(true);}}
-                        className="p-2 hover:bg-blue-100 dark:hover:bg-blue-800 text-blue-600 dark:text-blue-200 rounded-lg transition-colors"
+                        className="p-2 hover:bg-secondary hover:text-secondary-foreground text-foreground rounded-md transition-colors"
                         title="Chỉnh sửa"
                     >
                         <Edit2 size={18} />
@@ -454,7 +454,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => {setSTT(link.STT); setConfirmDeleteOpen(true)}}
                       >
                         <Trash2 className="h-4 w-4" />

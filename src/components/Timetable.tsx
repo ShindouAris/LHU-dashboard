@@ -334,7 +334,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           <div className="mt-1">
             <Badge
               variant="secondary"
-              className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} border-0`}
+              className={`${isMobile ? 'text-xs px-1 py-0' : isTablet ? 'text-xs px-1 py-0.5' : 'text-xs px-1.5 py-0.5'} border-2 border-border`}
               style={{ backgroundColor: `${bgColor}cc`, color: textColor }}
             >
               {statusText}
@@ -396,42 +396,42 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
           <div className="flex items-center gap-1 sm:gap-2">
             <button
               onClick={goToToday}
-              className={`${getButtonSize()} bg-[#8839ef] text-white rounded-md hover:bg-[#6a1fd4] transition-colors font-medium shadow-sm hover:shadow-md`}
+              className={`${getButtonSize()} bg-[hsl(258_90%_66%)] text-white border-2 border-border rounded-md transition-colors font-display font-bold shadow-brutal-sm`}
               aria-label="Đi đến hôm nay"
             >
               Hôm nay
             </button>
             <button
               onClick={goToPrev}
-              className={`${getNavButtonSize()} bg-muted hover:bg-muted/80 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              className={`${getNavButtonSize()} bg-muted hover:bg-accent border-2 border-border rounded-md transition-colors shadow-brutal-sm`}
               aria-label="Tuần trước"
             >
               ←
             </button>
             <button
               onClick={goToNext}
-              className={`${getNavButtonSize()} bg-muted hover:bg-muted/80 rounded-md transition-colors shadow-sm hover:shadow-md`}
+              className={`${getNavButtonSize()} bg-muted hover:bg-accent border-2 border-border rounded-md transition-colors shadow-brutal-sm`}
               aria-label="Tuần sau"
             >
               →
             </button>
           </div>
-          
-          <div className={`${getTitleSize()} font-semibold text-foreground text-center`}>
+
+          <div className={`${getTitleSize()} font-display font-bold text-foreground text-center`}>
             {toolbar.label}
           </div>
         </div>
-        
+
         {/* View Controls */}
         <div className="flex items-center justify-center">
-          <div className="flex items-center gap-1 bg-muted rounded-md p-1 shadow-sm">
+          <div className="flex items-center gap-1 bg-muted border-2 border-border rounded-md p-1 shadow-brutal-sm">
             {Object.entries(viewNames).map(([key, name]) => (
               <button
                 key={key}
                 onClick={() => toolbar.onView(key)}
                 className={`${getViewButtonSize()} rounded font-medium transition-colors ${
                   toolbar.view === key
-                    ? 'bg-background text-[#8839ef] dark:text-[#cba6f7] shadow-sm'
+                    ? 'bg-secondary text-black border-2 border-border'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
                 aria-label={`Chuyển sang chế độ ${name}`}
@@ -464,9 +464,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   if (schedules.length === 0) {
     return (
-      <Card className="text-center py-8 sm:py-16 border-0 shadow-lg bg-background/80 backdrop-blur-sm">
+      <Card className="text-center py-8 sm:py-16 border-2 border-border shadow-brutal bg-card">
         <CardContent>
-          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted border-2 border-border rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-xl sm:text-2xl">📅</span>
           </div>
           <p className="text-muted-foreground text-base sm:text-lg">Không có lịch học nào để hiển thị</p>
@@ -483,32 +483,32 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       )}
       
       {/* Thống kê nhanh */}
-      <Card className="border-0 shadow-lg bg-gradient-to-r from-[#e6e9ef] to-[#f5f0ff] dark:from-[#313244] dark:to-[#313244]">
+      <Card className="border-2 border-border shadow-brutal bg-card">
         <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">
+          <CardTitle className="text-sm sm:text-base md:text-lg font-display font-bold text-foreground">
             Thống kê lịch học
           </CardTitle>
         </CardHeader>
         <CardContent className="p-3 sm:p-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
-            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#89b4fa]">{schedules.length}</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Tổng số tiết</div>
+            <div className="text-center p-2 sm:p-3 bg-secondary border-2 border-border rounded-md">
+              <div className="text-lg sm:text-xl md:text-2xl font-black tabular-nums text-black">{schedules.length}</div>
+              <div className="text-xs sm:text-sm text-black">Tổng số tiết</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#a6e3a1]">
+            <div className="text-center p-2 sm:p-3 bg-[hsl(83_78%_56%)] border-2 border-border rounded-md">
+              <div className="text-lg sm:text-xl md:text-2xl font-black tabular-nums text-black">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 2).length}
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Sắp diễn ra</div>
+              <div className="text-xs sm:text-sm text-black">Sắp diễn ra</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#fab387]">
+            <div className="text-center p-2 sm:p-3 bg-[hsl(27_96%_61%)] border-2 border-border rounded-md">
+              <div className="text-lg sm:text-xl md:text-2xl font-black tabular-nums text-black">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 1).length}
               </div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Đang diễn ra</div>
+              <div className="text-xs sm:text-sm text-black">Đang diễn ra</div>
             </div>
-            <div className="text-center p-2 sm:p-3 bg-background/50 rounded-lg">
-              <div className="text-lg sm:text-xl md:text-2xl font-bold text-[#6c7086]">
+            <div className="text-center p-2 sm:p-3 bg-muted border-2 border-border rounded-md">
+              <div className="text-lg sm:text-xl md:text-2xl font-black tabular-nums text-foreground">
                 {schedules.filter(s => getRealtimeStatus(s.ThoiGianBD, s.ThoiGianKT) === 3).length}
               </div>
               <div className="text-xs sm:text-sm text-muted-foreground">Đã kết thúc</div>
@@ -518,9 +518,9 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
       </Card>
 
       {/* Calendar */}
-      <Card className="border-0 shadow-lg" role="main" aria-label="Lịch học">
+      <Card className="border-2 border-border shadow-brutal" role="main" aria-label="Lịch học">
         <CardHeader className="pb-2 sm:pb-3">
-          <CardTitle className="text-sm sm:text-base md:text-lg text-foreground">
+          <CardTitle className="text-sm sm:text-base md:text-lg font-display font-bold text-foreground">
             Lịch học {studentName ? `của ${studentName}` : ''}
           </CardTitle>
         </CardHeader>
@@ -600,7 +600,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
       {/* Event Detail Dialog */}
       <Dialog open={!!selectedEvent} onOpenChange={(open) => { if (!open) setSelectedEvent(null); }}>
-        <DialogContent className="max-w-md w-[calc(100vw-2rem)] sm:w-full rounded-xl p-0 overflow-hidden gap-0">
+        <DialogContent className="max-w-md w-[calc(100vw-2rem)] sm:w-full rounded-md p-0 overflow-hidden gap-0">
           {selectedEvent && (() => {
             const isExam = (selectedEvent.resource as any).__isExam === true;
             const schedule = selectedEvent.resource as ScheduleWithMetadata;
@@ -634,13 +634,13 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
                   <div className="flex items-start justify-between gap-3 pr-6">
                     <div className="flex-1 min-w-0">
                       <Badge
-                        className="mb-2 text-xs font-medium border-0"
+                        className="mb-2 text-xs font-medium border-2 border-border"
                         style={{ backgroundColor: `${textColor}20`, color: textColor }}
                       >
                         {statusText}
                       </Badge>
                       <DialogTitle
-                        className="text-base sm:text-lg font-bold leading-snug"
+                        className="text-base sm:text-lg font-display font-black leading-snug"
                         style={{ color: textColor }}
                       >
                         {isExam ? exam.TenKT : `${schedule.TenMonHoc}`}
@@ -683,7 +683,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
                       href={schedule.GoogleMap}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline mt-1"
+                      className="flex items-center gap-2 text-sm font-medium text-foreground underline decoration-2 underline-offset-2 hover:text-secondary-foreground hover:bg-secondary px-1 -mx-1 rounded-sm mt-1"
                     >
                       <span>🗺️</span>
                       <span>Xem trên Google Maps</span>

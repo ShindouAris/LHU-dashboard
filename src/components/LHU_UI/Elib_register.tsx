@@ -302,39 +302,39 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
 
     if (loading) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-50">
-            <div className="text-gray-600">Đang tải dữ liệu...</div>
+        <div className="flex items-center justify-center min-h-screen bg-background">
+            <div className="text-muted-foreground">Đang tải dữ liệu...</div>
         </div>
     );
     }
 
     if (!roomsState || !thietBiAvailable) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="text-red-600">Không thể tải dữ liệu</div>
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <div className="text-destructive font-bold">Không thể tải dữ liệu</div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
+        <div className="min-h-screen bg-background py-8 px-4">
             <div className="max-w-4xl mx-auto">
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+            <div className="bg-card border-2 border-border rounded-md shadow-brutal overflow-hidden">
                 {/* Header */}
-                <div className="bg-blue-600 dark:bg-blue-700 text-white px-6 py-4">
-                <h1 className="text-2xl font-bold">Đăng Ký Phòng Học Nhóm
-                <Button className='inline items-end float-right p-1 rounded-md hover:bg-red-500 hover:text-white dark:hover:bg-red-600' variant={'ghost'}>
+                <div className="bg-section text-section-foreground border-b-2 border-border px-6 py-4">
+                <h1 className="text-2xl font-display font-black">Đăng Ký Phòng Học Nhóm
+                <Button className='inline items-end float-right p-1 rounded-md hover:bg-destructive hover:text-destructive-foreground' variant={'ghost'}>
                     <MdClose size={20} onClick={onClose} />
                 </Button>
                 </h1>
-                
+
                 </div>
 
                 <div className="p-6 space-y-6">
                 {/* Khu vực 1: Thông tin thời gian */}
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 dark:text-white">
-                    <Calendar className="w-5 h-5 dark:text-gray-300" />
+                <div className="bg-muted border-2 border-border rounded-md p-4">
+                    <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2 text-foreground">
+                    <Calendar className="w-5 h-5 text-foreground" strokeWidth={2.5} />
                     Thông Tin Thời Gian
                     {(startTime !== get_time() || endTime !== null || date.getDay() !== getDate().getDay()) && (
                     <Button className='flex items-start' variant={'destructive'} onClick={() => {
@@ -348,23 +348,23 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Ngày</label>
-                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded dark:text-white">
-                        <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                        <label className="block text-sm font-medium text-muted-foreground mb-1">Ngày</label>
+                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-card border-2 border-border rounded-md text-foreground">
+                        <Calendar className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
                         <DayPicker />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giờ bắt đầu</label>
-                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded dark:text-white">
-                        <Clock className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                        <label className="block text-sm font-medium text-muted-foreground mb-1">Giờ bắt đầu</label>
+                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-card border-2 border-border rounded-md text-foreground">
+                        <Clock className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
                         <StartTImePicker />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Giờ kết thúc</label>
-                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded dark:text-white">
-                        <Clock className="w-4 h-4 text-gray-500 dark:text-gray-300" />
+                        <label className="block text-sm font-medium text-muted-foreground mb-1">Giờ kết thúc</label>
+                        <div className="flex items-center gap-2 px-3 py-2 h-14 bg-card border-2 border-border rounded-md text-foreground">
+                        <Clock className="w-4 h-4 text-muted-foreground" strokeWidth={2.5} />
                         <EndTimePicker />
                         </div>
                     </div>
@@ -373,49 +373,49 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
 
                 {/* Khu vực 2: Danh sách phòng */}
                 <div>
-                    <h2 className="text-lg font-semibold mb-4 dark:text-white">Chọn Phòng 
-                        <span className='block text-red-700 dark:text-red-400 text-sm underline cursor-help hover:opacity-50' onClick={() => setDialogOpen(true)}>Phòng nào là phù hợp với bạn?</span>
+                    <h2 className="text-lg font-display font-bold mb-4 text-foreground">Chọn Phòng
+                        <span className='block text-destructive text-sm underline cursor-help hover:opacity-50' onClick={() => setDialogOpen(true)}>Phòng nào là phù hợp với bạn?</span>
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {roomsState?.data.map(room => {
                         const isBusy = room.isBusy === 1;
                         const isSelected = selectedRoomId === room.PhongID;
-                        
+
                         return (
                             <div
                                 key={room.PhongID}
                                 onClick={() => handleRoomSelect(room.PhongID, room.isBusy)}
                                 className={`
-                                border rounded-lg p-4 transition-all
+                                border-2 border-border rounded-md p-4 transition-all
                                 ${isBusy || !endTime || !startTime
-                                    ? 'bg-gray-100 dark:bg-gray-700 opacity-60 cursor-not-allowed border-gray-300 dark:border-gray-600' 
+                                    ? 'bg-muted opacity-60 cursor-not-allowed'
                                     : isSelected
-                                    ? 'border-blue-500 dark:border-blue-400 border-2 bg-blue-50 dark:bg-blue-900/30 cursor-pointer'
-                                    : 'border-gray-300 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-400 hover:shadow-md cursor-pointer bg-white dark:bg-gray-800'
+                                    ? 'bg-secondary text-secondary-foreground shadow-brutal cursor-pointer'
+                                    : 'hover:shadow-brutal-sm cursor-pointer bg-card'
                                 }
                                 `}
                             >
                                 <div className="flex items-start gap-3">
                                 <div className="mt-1">
                                     {isBusy ? (
-                                    <Lock className="w-5 h-5 text-red-500 dark:text-red-400" />
+                                    <Lock className="w-5 h-5 text-destructive" strokeWidth={2.5} />
                                     ) : (
-                                    <Check className={`w-5 h-5 ${isSelected ? 'text-blue-600 dark:text-blue-400' : 'text-green-500 dark:text-green-400'}`} />
+                                    <Check className={`w-5 h-5 ${isSelected ? 'text-foreground' : 'text-[hsl(142_71%_45%)]'}`} strokeWidth={2.5} />
                                     )}
                                 </div>
                                 <div className="flex-1">
-                                    <h3 className="font-bold text-gray-900 dark:text-white">{room.TenPhong}</h3>
-                                    <div className="grid items-left gap-1 text-sm text-gray-600 dark:text-gray-300 mt-1">
-                                        
+                                    <h3 className="font-display font-bold text-foreground">{room.TenPhong}</h3>
+                                    <div className="grid items-left gap-1 text-sm text-muted-foreground mt-1">
+
                                         <span className='inline'>Sức chứa: {room.SucChuaMin} - {room.SucChuaMax} người</span>
                                     </div>
                                     {isBusy && (
-                                    <div className="grid items-center gap-1 text-sm text-red-500 dark:text-red-400 mt-2">
+                                    <div className="grid items-center gap-1 text-sm text-destructive mt-2">
                                         <span>Phòng đã được đặt trước trong khung giờ này</span>
                                     </div>
                                     )}
                                     {(!endTime || !startTime ) && (
-                                    <div className="grid items-center gap-1 text-sm text-red-500 dark:text-red-400 mt-2">
+                                    <div className="grid items-center gap-1 text-sm text-destructive mt-2">
                                         <span>Vui lòng chọn thời gian bắt đầu và kết thúc</span>
                                     </div>
                                     )}
@@ -429,7 +429,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
 
                 {/* Khu vực 3: Danh sách thiết bị */}
                 <div>
-                    <h2 className="text-lg font-semibold mb-4 dark:text-white">Đăng Ký Thiết Bị</h2>
+                    <h2 className="text-lg font-display font-bold mb-4 text-foreground">Đăng Ký Thiết Bị</h2>
                     <div className="space-y-3">
                     {thietBiAvailable?.data.map(eq => {
                         // const isOverbooked = eq.SoLuong - eq.SoLuongDaMuon < 0;
@@ -439,27 +439,27 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                         const current = thietBiMuonMuon.find(tb => tb.ThietBiID === eq.ThietBiID)?.SoLuongDKMuon ?? 0
 
                         return (
-                            <div 
+                            <div
                                 key={eq.ThietBiID}
                                 className={`
-                                    border rounded-lg p-4 transition-all
+                                    border-2 border-border rounded-md p-4 transition-all
                                     ${isOutOfStock || !endTime || !startTime
-                                        ? 'bg-gray-50 dark:bg-gray-700/50 border-gray-300 dark:border-gray-600 opacity-60' 
-                                        : 'border-gray-300 dark:border-gray-600 hover:shadow-sm bg-white dark:bg-gray-800'
+                                        ? 'bg-muted opacity-60'
+                                        : 'hover:shadow-brutal-sm bg-card'
                                     }
                                 `}
                             >
                                 <div className="flex flex-col gap-3">
                                     {/* Header: Tên thiết bị */}
                                     <div className="flex items-start justify-between gap-2">
-                                        <h4 className="font-semibold text-gray-900 dark:text-white flex-1">
+                                        <h4 className="font-display font-bold text-foreground flex-1">
                                             {eq.TenThietBi}
                                         </h4>
                                         <div className={`
-                                            text-xs font-medium px-2 py-1 rounded-full whitespace-nowrap
-                                            ${isOutOfStock 
-                                                ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-400' 
-                                                : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                                            text-xs font-bold px-2 py-1 border-2 border-border rounded-md whitespace-nowrap text-black
+                                            ${isOutOfStock
+                                                ? 'bg-[hsl(27_96%_61%)]'
+                                                : 'bg-[hsl(142_71%_45%)]'
                                             }
                                         `}>
                                             {isOutOfStock ? 'Hết thiết bị' : `Còn ${maxQuantity}/${eq.SoLuong}`}
@@ -469,7 +469,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                                     {/* Controls: Số lượng */}
                                     {canBook ? (
                                         <div className="flex items-center justify-between gap-3">
-                                            <span className="text-sm text-gray-600 dark:text-gray-300">
+                                            <span className="text-sm text-muted-foreground">
                                                 Số lượng mượn:
                                             </span>
                                             <div className="flex items-center gap-2">
@@ -478,7 +478,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                                                     disabled={current === 0}
                                                     variant={'outline'}
                                                     size="sm"
-                                                    className="w-9 h-9 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                                                    className="w-9 h-9 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     -
                                                 </Button>
@@ -492,21 +492,21 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                                                         const value = parseInt(e.target.value) || 0;
                                                         handleEquipmentChange(eq, Math.min(maxQuantity, Math.max(0, value)));
                                                     }}
-                                                    className="w-16 h-9 text-center border dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
+                                                    className="w-16 h-9 text-center border-2 border-border rounded-md"
                                                 />
                                                 <Button
                                                     onClick={() => handleEquipmentChange(eq, Math.min(maxQuantity, current + 1))}
                                                     disabled={current >= maxQuantity || isOutOfStock || !endTime || !startTime}
                                                     variant={'outline'}
                                                     size="sm"
-                                                    className="w-9 h-9 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed dark:border-gray-600 dark:hover:bg-gray-700"
+                                                    className="w-9 h-9 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
                                                     +
                                                 </Button>
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="text-center py-2 text-sm text-gray-500 dark:text-gray-400">
+                                        <div className="text-center py-2 text-sm text-muted-foreground">
                                             Không thể mượn thiết bị này
                                         </div>
                                     )}
@@ -519,10 +519,10 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 </div>
 
                 {/* Footer */}
-                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-4 flex justify-end gap-3 border-t dark:border-gray-700">
+                <div className="bg-muted px-6 py-4 flex justify-end gap-3 border-t-2 border-border">
                     <Button
                         onClick={handleCancel}
-                        className="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                        className="px-6 py-2 rounded-md"
                         variant={'outline'}
                     >
                         Hủy
@@ -531,10 +531,10 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                         onClick={submit}
                         disabled={!selectedRoomId || !isStartTimeInPast()}
                         className={`
-                        px-6 py-2 rounded-lg font-medium transition-colors
+                        px-6 py-2 rounded-md font-bold transition-colors
                         ${selectedRoomId || !isStartTimeInPast()
-                            ? 'bg-blue-600 dark:bg-blue-700 text-white hover:bg-blue-700 dark:hover:bg-blue-800' 
-                            : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                            ? 'bg-primary text-primary-foreground border-2 border-border shadow-brutal hover:bg-primary/90'
+                            : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }
                         `}
                     >
@@ -550,7 +550,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                     </DialogHeader>
                     <DialogDescription>
                         Bạn có chắc chắn muốn đăng ký phòng học nhóm với các thông tin đã chọn không? Vui lòng kiểm tra kỹ trước khi xác nhận.<br/>
-                        <span className='font-bold text-red-700'>Lưu ý: Đọc kỹ các quy định về việc sử dụng phòng học nhóm trong thư viện ở trang trước đó.</span>
+                        <span className='font-bold text-destructive'>Lưu ý: Đọc kỹ các quy định về việc sử dụng phòng học nhóm trong thư viện ở trang trước đó.</span>
                         <PowerOffSlide
                             label='Tôi dong tinh'
                             onPowerOff={() =>{ setIsAccepted(true); handleSubmit();}}

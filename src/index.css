@@ -4,59 +4,79 @@
 
 @layer base {
   :root {
-    --background: 220 23% 95%;
-    --foreground: 234 16% 35%;
-    --card: 220 22% 92%;
-    --card-foreground: 234 16% 35%;
-    --popover: 225 16% 82%;
-    --popover-foreground: 234 16% 35%;
-    --primary: 267 85% 58%;
-    --primary-foreground: 220 23% 95%;
-    --secondary: 225 14% 77%;
-    --secondary-foreground: 234 16% 35%;
-    --muted: 225 16% 82%;
-    --muted-foreground: 231 10% 59%;
-    --accent: 230 98% 72%;
-    --accent-foreground: 220 23% 95%;
-    --destructive: 347 87% 44%;
-    --destructive-foreground: 220 23% 95%;
-    --border: 225 14% 77%;
-    --input: 225 14% 77%;
-    --ring: 267 85% 58%;
-    --radius: 0.75rem;
-    --chart-1: 220 92% 54%;
-    --chart-2: 109 58% 40%;
-    --chart-3: 22 99% 52%;
-    --chart-4: 267 85% 58%;
-    --chart-5: 317 73% 69%;
+    /* Neobrutalism — light ("cream paper" + black keylines) */
+    --background: 48 100% 98%;
+    --foreground: 0 0% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 4%;
+    --primary: 50 100% 50%;          /* yellow */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 199 93% 60%;        /* cyan */
+    --secondary-foreground: 0 0% 4%;
+    --muted: 46 40% 92%;
+    --muted-foreground: 240 4% 34%;
+    --accent: 46 40% 88%;            /* subtle hover fill */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 84% 60%;        /* red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 4%;               /* ink — borders + hard shadows */
+    --input: 0 0% 4%;
+    --ring: 0 0% 4%;
+    --radius: 0.375rem;
+    /* Per-section signature accent (wayfinding); overridden by [data-section] */
+    --section: 50 100% 50%;
+    --section-foreground: 0 0% 4%;
+    --chart-1: 50 100% 50%;          /* yellow */
+    --chart-2: 199 93% 60%;          /* cyan */
+    --chart-3: 334 100% 71%;         /* pink */
+    --chart-4: 83 78% 56%;           /* lime */
+    --chart-5: 258 90% 66%;          /* purple */
   }
 
   .dark {
-    --background: 240 21% 15%;
-    --foreground: 226 64% 88%;
-    --card: 240 21% 12%;
-    --card-foreground: 226 64% 88%;
-    --popover: 237 16% 23%;
-    --popover-foreground: 226 64% 88%;
-    --primary: 267 84% 81%;
-    --primary-foreground: 240 23% 9%;
-    --secondary: 237 14% 31%;
-    --secondary-foreground: 226 64% 88%;
-    --muted: 237 16% 23%;
-    --muted-foreground: 231 13% 55%;
-    --accent: 234 100% 85%;
-    --accent-foreground: 240 23% 9%;
-    --destructive: 343 81% 75%;
-    --destructive-foreground: 240 23% 9%;
-    --border: 237 14% 31%;
-    --input: 237 14% 31%;
-    --ring: 267 84% 81%;
-    --chart-1: 217 92% 76%;
-    --chart-2: 115 54% 76%;
-    --chart-3: 23 92% 75%;
-    --chart-4: 267 84% 81%;
-    --chart-5: 316 72% 86%;
+    /* Neobrutalism — dark ("ink paper" + off-white keylines, bright accents kept) */
+    --background: 240 6% 8%;
+    --foreground: 60 11% 95%;
+    --card: 240 8% 14%;
+    --card-foreground: 60 11% 95%;
+    --popover: 240 8% 14%;
+    --popover-foreground: 60 11% 95%;
+    --primary: 50 100% 50%;
+    --primary-foreground: 0 0% 4%;
+    --secondary: 199 93% 60%;
+    --secondary-foreground: 0 0% 4%;
+    --muted: 240 7% 19%;
+    --muted-foreground: 240 5% 68%;
+    --accent: 240 7% 24%;
+    --accent-foreground: 60 11% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 60 11% 92%;            /* off-white — borders + hard shadows flip light */
+    --input: 60 11% 92%;
+    --ring: 60 11% 92%;
+    --section: 50 100% 50%;
+    --section-foreground: 0 0% 4%;
+    --chart-1: 50 100% 50%;
+    --chart-2: 199 93% 60%;
+    --chart-3: 334 100% 71%;
+    --chart-4: 83 78% 56%;
+    --chart-5: 258 90% 66%;
   }
+
+  /* Per-section signature accent — set via data-section on the page/shell root */
+  [data-section='timetable'],
+  [data-section='weather'] { --section: 199 93% 60%; --section-foreground: 0 0% 4%; }
+  [data-section='mark'],
+  [data-section='diemrenluyen'] { --section: 83 78% 56%; --section-foreground: 0 0% 4%; }
+  [data-section='diemdanh'],
+  [data-section='thuvien'] { --section: 334 100% 71%; --section-foreground: 0 0% 4%; }
+  [data-section='qrscan'],
+  [data-section='chisaAI'] { --section: 258 90% 66%; --section-foreground: 0 0% 100%; }
+  [data-section='parking'],
+  [data-section='toollhu'] { --section: 27 96% 61%; --section-foreground: 0 0% 4%; }
+  [data-section='settings'] { --section: 215 14% 47%; --section-foreground: 0 0% 100%; }
 }
 
 @layer base {
@@ -78,6 +98,16 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  /* Bold grotesque display for headings (Space Grotesk), Inter for body */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  /* Tabular figures for stats/numbers */
+  .tabular-nums {
+    font-feature-settings: "tnum" 1;
+  }
+
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
@@ -95,49 +125,43 @@
     @apply bg-slate-400 dark:bg-slate-500;
   }
 
-  /* Smooth transitions */
+  /* Snappy color transitions (neobrutalism favors decisive, quick changes) */
   * {
-    @apply transition-colors duration-200;
+    @apply transition-colors duration-150;
   }
 
-  /* Focus styles */
+  /* Focus styles — thick, high-contrast ring (ink) for keyboard a11y */
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
   }
 
-  /* Glass morphism effect */
-  .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20;
+  /* Neobrutalism "press" interaction: element shifts toward its hard shadow. */
+  .brutal-hover {
+    @apply transition-[transform,box-shadow] duration-150 ease-out;
+  }
+  .brutal-hover:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px 0px hsl(var(--border));
+  }
+  .brutal-hover:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 hsl(var(--border));
   }
 
-  .glass-dark {
-    @apply bg-[#1e1e2e]/80 backdrop-blur-md border border-[#45475a]/20;
-  }
-
-  /* Gradient backgrounds */
-  .gradient-primary {
-    @apply bg-gradient-to-br from-[#cba6f7] via-[#b4befe] to-[#89b4fa];
-  }
-
-  .gradient-secondary {
-    @apply bg-gradient-to-br from-[#89b4fa] via-[#b4befe] to-[#cba6f7];
-  }
-
-  .gradient-success {
-    @apply bg-gradient-to-br from-[#a6e3a1] via-[#94e2d5] to-[#89dceb];
-  }
-
-  .gradient-warning {
-    @apply bg-gradient-to-br from-[#f9e2af] via-[#fab387] to-[#f5c2e7];
-  }
-
-  .gradient-danger {
-    @apply bg-gradient-to-br from-[#f38ba8] via-[#eba0ac] to-[#f2cdcd];
-  }
-
-  /* Card hover effects */
-  .card-hover {
-    @apply hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+  /* Respect reduced-motion: disable the press/ambient motion, keep instant state */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+    .brutal-hover:hover,
+    .brutal-hover:active {
+      transform: none !important;
+    }
   }
 
   /* Button animations */

@@ -515,20 +515,20 @@ export const QRScanner: React.FC = () => {
     <div className="flex flex-col items-center justify-center min-h-screen text-foreground select-none p-4">
       {/* App Bar */}
       <div className="w-full max-w-md mb-4">
-        <div className="bg-gradient-to-r from-[#cba6f7] to-[#b4befe] text-[#1e1e2e] px-4 py-4 rounded-t-lg shadow-md">
+        <div className="bg-section text-section-foreground border-2 border-border rounded-t-md shadow-brutal px-4 py-4">
           <div className="flex items-center gap-3">
-            <QrCode className="w-6 h-6" />
-            <h1 className="text-xl font-medium">Quét mã điểm danh</h1>
-            <FaRegQuestionCircle size={25} className="ml-auto text-[#1e1e2e]/70 hover:text-[#1e1e2e]" onClick={handleDialog} />
+            <QrCode className="w-6 h-6" strokeWidth={2.5} />
+            <h1 className="text-xl font-display font-bold">Quét mã điểm danh</h1>
+            <FaRegQuestionCircle size={25} className="ml-auto cursor-pointer opacity-70 hover:opacity-100" onClick={handleDialog} />
           </div>
         </div>
       </div>
 
       {/* Main Card */}
-      <Card className="w-full max-w-md bg-card border border-border shadow-lg rounded-lg overflow-hidden">
+      <Card className="w-full max-w-md bg-card overflow-hidden">
         <CardContent className="p-0">
           {/* Scanner Container */}
-          <div className="relative w-full bg-black overflow-hidden">
+          <div className="relative mx-2 mt-2 bg-black overflow-hidden border-2 border-border rounded-md">
             <div
               className="relative w-full aspect-square touch-none"
               onTouchMove={handleTouchMove}
@@ -545,7 +545,7 @@ export const QRScanner: React.FC = () => {
 
               {/* Zoom indicator */}
               {scale > 1 && (
-                <div className="absolute top-4 right-4 bg-[#1e1e2e]/70 text-[#cdd6f4] px-3 py-1 rounded-full text-sm font-medium">
+                <div className="absolute top-4 right-4 bg-primary text-black border-2 border-border px-3 py-1 rounded-full text-sm font-bold">
                   {scale.toFixed(1)}x
                 </div>
               )}
@@ -561,21 +561,21 @@ export const QRScanner: React.FC = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="bg-[#a6e3a1]/15 border-l-4 border-[#a6e3a1] p-4 rounded"
+                  className="bg-[hsl(142_71%_45%)] text-black border-2 border-border rounded-md shadow-brutal-sm p-4"
                 >
-                  <div className="flex items-start">
+                  <div className="flex items-start gap-2">
                     <img className="w-8 h-8" src="/Success.gif" alt="Success"/>
                     <div className="flex-1">
-                      <p className="text-[#40a02b] dark:text-[#a6e3a1] font-medium text-sm">
+                      <p className="font-bold text-sm">
                         {
-                        scanned.substring(0,3) === "STB" ? "Điểm danh thành công" : 
+                        scanned.substring(0,3) === "STB" ? "Điểm danh thành công" :
                         scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" :
                         scanned.substring(0,3) === "LIB" ? "Quét mã thư viện thành công" : "Thành công"
                         }
                       </p>
-                      <p className="text-[#40a02b]/80 dark:text-[#a6e3a1]/80 text-xs mt-1 break-all">
+                      <p className="text-black/80 text-xs mt-1 break-all">
                         {scanned.substring(0,3) === "STB" ? monHocDaDiemDanh ? `Môn học: ${monHocDaDiemDanh}` : scanned :
-                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" : 
+                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" :
                         scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""
                         }
                       </p>
@@ -589,26 +589,26 @@ export const QRScanner: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
                   className={`${
-                    isExpiredQR 
-                      ? "bg-[#f38ba8]/20 border-l-4 border-[#f38ba8] shadow-lg ring-2 ring-[#f38ba8]/30" 
-                      : "bg-[#f38ba8]/10 border-l-4 border-[#f38ba8]"
-                  } p-4 rounded`}
+                    isExpiredQR
+                      ? "bg-destructive text-black border-2 border-border shadow-brutal"
+                      : "bg-[hsl(334_100%_71%)] text-black border-2 border-border shadow-brutal-sm"
+                  } p-4 rounded-md`}
                 >
                   <div className="flex items-start gap-3">
                     {isExpiredQR ? (
-                      <AlertTriangle className="w-6 h-6 text-[#f38ba8] flex-shrink-0 mt-0.5 animate-pulse" />
+                      <AlertTriangle className="w-6 h-6 text-black flex-shrink-0 mt-0.5 animate-pulse" strokeWidth={2.5} />
                     ) : (
-                      <AlertCircle className="w-5 h-5 text-[#f38ba8] flex-shrink-0 mt-0.5" />
+                      <AlertCircle className="w-5 h-5 text-black flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                     )}
                     <div className="flex-1">
-                      <p className={`${isExpiredQR ? "text-[#d20f39] dark:text-[#f38ba8] font-bold text-base" : "text-[#d20f39] dark:text-[#f38ba8] font-medium text-sm"}`}>
+                      <p className={`${isExpiredQR ? "font-bold text-base" : "font-bold text-sm"}`}>
                         {isExpiredQR ? "Cảnh báo: Mã QR đã hết hạn" : "Lỗi"}
                       </p>
-                      <p className={`${isExpiredQR ? "text-[#d20f39] dark:text-[#f38ba8] font-semibold" : "text-[#d20f39] dark:text-[#f38ba8]"} text-xs mt-1 break-all`}>
+                      <p className={`${isExpiredQR ? "font-semibold" : ""} text-xs mt-1 break-all`}>
                         {error}
                       </p>
                       {isExpiredQR && (
-                        <p className="text-[#d20f39] dark:text-[#f38ba8] text-xs mt-2 italic">
+                        <p className="text-xs mt-2 italic">
                           Vui lòng quét mã QR mới để điểm danh.
                         </p>
                       )}
@@ -621,11 +621,11 @@ export const QRScanner: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="bg-[#89b4fa]/15 border-l-4 border-[#89b4fa] p-4 rounded"
+                  className="bg-secondary text-black border-2 border-border rounded-md shadow-brutal-sm p-4"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-7 h-7 border-4 border-[#45475a] border-t-[#89b4fa] rounded-full animate-spin"></div>
-                    <p className="text-[#1e66f5] dark:text-[#89b4fa] text-sm">
+                    <div className="w-7 h-7 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
+                    <p className="text-black font-bold text-sm">
                       Đang quét QR...
                     </p>
                   </div>
@@ -651,7 +651,8 @@ export const QRScanner: React.FC = () => {
             </Button>
             <Button
               onClick={handleReset}
-              className="flex-1 bg-[#8839ef] hover:bg-[#6a1fd4] text-white rounded shadow-md hover:shadow-lg transition-all duration-200 py-6 font-medium"
+              variant="section"
+              className="flex-1 py-6 font-bold"
             >
               <RefreshCw className="w-5 h-5 mr-2" />
               Reset
@@ -662,11 +663,13 @@ export const QRScanner: React.FC = () => {
 
       {/* User List Card - Shows when LGN QR is scanned */}
       {showUserListAnimation && newlyAddedUser && (
-        <Card className="w-full max-w-md mt-4 border-2 border-[#a6e3a1] bg-card">
+        <Card className="w-full max-w-md mt-4 bg-card">
           <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <UserPlus className="w-5 h-5 text-[#40a02b] dark:text-[#a6e3a1]" />
-              <h3 className="font-semibold text-foreground">Người dùng đã được thêm</h3>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(142_71%_45%)] p-1.5">
+                <UserPlus className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
+              <h3 className="font-display font-bold text-foreground">Người dùng đã được thêm</h3>
             </div>
             
             <div className="space-y-2 max-h-64 overflow-y-auto">
@@ -675,8 +678,8 @@ export const QRScanner: React.FC = () => {
                 return (
                   <div
                     key={user.UserID}
-                    className={`flex items-center gap-3 p-2 rounded-lg ${
-                      isNewUser ? "bg-[#a6e3a1]/15 ring-2 ring-[#a6e3a1] shadow-md" : ""
+                    className={`flex items-center gap-3 p-2 rounded-md ${
+                      isNewUser ? "bg-[hsl(142_71%_45%)] text-black border-2 border-border shadow-brutal-sm" : "border-2 border-transparent"
                     }`}
                   >
                     <div className="relative">
@@ -684,31 +687,31 @@ export const QRScanner: React.FC = () => {
                         <img
                           src={user.Avatar}
                           alt={user.FullName}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                          className="w-10 h-10 rounded-full object-cover border-2 border-border"
                         />
                       ) : (
-                        <div className="w-10 h-10 rounded-full bg-[#8839ef] flex items-center justify-center text-white font-semibold">
+                        <div className="w-10 h-10 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] flex items-center justify-center text-black font-bold">
                           {user.FullName?.charAt(0) || user.UserName?.charAt(0) || "?"}
                         </div>
                       )}
                       {isNewUser && (
-                        <div className="absolute -top-1 -right-1 bg-[#a6e3a1] rounded-full p-0.5">
-                          <CheckCircle2 className="w-4 h-4 text-[#1e1e2e]" />
+                        <div className="absolute -top-1 -right-1 bg-primary border-2 border-border rounded-full p-0.5">
+                          <CheckCircle2 className="w-4 h-4 text-black" strokeWidth={2.5} />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={`font-medium text-sm truncate ${
-                        isNewUser ? "text-[#40a02b] dark:text-[#a6e3a1] font-semibold" : "text-foreground"
+                      <p className={`font-bold text-sm truncate ${
+                        isNewUser ? "text-black" : "text-foreground"
                       }`}>
                         {user.FullName || user.UserName || "Người dùng"}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">
+                      <p className={`text-xs truncate ${isNewUser ? "text-black/70" : "text-muted-foreground"}`}>
                         {user.UserID} {user.Class ? `• ${user.Class}` : ""}
                       </p>
                     </div>
                     {isNewUser && (
-                      <div className="text-[#40a02b] dark:text-[#a6e3a1] text-xs font-semibold">
+                      <div className="text-black text-xs font-bold uppercase tracking-wide">
                         Mới
                       </div>
                     )}
@@ -717,9 +720,9 @@ export const QRScanner: React.FC = () => {
               })}
             </div>
             
-            <div className="mt-3 pt-3 border-t border-border">
+            <div className="mt-3 pt-3 border-t-2 border-border">
               <p className="text-xs text-center text-muted-foreground">
-                Tổng số: <span className="font-semibold text-[#40a02b] dark:text-[#a6e3a1]">{usersList.length}</span> người dùng
+                Tổng số: <span className="font-bold text-foreground">{usersList.length}</span> người dùng
               </p>
             </div>
           </CardContent>
@@ -733,7 +736,7 @@ export const QRScanner: React.FC = () => {
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
           onClick={() => setScale(1)}
-          className="fixed bottom-8 right-8 w-14 h-14 bg-[#8839ef] hover:bg-[#6a1fd4] text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center z-40"
+          className="fixed bottom-8 right-8 w-14 h-14 bg-section text-section-foreground border-2 border-border rounded-full shadow-brutal hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brutal-sm active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-[transform,box-shadow] duration-150 flex items-center justify-center z-40"
         >
           <span className="text-sm font-bold">1x</span>
         </motion.button>
@@ -751,7 +754,7 @@ export const QRScanner: React.FC = () => {
                         loop
                         controls
                         playsInline
-                        className="rounded-lg w-full max-h-[70vh] object-contain"
+                        className="rounded-md border-2 border-border w-full max-h-[70vh] object-contain"
                     />
                 </DialogDescription>
             </DialogContent>
@@ -759,11 +762,13 @@ export const QRScanner: React.FC = () => {
 
         {/* Expired QR Code Warning Dialog */}
         <Dialog open={dialogExpiredQROpen} onOpenChange={setDialogExpiredQROpen}>
-            <DialogContent className="max-w-md border-[#f38ba8] border-2 bg-card">
+            <DialogContent className="max-w-md bg-card">
                 <DialogHeader>
                     <div className="flex items-center gap-3 mb-2">
-                        <AlertTriangle className="w-8 h-8 text-[#f38ba8] animate-pulse" />
-                        <DialogTitle className="text-foreground text-xl font-bold">
+                        <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-destructive p-1.5">
+                            <AlertTriangle className="w-7 h-7 text-black animate-pulse" strokeWidth={2.5} />
+                        </span>
+                        <DialogTitle className="text-foreground text-xl font-display font-bold">
                             CẢNH BÁO: Mã QR đã hết hạn
                         </DialogTitle>
                     </div>
@@ -772,11 +777,11 @@ export const QRScanner: React.FC = () => {
                     <p className="font-semibold text-base">
                         Mã QR điểm danh bạn vừa quét đã hết hạn sử dụng.
                     </p>
-                    <div className="bg-[#f38ba8]/10 p-3 rounded-lg border border-[#f38ba8]/30">
-                        <p className="text-sm font-medium text-[#d20f39] dark:text-[#f38ba8] mb-1">
+                    <div className="bg-destructive text-black p-3 rounded-md border-2 border-border">
+                        <p className="text-sm font-bold mb-1">
                             Chi tiết lỗi:
                         </p>
-                        <p className="text-sm text-[#d20f39] dark:text-[#f38ba8] break-all">
+                        <p className="text-sm break-all">
                             {error}
                         </p>
                     </div>
@@ -787,14 +792,13 @@ export const QRScanner: React.FC = () => {
                 <DialogFooter className="mt-4">
                     <Button
                         onClick={handleCloseExpiredDialog}
-                        className="bg-[#f38ba8] hover:bg-[#eba0ac] text-[#1e1e2e] font-semibold"
+                        variant="destructive"
                     >
                         Đã hiểu
                     </Button>
                     <Button
                         onClick={handleReset}
                         variant="outline"
-                        className="border-[#f38ba8]/50 text-[#d20f39] dark:text-[#f38ba8] hover:bg-[#f38ba8]/10"
                     >
                         <RefreshCw className="w-4 h-4 mr-2" />
                         Quét lại

@@ -142,7 +142,7 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
           {/* Tìm kiếm */}
           <div className="space-y-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-5 h-5" strokeWidth={2.5} />
               <Input
                 type="text"
                 placeholder="Tìm kiếm học sinh để thêm (nhập tên hoặc MSSV)..."
@@ -154,7 +154,7 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
 
             {/* Kết quả tìm kiếm */}
             {searchTerm && (
-              <Card className="bg-slate-50">
+              <Card className="bg-muted">
                 <CardHeader>
                   <CardTitle className="text-lg">
                     {searching ? 'Đang tìm kiếm...' : `Kết quả tìm kiếm (${searchResults.length})`}
@@ -162,7 +162,7 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
                 </CardHeader>
                 <CardContent>
                   {searchResults.length === 0 ? (
-                    <div className="text-center py-4 text-gray-500">
+                    <div className="text-center py-4 text-muted-foreground">
                       {searching ? 'Đang tìm...' : 'Không tìm thấy học sinh nào'}
                     </div>
                   ) : (
@@ -170,15 +170,15 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
                       {searchResults.map((student) => (
                         <div
                           key={student.ObjectID}
-                          className="flex items-center justify-between p-3 bg-white rounded-lg hover:shadow-md transition-shadow"
+                          className="flex items-center justify-between p-3 bg-card border-2 border-border rounded-md hover:shadow-brutal-sm transition-shadow"
                         >
                           <div className="flex-1">
-                            <h4 className="font-semibold">{student.ObjectName}</h4>
+                            <h4 className="font-display font-bold">{student.ObjectName}</h4>
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="secondary" className="text-xs">
                                 {student.ObjectNickName}
                               </Badge>
-                              <span className="text-sm text-gray-600">{student.Description}</span>
+                              <span className="text-sm text-muted-foreground">{student.Description}</span>
                             </div>
                           </div>
                           <Button
@@ -207,38 +207,38 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
 
           {/* Danh sách học sinh đã thêm */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-lg font-display font-bold mb-3">
               Thành viên đã thêm ({addedStudents.length})
             </h3>
-            
+
             {loading ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground">
                 Đang tải danh sách thành viên...
               </div>
             ) : addedStudents.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-muted-foreground">
                 Chưa có thành viên nào. Sử dụng ô tìm kiếm để thêm thành viên.
               </div>
             ) : (
               <div className="space-y-3">
                 {addedStudents.map((student) => (
-                  <Card key={student.StudentID} className="hover:shadow-md transition-shadow">
+                  <Card key={student.StudentID} className="hover:shadow-brutal-sm transition-shadow">
                     <CardContent className="flex items-center justify-between p-4">
                       <div className="flex-1">
-                        <h4 className="font-semibold text-lg">
+                        <h4 className="font-display font-bold text-lg">
                           {student.FirstName} {student.LastName}
                         </h4>
                         <div className="flex items-center gap-3 mt-1">
                           <Badge variant="secondary">{student.StudentID}</Badge>
                           {student.Email && (
-                            <span className="text-sm text-gray-600">{student.Email}</span>
+                            <span className="text-sm text-muted-foreground">{student.Email}</span>
                           )}
                           {student.DepartmentName && (
-                            <span className="text-sm text-gray-600">{student.DepartmentName}</span>
+                            <span className="text-sm text-muted-foreground">{student.DepartmentName}</span>
                           )}
                         </div>
                         {student.ThoiGianXacNhan && (
-                          <div className="text-xs text-green-600 mt-1">
+                          <div className="text-xs text-[hsl(142_71%_45%)] font-bold mt-1">
                             ✓ Đã xác nhận lúc {new Date(student.ThoiGianXacNhan).toLocaleString('vi-VN')}
                           </div>
                         )}
@@ -247,7 +247,7 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
                         variant="ghost"
                         size="icon"
                         onClick={() => removeStudent(student.StudentID)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
                       >
                         <X className="w-5 h-5" />
                       </Button>

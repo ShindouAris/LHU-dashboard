@@ -61,10 +61,10 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Sun className="h-6 w-6" /> Thời tiết
+          <h2 className="text-2xl sm:text-3xl font-display font-black text-foreground flex items-center gap-2">
+            <Sun className="h-6 w-6" strokeWidth={2.5} /> Thời tiết
           </h2>
-        </div>  
+        </div>
         {onBackToSchedule && (
           <Button variant="outline" onClick={onBackToSchedule} className="shrink-0">
             <ArrowLeft className="h-4 w-4 mr-2" /> Quay lại lịch học
@@ -73,7 +73,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
       </div>
 
       {currentWeather && (
-        <Card key={currentWeather.current.last_updated} className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+        <Card key={currentWeather.current.last_updated} className="overflow-hidden border-2 border-border rounded-md shadow-brutal bg-secondary text-secondary-foreground">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span className="flex items-center gap-2">
@@ -85,19 +85,19 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 flex flex-col items-center justify-center text-center">
-          <div className="text-2xl font-semibold">{Math.round(currentWeather.current.temp_c)}°C</div>
-          <div className="text-gray-600 dark:text-gray-300">{currentWeather.current.condition?.text || 'N/A'}</div>
+          <div className="text-5xl font-display font-black tabular-nums">{Math.round(currentWeather.current.temp_c)}°C</div>
+          <div className="font-semibold">{currentWeather.current.condition?.text || 'N/A'}</div>
           <div className="grid grid-cols-2 gap-3 text-sm w-full max-w-xs mx-auto">
-            <div className="flex items-center gap-2 justify-center"><Thermometer className="h-4 w-4" />Cao: {Math.round(currentWeather.current.temp_c)}°C</div>
-            <div className="flex items-center gap-2 justify-center"><Leaf className="h-4 w-4" />AQI: {computeAQIFromPM(currentWeather.current.air_quality.pm2_5, currentWeather.current.air_quality.pm10).aqi}</div>
-            <div className="flex items-center gap-2 justify-center"><Wind className="h-4 w-4" />Gió: {Math.round(currentWeather.current.wind_kph)} km/h</div>
-            <div className="flex items-center gap-2 justify-center"><Droplets className="h-4 w-4" />Ẩm: {Math.round(currentWeather.current.humidity)}%</div>
+            <div className="flex items-center gap-2 justify-center"><Thermometer className="h-4 w-4" strokeWidth={2.5} />Cao: {Math.round(currentWeather.current.temp_c)}°C</div>
+            <div className="flex items-center gap-2 justify-center"><Leaf className="h-4 w-4" strokeWidth={2.5} />AQI: {computeAQIFromPM(currentWeather.current.air_quality.pm2_5, currentWeather.current.air_quality.pm10).aqi}</div>
+            <div className="flex items-center gap-2 justify-center"><Wind className="h-4 w-4" strokeWidth={2.5} />Gió: {Math.round(currentWeather.current.wind_kph)} km/h</div>
+            <div className="flex items-center gap-2 justify-center"><Droplets className="h-4 w-4" strokeWidth={2.5} />Ẩm: {Math.round(currentWeather.current.humidity)}%</div>
           </div>
         </CardContent>
         <CardFooter>
-            <div className="w-full rounded-xl border text-center border-yellow-300 dark:border-yellow-700 bg-gradient-to-r from-yellow-50 to-yellow-100/70 dark:from-yellow-900/40 dark:to-yellow-800/30 px-4 py-3 text-sm text-yellow-900 dark:text-yellow-100 shadow-md whitespace-pre-line leading-relaxed">
+            <div className="w-full rounded-md border-2 text-center border-border bg-primary px-4 py-3 text-sm text-black shadow-brutal-sm whitespace-pre-line leading-relaxed">
                 ⚠️ Lưu ý thời tiết
-                <hr className="my-2 border-yellow-300 dark:border-yellow-700" />
+                <hr className="my-2 border-t-2 border-border" />
                 {get_warning(autoforecastResp, currentWeather)}
             </div>
         </CardFooter>
@@ -106,14 +106,14 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
       )}
 
       {loading && (
-        <Card className="border-0 shadow-lg">
+        <Card className="border-2 border-border rounded-md shadow-brutal">
           <CardContent className="py-8 text-center">Đang tải dữ liệu thời tiết…</CardContent>
         </Card>
       )}
 
       {error && (
-        <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">{error}</CardContent>
+        <Card className="border-2 border-border rounded-md shadow-brutal">
+          <CardContent className="py-8 text-center text-destructive">{error}</CardContent>
         </Card>
       )}
 
@@ -122,11 +122,11 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
           {forecastDays?.forecast.forecastday.map((d) => {
             const rep = pickRepresentativeHour(d.hour);
             return (
-              <Card key={d.date} className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+              <Card key={d.date} className="overflow-hidden border-2 border-border rounded-md shadow-brutal bg-card text-card-foreground">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="flex items-center gap-2">
-                      <CalendarDays className="h-5 w-5" /> {new Date(d.date).toLocaleDateString()}
+                      <CalendarDays className="h-5 w-5" strokeWidth={2.5} /> {new Date(d.date).toLocaleDateString()}
                     </span>
                     {rep?.condition?.icon && (
                       <img src={(rep.condition.icon || '').startsWith('http') ? rep.condition.icon : `https:${rep.condition.icon}`} alt="icon" className="w-8 h-8" />
@@ -134,29 +134,29 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="text-2xl font-semibold">{Math.round(d.day.avgtemp_c)}°C</div>
-                  <div className="text-gray-600 dark:text-gray-300">{d.day.condition?.text || 'N/A'}</div>
+                  <div className="text-4xl font-display font-black tabular-nums">{Math.round(d.day.avgtemp_c)}°C</div>
+                  <div className="font-semibold text-muted-foreground">{d.day.condition?.text || 'N/A'}</div>
                   <div className="grid grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Cao: {Math.round(d.day.maxtemp_c)}°C</div>
-                    <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" />Thấp: {Math.round(d.day.mintemp_c)}°C</div>
-                    <div className="flex items-center gap-2"><Wind className="h-4 w-4" />Gió: {Math.round(d.day.maxwind_kph)} km/h</div>
-                    <div className="flex items-center gap-2"><Droplets className="h-4 w-4" />Ẩm: {Math.round(d.day.avghumidity)}%</div>
-                    <div className="flex items-center gap-2"><CloudRain className="h-4 w-4" />Mưa: {d.day.daily_chance_of_rain}%</div>
+                    <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" strokeWidth={2.5} />Cao: {Math.round(d.day.maxtemp_c)}°C</div>
+                    <div className="flex items-center gap-2"><Thermometer className="h-4 w-4" strokeWidth={2.5} />Thấp: {Math.round(d.day.mintemp_c)}°C</div>
+                    <div className="flex items-center gap-2"><Wind className="h-4 w-4" strokeWidth={2.5} />Gió: {Math.round(d.day.maxwind_kph)} km/h</div>
+                    <div className="flex items-center gap-2"><Droplets className="h-4 w-4" strokeWidth={2.5} />Ẩm: {Math.round(d.day.avghumidity)}%</div>
+                    <div className="flex items-center gap-2"><CloudRain className="h-4 w-4" strokeWidth={2.5} />Mưa: {d.day.daily_chance_of_rain}%</div>
                     <div className="flex items-center gap-2"><FaHouseFloodWater className="h-4 w-4" />Tổng {Math.round(d.day.totalprecip_mm)} mm</div>
                   </div>
 
                   {/* Mini hours strip */}
-                  <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-3">
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">Một số mốc giờ</div>
+                  <div className="mt-2 border-t-2 border-border pt-3">
+                    <div className="text-xs text-muted-foreground mb-2">Một số mốc giờ</div>
                     <div className="grid grid-cols-4 gap-2 text-xs">
                       {d.hour.filter((_, __) => [6, 9, 12, 15].includes(new Date(_.time).getHours())).map((h) => (
-                        <div key={h.time} className="p-2 rounded-md bg-gray-50 dark:bg-gray-700/50">
-                          <div className="font-medium">{formatHour(h.time)}</div>
+                        <div key={h.time} className="p-2 rounded-md border-2 border-border bg-muted">
+                          <div className="font-semibold">{formatHour(h.time)}</div>
                           <div className="flex items-center gap-1">
                             {h.condition?.icon && (
                               <img src={(h.condition.icon || '').startsWith('http') ? h.condition.icon : `https:${h.condition.icon}`} className="w-4 h-4" />
                             )}
-                            <span>{Math.round(h.temp_c)}°C</span>
+                            <span className="tabular-nums">{Math.round(h.temp_c)}°C</span>
                           </div>
                         </div>
                       ))}

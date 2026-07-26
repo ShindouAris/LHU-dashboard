@@ -146,10 +146,10 @@ export const TimetablePage: React.FC = () => {
       <div className="min-h-screen py-6 sm:py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
-              <GraduationCap className="h-10 w-10 text-white" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-secondary border-2 border-border rounded-full mb-6 shadow-brutal">
+              <GraduationCap className="h-10 w-10 text-black" strokeWidth={2.5} />
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
+            <h1 className="text-3xl sm:text-5xl font-display font-black text-foreground mb-3 sm:mb-4 font-loveHouse">
               <GradientText
                 yoyo={false}
                 animationSpeed={0.8}
@@ -158,14 +158,14 @@ export const TimetablePage: React.FC = () => {
                 Thời khóa biểu
               </GradientText>
             </h1>
-            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Xem lịch học theo dạng lịch
             </p>
           </div>
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="text-lg text-gray-600 dark:text-gray-300">Đang tải...</div>
+              <div className="text-lg text-muted-foreground">Đang tải...</div>
             </div>
           ) : (
             <div className="max-w-2xl mx-auto">

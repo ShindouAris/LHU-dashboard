@@ -78,14 +78,14 @@ const getStatusConfig = (
         return {
             label: 'Nghỉ lễ',
             icon: CircleSlash,
-            badgeClass: 'bg-[#a6e3a1] text-[#1e1e2e] dark:bg-[#a6e3a1] dark:text-[#1e1e2e]',
+            badgeClass: 'bg-[hsl(142_71%_45%)] text-black',
         };
     }
     if (cancelType === 'cancelled') {
         return {
             label: 'Báo nghỉ',
             icon: CircleSlash,
-            badgeClass: 'bg-[#f38ba8] text-[#1e1e2e] dark:bg-[#f38ba8] dark:text-[#1e1e2e]',
+            badgeClass: 'bg-destructive text-destructive-foreground',
         };
     }
     switch (status) {
@@ -93,7 +93,7 @@ const getStatusConfig = (
             return {
                 label: 'Đang diễn ra',
                 icon: CheckCircle2,
-                badgeClass: 'bg-[#a6e3a1] text-[#1e1e2e] dark:bg-[#a6e3a1] dark:text-[#1e1e2e]',
+                badgeClass: 'bg-[hsl(142_71%_45%)] text-black',
             };
         case 2:
             return {
@@ -133,14 +133,14 @@ const getCardAccent = (
     isExam: boolean
 ): string => {
     if (cancelType === 'holiday')
-        return 'border-l-4 border-l-[#a6e3a1] bg-[#a6e3a1]/10 ring-1 ring-[#a6e3a1]/20';
+        return 'border-l-8 border-l-[hsl(142_71%_45%)]';
     if (cancelType === 'cancelled')
-        return 'border-l-4 border-l-[#f38ba8] bg-[#f38ba8]/10 ring-1 ring-[#f38ba8]/20';
+        return 'border-l-8 border-l-destructive';
     if (isNext)
-        return 'border-l-4 border-l-primary bg-primary/5 ring-1 ring-primary/20';
+        return 'border-l-8 border-l-primary';
     if (isExam)
-        return 'border-l-4 border-l-[#fab387] bg-[#fab387]/5 ring-1 ring-[#fab387]/20';
-    return 'border-l-4 border-l-border';
+        return 'border-l-8 border-l-[hsl(258_90%_66%)]';
+    return 'border-l-8 border-l-border';
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -252,9 +252,9 @@ const InfoRow: React.FC<InfoRowProps> = ({
     );
 
     return (
-        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-lg bg-muted/40 hover:bg-muted/70 transition-colors min-w-0">
-            <div className="flex-shrink-0 w-8 h-8 rounded-md bg-primary flex items-center justify-center">
-                {iconNode ?? (Icon ? <Icon className="h-4 w-4 text-primary-foreground" /> : null)}
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-md border-2 border-border bg-muted hover:bg-accent transition-colors min-w-0">
+            <div className="flex-shrink-0 w-8 h-8 rounded-md border-2 border-border bg-primary flex items-center justify-center">
+                {iconNode ?? (Icon ? <Icon className="h-4 w-4 text-primary-foreground" strokeWidth={2.5} /> : null)}
             </div>
             <div className="min-w-0 flex-1">
                 <div className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -283,7 +283,7 @@ interface CardBannerProps {
 }
 
 const CardBanner: React.FC<CardBannerProps> = ({ icon: Icon, children }) => (
-    <div className="bg-primary text-primary-foreground px-4 py-2 text-xs sm:text-sm font-medium flex items-center gap-2">
+    <div className="bg-primary text-primary-foreground border-b-2 border-border px-4 py-2 text-xs sm:text-sm font-bold flex items-center gap-2">
         <Icon className="h-4 w-4 animate-pulse flex-shrink-0" />
         <span className="truncate">{children}</span>
     </div>
@@ -335,7 +335,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
     return (
         <Card
-            className={`group relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 focus-within:ring-2 focus-within:ring-primary/60 ${getCardAccent(
+            className={`group relative overflow-hidden brutal-hover focus-within:ring-2 focus-within:ring-ring ${getCardAccent(
                 cancelType,
                 isNext,
                 isExam
@@ -387,7 +387,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
                 {/* Meta row: day, date, badges */}
                 <div className="flex flex-wrap items-center gap-1.5 mb-3 text-xs">
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/20 text-foreground">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sm border-2 border-border bg-primary/20 font-bold text-foreground">
                         <Calendar className="h-3 w-3" />
                         {getDayName(schedule.Thu)}
                     </span>
@@ -405,22 +405,22 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
                         </Badge>
                     )}
                     {duplicate.isDuplicate && (
-                        <Badge className="bg-[#fab387] text-[#1e1e2e] px-2 py-0.5 text-[11px] rounded-full">
+                        <Badge className="bg-[hsl(27_96%_61%)] text-black px-2 py-0.5 text-[11px]">
                             {duplicate.schedules.length - 1} trùng
                         </Badge>
                     )}
                     {isExam && (
-                        <Badge className="bg-[#cba6f7] text-[#1e1e2e] px-2 py-0.5 text-[11px] rounded-full">
+                        <Badge className="bg-[hsl(258_90%_66%)] text-white px-2 py-0.5 text-[11px]">
                             Thi
                         </Badge>
                     )}
-                    <Badge className="bg-muted text-muted-foreground px-2 py-0.5 text-[11px] rounded-full">
+                    <Badge variant="outline" className="px-2 py-0.5 text-[11px]">
                         {schedule.Type === 0 ? 'LT' : 'TH'}
                     </Badge>
                 </div>
 
                 {/* Time highlight */}
-                <div className="mb-3 px-3 py-2 rounded-lg bg-primary/15 flex items-center justify-between gap-3">
+                <div className="mb-3 px-3 py-2 rounded-md border-2 border-border bg-primary/20 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2 min-w-0">
                         <Clock className="h-4 w-4 text-foreground flex-shrink-0" />
                         <div className="text-base sm:text-lg font-bold text-foreground tabular-nums truncate">
@@ -505,15 +505,15 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
                 {/* Duplicate warning */}
                 {duplicate.isDuplicate && (
-                    <div className="mt-3 flex items-start gap-2 p-2.5 rounded-lg bg-[#fab387]/10 border border-[#fab387]/30 text-xs">
-                        <AlertTriangle className="h-4 w-4 text-[#fab387] flex-shrink-0 mt-0.5" />
+                    <div className="mt-3 flex items-start gap-2 p-2.5 rounded-md border-2 border-border bg-[hsl(27_96%_61%)]/20 text-xs">
+                        <AlertTriangle className="h-4 w-4 text-[hsl(27_96%_45%)] dark:text-[hsl(27_96%_61%)] flex-shrink-0 mt-0.5" strokeWidth={2.5} />
                         <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-[#df8e1d] dark:text-[#fab387]">
+                            <div className="font-bold text-foreground">
                                 Cảnh báo lịch trùng (
                                 {duplicate.schedules.length - 1} lịch khác)
                             </div>
                             {duplicate.status?.statusText && (
-                                <div className="text-[#df8e1d] dark:text-[#fab387] mt-0.5">
+                                <div className="text-muted-foreground mt-0.5">
                                     {duplicate.status.statusText}
                                 </div>
                             )}
@@ -523,7 +523,7 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
                 {/* Actions */}
                 {(schedule.GoogleMap || schedule.OnlineLink) && (
-                    <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t border-border">
+                    <div className="flex flex-col sm:flex-row gap-2 mt-3 pt-3 border-t-2 border-border">
                         {schedule.GoogleMap && (
                             <Button
                                 size="sm"

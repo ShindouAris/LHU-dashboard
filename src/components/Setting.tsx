@@ -366,8 +366,8 @@ const SettingsPage: React.FC = () => {
   }> = ({ icon: Icon, title, description, action }) => (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-4 flex-1">
-        <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-          <Icon className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+        <div className="p-2 border-2 border-border bg-secondary rounded-md">
+          <Icon className="h-5 w-5 text-black" />
         </div>
         <div className="flex-1">
           <Label className="text-base font-medium cursor-pointer">{title}</Label>
@@ -638,8 +638,8 @@ const SettingsPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#a6e3a1]/10 rounded-lg">
-                    <Database className="h-5 w-5 text-[#40a02b] dark:text-[#a6e3a1]" />
+                  <div className="p-2 border-2 border-border bg-[hsl(142_71%_45%)] rounded-md">
+                    <Database className="h-5 w-5 text-black" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Dung lượng bộ nhớ đệm</Label>
@@ -697,8 +697,8 @@ const SettingsPage: React.FC = () => {
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-4 flex-1">
-                    <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                      <User className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                    <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                      <User className="h-5 w-5 text-black" />
                     </div>
                     <div className="flex-1">
                       <Label className="text-base font-medium">Mã sinh viên</Label>
@@ -711,8 +711,8 @@ const SettingsPage: React.FC = () => {
                     <Separator />
                     <div className="flex items-center justify-between py-4">
                       <div className="flex items-center gap-4 flex-1">
-                    <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                      <User className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                    <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                      <User className="h-5 w-5 text-black" />
                         </div>
                         <div className="flex-1">
                           <Label className="text-base font-medium">Họ và tên</Label>
@@ -753,8 +753,8 @@ const SettingsPage: React.FC = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                    <Info className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                  <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                    <Info className="h-5 w-5 text-black" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Tên ứng dụng</Label>
@@ -768,8 +768,8 @@ const SettingsPage: React.FC = () => {
                   <Separator />
                   <div className="flex items-center justify-between py-4">
                     <div className="flex items-center gap-4 flex-1">
-                      <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                        <Info className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                      <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                        <Info className="h-5 w-5 text-black" />
                       </div>
                       <div className="flex-1">
                         <Label className="text-base font-medium">Ứng dụng điện thoại</Label>
@@ -784,8 +784,8 @@ const SettingsPage: React.FC = () => {
               <Separator />
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                    <Shield className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                  <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                    <Shield className="h-5 w-5 text-black" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Phiên bản</Label>
@@ -796,8 +796,8 @@ const SettingsPage: React.FC = () => {
               <Separator />
               <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
-                    <Globe className="h-5 w-5 text-[#8839ef] dark:text-[#cba6f7]" />
+                  <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+                    <Globe className="h-5 w-5 text-black" />
                   </div>
                   <div className="flex-1">
                     <Label className="text-base font-medium">Ngôn ngữ</Label>
@@ -808,7 +808,7 @@ const SettingsPage: React.FC = () => {
               <Separator />
               <div className="flex items-center justify-between py-4 overflow-hidden">
                 <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 bg-[#e6e9ef] dark:bg-[#cba6f7]/10 rounded-lg">
+                  <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
                     <GitHub />
                   </div>
                   <div className="flex-1">

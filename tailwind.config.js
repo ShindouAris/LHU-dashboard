@@ -50,12 +50,19 @@ export default {
   			card: {
   				DEFAULT: 'hsl(var(--card))',
   				foreground: 'hsl(var(--card-foreground))'
+  			},
+  			section: {
+  				DEFAULT: 'hsl(var(--section))',
+  				foreground: 'hsl(var(--section-foreground))'
   			}
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
+  		},
+  		borderWidth: {
+  			'3': '3px'
   		},
   		keyframes: {
   			'accordion-down': {
@@ -192,6 +199,18 @@ export default {
   				'system-ui',
   				'sans-serif'
   			],
+  			display: [
+  				'Space Grotesk',
+  				'Inter',
+  				'system-ui',
+  				'sans-serif'
+  			],
+  			black: [
+  				'Archivo Black',
+  				'Space Grotesk',
+  				'system-ui',
+  				'sans-serif'
+  			],
   			mono: [
   				'JetBrains Mono',
   				'monospace'
@@ -212,7 +231,12 @@ export default {
   		boxShadow: {
   			'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
   			'medium': '0 4px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  			'large': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1)'
+  			'large': '0 10px 40px -10px rgba(0, 0, 0, 0.15), 0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+  			/* Neobrutalism hard offset shadows — color follows --border (flips in dark) */
+  			'brutal-sm': '2px 2px 0px 0px hsl(var(--border))',
+  			'brutal': '4px 4px 0px 0px hsl(var(--border))',
+  			'brutal-lg': '6px 6px 0px 0px hsl(var(--border))',
+  			'brutal-xl': '8px 8px 0px 0px hsl(var(--border))'
   		}
   	},
   	keyframes: {

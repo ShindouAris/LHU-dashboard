@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -12,12 +13,31 @@ interface LayoutProps {
   title?: string;
 }
 
+// Maps the current route to a section key so [data-section] accent theming
+// (defined in src/index.css) lights up the right signature color per page.
+const sectionForPath = (path: string): string => {
+  if (path.startsWith('/toollhu')) return 'toollhu';
+  if (path.startsWith('/chisaAI')) return 'chisaAI';
+  if (path.startsWith('/timetable')) return 'timetable';
+  if (path.startsWith('/weather')) return 'weather';
+  if (path.startsWith('/mark')) return 'mark';
+  if (path.startsWith('/diemrenluyen')) return 'diemrenluyen';
+  if (path.startsWith('/diemdanh')) return 'diemdanh';
+  if (path.startsWith('/thuvien')) return 'thuvien';
+  if (path.startsWith('/qrscan')) return 'qrscan';
+  if (path.startsWith('/parking')) return 'parking';
+  if (path.startsWith('/settings')) return 'settings';
+  return 'schedule';
+};
+
 export const Layout: React.FC<LayoutProps> = ({
   children,
   title,
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const loggedInUser = AuthStorage.isLoggedIn();
+  const location = useLocation();
+  const section = sectionForPath(location.pathname);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -33,7 +53,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
   const Footer: React.FC = () => {
   return (
-    <footer className="relative z-10 mt-auto border-t border-border bg-background/80 backdrop-blur-sm hidden lg:block">
+    <footer className="relative z-10 mt-auto border-t-2 border-border bg-background hidden lg:block">
       <div className="container mx-auto px-4 py-6">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
@@ -70,15 +90,10 @@ export const Layout: React.FC<LayoutProps> = ({
 
 
   return (
-    <div className="relative h-dvh overflow-hidden bg-gradient-to-br from-[#eff1f5] via-[#e6e9ef] to-[#dce0e8] dark:from-[#1e1e2e] dark:via-[#181825] dark:to-[#11111b] flex flex-col">
-      {/* <Snowfall /> */}
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden hidden md:block">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#89b4fa] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob dark:opacity-20"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-[#cba6f7] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000 dark:opacity-20"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-[#f5c2e7] rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000 dark:opacity-20"></div>
-      </div>
-
+    <div
+      data-section={section}
+      className="relative h-dvh overflow-hidden bg-background flex flex-col"
+    >
       <div className="relative z-10 flex w-full flex-1 min-h-0">
         {/* Sidebar */}
         <Sidebar
@@ -91,17 +106,17 @@ export const Layout: React.FC<LayoutProps> = ({
         {/* Main Content */}
         <div className="flex-1 w-full min-w-0 lg:ml-0 flex flex-col min-h-0">
           {/* Mobile Header */}
-          <div className="lg:hidden sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
-            <div className="flex items-center justify-between p-4">
+          <div className="lg:hidden sticky top-0 z-40 bg-section text-section-foreground border-b-2 border-border">
+            <div className="flex items-center justify-between p-3">
               <Button
-                variant="ghost"
-                size="sm"
+                variant="outline"
+                size="icon"
                 onClick={toggleSidebar}
-                className="p-2"
+                aria-label="Mở menu"
               >
                 <Menu className="h-5 w-5" />
               </Button>
-              <h1 className="text-lg font-semibold text-foreground truncate">
+              <h1 className="font-display text-lg font-bold text-section-foreground truncate">
                 {title}
               </h1>
               <div className="w-10" />

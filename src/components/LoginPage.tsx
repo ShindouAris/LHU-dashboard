@@ -72,12 +72,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Card className="border-0 shadow-2xl backdrop-blur-md bg-white/90 dark:bg-gray-900/90">
-          <CardHeader className="text-center space-y-2">
-            <CardTitle className="text-2xl font-bold">Chào mừng trở lại 👋</CardTitle>
-            <p className="text-sm text-muted-foreground">Đăng nhập để tiếp tục</p>
+        <Card className="overflow-hidden shadow-brutal-xl">
+          <CardHeader className="text-center space-y-2 bg-primary text-primary-foreground border-b-2 border-border">
+            <CardTitle className="font-display text-2xl font-black">Chào mừng trở lại 👋</CardTitle>
+            <p className="text-sm font-bold">Đăng nhập để tiếp tục</p>
           </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -125,7 +125,7 @@ export default function LoginPage() {
                 </Button>
               </form>
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                  Quay lại <a onClick={() => navigate('/')} className="text-indigo-600 hover:underline">Trang chủ</a>
+                  Quay lại <a onClick={() => navigate('/')} className="text-foreground font-bold underline cursor-pointer">Trang chủ</a>
               </div>
             </CardContent>
           </Card>

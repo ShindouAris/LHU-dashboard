@@ -13,15 +13,15 @@ interface BottomToolBarProps {
 
 export default function BottomToolBar({ tools, activeKey, onChange }: BottomToolBarProps) {
     return (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t rounded-t-2xl border-gray-300 dark:border-gray-700 shadow-md flex justify-around py-4 z-50 md:hidden">
+        <nav className="fixed bottom-0 left-0 right-0 bg-card border-t-2 rounded-t-md border-border shadow-brutal flex justify-around py-4 z-50 md:hidden">
             {tools.map((tool) => (
                 <button
                     key={tool.key}
                     onClick={() => {if (tool.content !== null) onChange(tool.key)}}
-                    className={`flex flex-col items-center text-xs font-medium transition-colors
-                        ${activeKey === tool.key 
-                            ? "text-blue-600 dark:text-blue-400" 
-                            : "text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"}`}
+                    className={`flex flex-col items-center text-xs font-bold transition-colors
+                        ${activeKey === tool.key
+                            ? "text-foreground"
+                            : "text-muted-foreground hover:text-foreground"}`}
                     type="button"
                 >
                     {React.cloneElement(tool.icon, { size: 22 })}

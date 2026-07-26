@@ -186,9 +186,9 @@ const CountdownTimer: React.FC<CountdownTimerProps> = ({ targetTime, onExpired }
   if (!timeLeft) return null;
 
   return (
-    <div className="flex items-center gap-1 text-red-600 dark:text-red-400 text-sm font-semibold">
-      <Clock className="w-4 h-4" />
-      <span>{timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, '0')}</span>
+    <div className="flex items-center gap-1 text-destructive text-sm font-semibold">
+      <Clock className="w-4 h-4" strokeWidth={2.5} />
+      <span className="tabular-nums">{timeLeft.minutes}:{timeLeft.seconds.toString().padStart(2, '0')}</span>
     </div>
   );
 };
@@ -203,21 +203,21 @@ const ExpansionPanel: React.FC<ExpansionPanelProps> = ({ title, items, defaultOp
   const [isOpen, setIsOpen] = useState<boolean>(defaultOpen);
 
   return (
-    <div className="border border-gray-300 dark:border-gray-600 rounded-lg overflow-hidden">
+    <div className="border-2 border-border rounded-md overflow-hidden shadow-brutal bg-card">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+        className="w-full flex items-center justify-between p-4 bg-section text-section-foreground hover:brightness-95 transition-all"
       >
-        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{title}</h2>
-        {isOpen ? <ChevronUp className="w-5 h-5 dark:text-gray-300" /> : <ChevronDown className="w-5 h-5 dark:text-gray-300" />}
+        <h2 className="text-lg font-display font-bold">{title}</h2>
+        {isOpen ? <ChevronUp className="w-5 h-5" strokeWidth={2.5} /> : <ChevronDown className="w-5 h-5" strokeWidth={2.5} />}
       </button>
-      
+
       {isOpen && (
-        <div className="p-4 bg-white dark:bg-gray-900 space-y-3">
+        <div className="p-4 bg-card text-card-foreground space-y-3 border-t-2 border-border">
           {items.map((item, idx) => (
             <div key={idx} className="flex items-start gap-3">
-              <div className="text-blue-600 dark:text-blue-400 mt-0.5">{item.icon}</div>
-              <p className="text-gray-700 dark:text-gray-300">{item.text}</p>
+              <div className="text-foreground mt-0.5">{item.icon}</div>
+              <p className="text-foreground">{item.text}</p>
             </div>
           ))}
         </div>
@@ -249,23 +249,23 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
   ].filter(a => a.show);
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+    <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal overflow-hidden">
       <div className="flex flex-col md:flex-row">
-        <div className="p-4 text-white text-center md:w-32" style={{ backgroundColor: status.text }}>
-          <div className="text-2xl font-bold">{startTime.date}</div>
-          <div className="text-sm mt-1">{startTime.time}</div>
+        <div className="p-4 text-white text-center md:w-32 border-b-2 md:border-b-0 md:border-r-2 border-border" style={{ backgroundColor: status.text }}>
+          <div className="text-2xl font-display font-black tabular-nums">{startTime.date}</div>
+          <div className="text-sm mt-1 tabular-nums">{startTime.time}</div>
           <div className="text-xs opacity-80">đến</div>
-          <div className="text-sm">{endTime.time}</div>
+          <div className="text-sm tabular-nums">{endTime.time}</div>
         </div>
 
         <div className="flex-1 p-4">
           <div className="flex items-start justify-between mb-2">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100">{booking.TenPhong}</h3>
+              <h3 className="text-lg font-display font-bold text-foreground">{booking.TenPhong}</h3>
             </div>
-            
-            <span 
-              className="px-3 py-1 rounded-full text-xs font-semibold"
+
+            <span
+              className="px-3 py-1 rounded-full text-xs font-semibold border-2 border-border"
               style={{ backgroundColor: status.bg, color: status.text }}
             >
               {status.label}
@@ -295,10 +295,10 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
 
             return (
               <div className="mt-3">
-                <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Thiết bị mượn:</div>
+                <div className="text-xs text-muted-foreground mb-1">Thiết bị mượn:</div>
                 <div className="flex flex-wrap gap-2">
                   {thietBiList.map((tb, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs rounded">
+                    <span key={idx} className="px-2 py-1 bg-secondary text-secondary-foreground border-2 border-border text-xs rounded-full font-semibold">
                       {tb.TenThietBi}
                     </span>
                   ))}
@@ -308,27 +308,27 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
           })()}
         </div>
 
-        <div className="p-4 flex md:flex-col gap-2 border-t md:border-t-0 md:border-l border-gray-200 dark:border-gray-700">
+        <div className="p-4 flex md:flex-col gap-2 border-t-2 md:border-t-0 md:border-l-2 border-border">
           {isOwner && booking.TrangThai === 0 && (
             <button
               onClick={() => onAction(ActionType.Invite, booking.DangKyID)}
-              className="flex items-center gap-2 px-3 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700 transition-colors text-sm"
+              className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover text-sm font-semibold"
             >
-              <UserPlus className="w-4 h-4" />
+              <UserPlus className="w-4 h-4" strokeWidth={2.5} />
               <span className="hidden md:inline">Mời</span>
             </button>
           )}
-          
+
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover"
             >
-              <MoreVertical className="w-4 h-4" />
+              <MoreVertical className="w-4 h-4" strokeWidth={2.5} />
             </button>
-            
+
             {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-10">
+              <div className="absolute right-0 mt-2 w-48 bg-popover text-popover-foreground rounded-md shadow-brutal border-2 border-border z-10 overflow-hidden">
                 {actions.map(action => (
                   <button
                     key={action.id}
@@ -336,7 +336,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
                       onAction(action.id, booking.DangKyID);
                       setShowMenu(false);
                     }}
-                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 text-left text-sm text-gray-700 dark:text-gray-200"
+                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-accent text-left text-sm text-foreground"
                   >
                     {action.icon}
                     <span>{action.label}</span>
@@ -462,21 +462,21 @@ const Elib: React.FC = () => {
         <div className='flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-3'>
           <div className="toolbar-left">
             <div className="flex gap-2">
-              <button 
+              <button
                 onClick={() => onNavigate("TODAY")}
-                className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-semibold text-sm"
+                className="px-4 py-2 bg-primary text-primary-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold text-sm"
               >
                 Hôm nay
               </button>
-              <button 
+              <button
                 onClick={() => onNavigate("PREV")}
-                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold"
+                className="px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold"
               >
                 <FaArrowLeft />
               </button>
-              <button 
+              <button
                 onClick={() => onNavigate("NEXT")}
-                className="px-3 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors font-semibold"
+                className="px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold"
               >
                 <FaArrowRight />
               </button>
@@ -503,7 +503,7 @@ const Elib: React.FC = () => {
 
         <Badge
           variant="secondary"
-          className="mt-1 text-xs px-1.5 py-0 bg-indigo-600 text-white border-0"
+          className="mt-1 text-xs px-1.5 py-0 border-2 border-border"
         >
           {status.label}
         </Badge>
@@ -642,22 +642,22 @@ const Elib: React.FC = () => {
           defaultOpen={true}
         />
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
+        <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6">
           <span className='mt-0 '>
             <span className='inline font-bold'>Lưu ý:</span> Mỗi lượt max 4 giờ, mỗi bạn được đăng kí phòng học nhóm tối đa <span className='font-bold inline'>2 lượt</span> (dự trữ hoặc đang dùng),
             sau khi trả phòng sẽ được đăng kí lượt mới
           </span>
-          <div className="border-l-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20 p-4 mb-4 mt-3">
+          <div className="border-2 border-border bg-secondary text-secondary-foreground rounded-md p-4 mb-4 mt-3">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+              <span className="text-sm font-semibold">
                 Số lượt đã đăng ký: {dataLuotDaDangKy}/{MaxRoomBookingLimit}
               </span>
-              <span className="text-sm text-blue-600 dark:text-blue-400">
+              <span className="text-sm font-semibold">
                 Còn lại: {MaxRoomBookingLimit - dataLuotDaDangKy} lượt
               </span>
             </div>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
-              <div 
+            <div className="w-full bg-card border-2 border-border rounded-full h-3 overflow-hidden">
+              <div
                 className={`h-full transition-all duration-300 ${progressColor}`}
                 style={{ width: `${progressPercentage}%` }}
               ></div>
@@ -670,18 +670,18 @@ const Elib: React.FC = () => {
                 type="checkbox"
                 checked={chkAgree}
                 onChange={(e) => setChkAgree(e.target.checked)}
-                className="w-5 h-5 text-blue-600 rounded"
+                className="w-5 h-5 accent-primary rounded-sm border-2 border-border"
               />
-              <span className="text-gray-700 dark:text-gray-300 font-loveHouse">OK to the rule ?</span>
+              <span className="text-foreground font-loveHouse">OK to the rule ?</span>
             </label>
 
             <button
               onClick={handleRegister}
               disabled={!chkAgree}
-              className={`px-6 py-2 rounded-lg font-semibold transition-all ${
-                chkAgree 
-                  ? 'bg-blue-600 dark:bg-blue-500 text-white hover:bg-blue-700 dark:hover:bg-blue-600 cursor-pointer' 
-                  : 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+              className={`px-6 py-2 rounded-md font-semibold border-2 border-border transition-all ${
+                chkAgree
+                  ? 'bg-primary text-primary-foreground shadow-brutal-sm brutal-hover cursor-pointer'
+                  : 'bg-muted text-muted-foreground cursor-not-allowed'
               }`}
             >
               Đăng ký phòng
@@ -690,12 +690,12 @@ const Elib: React.FC = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">📅 Lịch đăng ký của bạn</h2>
-          
+          <h2 className="text-xl font-display font-bold text-foreground mb-4">📅 Lịch đăng ký của bạn</h2>
+
           {dataLichCaNhan.length === 0 ? (
-            <div className="bg-white dark:bg-gray-800 border-2 border-red-300 dark:border-red-700 rounded-lg p-8 text-center">
-              <Calendar className="w-16 h-16 mx-auto text-red-400 dark:text-red-500 mb-4" />
-              <p className="text-red-600 dark:text-red-400 font-semibold">Bạn chưa đăng ký lịch nào</p>
+            <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-8 text-center">
+              <Calendar className="w-16 h-16 mx-auto text-destructive mb-4" strokeWidth={2.5} />
+              <p className="text-destructive font-semibold">Bạn chưa đăng ký lịch nào</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -711,8 +711,8 @@ const Elib: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
-          <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">📆 Lịch tổng quát</h2>
+        <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6">
+          <h2 className="text-xl font-display font-bold text-foreground mb-4">📆 Lịch tổng quát</h2>
             <Calen
               localizer={dateFnsLocalizer({
                 format,
@@ -762,7 +762,7 @@ const Elib: React.FC = () => {
             {currentViewedEvent && (
               <div className="space-y-4 text-sm">
                 {/* Thời gian */}
-                <div className="border rounded-lg p-3">
+                <div className="border-2 border-border rounded-md p-3">
                   <p className="font-semibold mb-1">⏰ Thời gian sử dụng</p>
                   <p>
                     <span className="font-medium">Bắt đầu:</span>{" "}
@@ -775,18 +775,18 @@ const Elib: React.FC = () => {
                 </div>
 
                 {/* Người đăng ký */}
-                <div className="border rounded-lg p-3">
+                <div className="border-2 border-border rounded-md p-3">
                   <p className="font-semibold mb-1">👤 Người đăng ký</p>
                   <p>
                     {currentViewedEvent.FirstName} {currentViewedEvent.LastName}
                   </p>
-                  <p className="text-gray-500">
+                  <p className="text-muted-foreground">
                     Mã độc giả: {currentViewedEvent.DocGiaDangKy}
                   </p>
                 </div>
 
                 {/* Phòng + trạng thái */}
-                <div className="border rounded-lg p-3">
+                <div className="border-2 border-border rounded-md p-3">
                   <p className="font-semibold mb-1">🏫 Thông tin phòng</p>
                   <p>Tên phòng: {currentViewedEvent.TenPhong}</p>
                   <p>
@@ -800,17 +800,17 @@ const Elib: React.FC = () => {
                 </div>
 
                 {/* Số người */}
-                <div className="border rounded-lg p-3">
+                <div className="border-2 border-border rounded-md p-3">
                   <p className="font-semibold mb-1">👥 Số lượng thành viên</p>
                   <p>{currentViewedEvent.SoLuongTV} người</p>
                 </div>
 
                 {/* Thiết bị */}
-                <div className="border rounded-lg p-3">
+                <div className="border-2 border-border rounded-md p-3">
                   <p className="font-semibold mb-2">🔌 Thiết bị mượn</p>
 
                   {JSON.parse(currentViewedEvent.ThietBi || "[]").length === 0 ? (
-                    <p className="text-gray-500 italic">Không mượn thiết bị</p>
+                    <p className="text-muted-foreground italic">Không mượn thiết bị</p>
                   ) : (
                     <ul className="list-disc list-inside space-y-1">
                       {JSON.parse(currentViewedEvent.ThietBi).map((tb: any) => (
@@ -824,7 +824,7 @@ const Elib: React.FC = () => {
 
                 {/* Ghi chú */}
                 {currentViewedEvent.GhiChu && (
-                  <div className="border rounded-lg p-3">
+                  <div className="border-2 border-border rounded-md p-3">
                     <p className="font-semibold mb-1">📝 Ghi chú</p>
                     <p>{currentViewedEvent.GhiChu}</p>
                   </div>
@@ -836,31 +836,31 @@ const Elib: React.FC = () => {
 
         {showQRModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-sm w-full">
+            <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6 max-w-sm w-full">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold dark:text-gray-100">QR Check-in</h3>
+                <h3 className="text-lg font-display font-bold text-foreground">QR Check-in</h3>
                 <button
                   onClick={() => setShowQRModal(false)}
-                  className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                  className="text-muted-foreground hover:text-foreground"
                 >
                   ✕
                 </button>
               </div>
-              
-              <div className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg mb-4">
-                <div className="bg-white dark:bg-gray-600 p-4 rounded-lg">
-                  <QrCode className="w-48 h-48 mx-auto text-gray-400 dark:text-gray-500" />
+
+              <div className="bg-muted border-2 border-border p-4 rounded-md mb-4">
+                <div className="bg-card border-2 border-border p-4 rounded-md">
+                  <QrCode className="w-48 h-48 mx-auto text-foreground" />
                 </div>
-                <p className="text-center text-sm text-gray-600 dark:text-gray-300 mt-2">
+                <p className="text-center text-sm text-muted-foreground mt-2">
                   Mã: LIB-{selectedBookingId}
                 </p>
               </div>
 
               <button
                 onClick={() => copyToClipboard(`LIB-${selectedBookingId}`)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-primary-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold"
               >
-                <Copy className="w-4 h-4" />
+                <Copy className="w-4 h-4" strokeWidth={2.5} />
                 Sao chép mã
               </button>
             </div>

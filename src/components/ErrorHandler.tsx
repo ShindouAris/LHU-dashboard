@@ -38,8 +38,8 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
       return (
         <div className="w-full min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 md:p-6">
           <div className="w-full max-w-4xl text-left">
-            <p className="text-5xl md:text-7xl font-semibold mb-4 md:mb-6">:(</p>
-            <p className="text-xl md:text-2xl mb-3 md:mb-4 font-bold">
+            <p className="text-5xl md:text-7xl font-display font-black mb-4 md:mb-6">:(</p>
+            <p className="text-xl md:text-2xl mb-3 md:mb-4 font-display font-bold">
               Hệ thống đã gặp sự cố và cần khởi động lại.
             </p>
             <p className="text-sm md:text-base opacity-80 mb-4 md:mb-6">
@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             </p>
 
             {this.state.error && (
-              <div className="rounded-2xl bg-neutral-900 p-3 md:p-4 mb-4 md:mb-6 shadow max-h-[40vh] overflow-auto">
+              <div className="rounded-md border-2 border-white bg-neutral-900 p-3 md:p-4 mb-4 md:mb-6 shadow-brutal max-h-[40vh] overflow-auto">
                 <p className="text-xs md:text-sm font-mono break-all">
                   {this.state.error.toString()}
                 </p>
@@ -64,7 +64,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
                       const errorDetails = `${this.state.error?.toString()}\n\n${this.state.errorInfo?.componentStack}`;
                       navigator.clipboard.writeText(errorDetails);
                     }}
-                    className="rounded-2xl px-3 py-1 bg-neutral-800 hover:bg-neutral-700 transition text-xs md:text-sm"
+                    className="rounded-md border-2 border-white px-3 py-1 bg-neutral-800 hover:bg-neutral-700 transition text-xs md:text-sm"
                   >
                     Copy error details
                   </button>
@@ -75,7 +75,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             <div className="mt-2 md:mt-4">
               <button
                 onClick={this.handleRestart}
-                className="w-full sm:w-auto rounded-2xl px-5 md:px-6 py-3 shadow hover:shadow-lg transition active:scale-95 bg-white text-black font-semibold"
+                className="w-full sm:w-auto rounded-md border-2 border-white px-5 md:px-6 py-3 shadow-brutal transition active:translate-x-0.5 active:translate-y-0.5 bg-white text-black font-display font-bold"
               >
                 Khởi động lại
               </button>

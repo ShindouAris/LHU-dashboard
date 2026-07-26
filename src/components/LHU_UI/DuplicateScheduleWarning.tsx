@@ -32,12 +32,12 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
   }
 
   return (
-    <Alert className="mb-6 border-orange-200 bg-orange-50 dark:border-orange-800 dark:bg-orange-950/30">
-      {/* <AlertTriangle className="h-4 w-4 text-orange-600 dark:text-orange-400" /> */}
-      <AlertTitle className="text-orange-800 dark:text-orange-200">
+    <Alert className="mb-6 border-2 border-border bg-[hsl(27_96%_61%)] text-black shadow-brutal">
+      {/* <AlertTriangle className="h-4 w-4 text-black" /> */}
+      <AlertTitle className="text-black font-display font-bold">
         Cảnh báo: Phát hiện {duplicates.length} nhóm lịch trùng thời gian
       </AlertTitle>
-      <AlertDescription className="text-orange-700 dark:text-orange-300 mt-2">
+      <AlertDescription className="text-black mt-2">
         <p className="mb-3">
           Có {duplicates.length} nhóm lịch học có cùng thời gian bắt đầu và kết thúc. 
           Vui lòng kiểm tra lại thông tin để tránh nhầm lẫn.
@@ -54,20 +54,20 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
                   <Button
                     variant="outline"
                     size="sm"
-                    className="w-full justify-between bg-white dark:bg-gray-800 hover:bg-orange-50 dark:hover:bg-orange-950/50 border-orange-200 dark:border-orange-700"
+                    className="w-full justify-between bg-card"
                   >
                     <div className="flex items-center gap-2 text-left">
                       <div className="flex items-center gap-1">
                         {isExpanded ? (
-                          <ChevronDown className="h-4 w-4" />
+                          <ChevronDown className="h-4 w-4" strokeWidth={2.5} />
                         ) : (
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className="h-4 w-4" strokeWidth={2.5} />
                         )}
-                        <BookOpen className="h-4 w-4 text-orange-600" />
+                        <BookOpen className="h-4 w-4 text-foreground" strokeWidth={2.5} />
                       </div>
                       <div>
-                        <div className="font-medium">{group.subject}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                        <div className="font-bold">{group.subject}</div>
+                        <div className="text-xs text-muted-foreground flex items-center gap-2">
                           <Clock className="h-3 w-3" />
                           {formatTime(group.startTime)} - {formatTime(group.endTime)}
                           <Calendar className="h-3 w-3 ml-1" />
@@ -76,14 +76,14 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs ${
-                          status.hasCancelled 
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                            : status.hasRescheduled 
-                            ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300'
-                            : 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                      <Badge
+                        variant="secondary"
+                        className={`text-xs border-2 border-border text-black ${
+                          status.hasCancelled
+                            ? 'bg-[hsl(0_84%_60%)]'
+                            : status.hasRescheduled
+                            ? 'bg-[hsl(50_100%_50%)]'
+                            : 'bg-[hsl(142_71%_45%)]'
                         }`}
                       >
                         {group.schedules.length} lịch
@@ -93,44 +93,44 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
                 </CollapsibleTrigger>
                 
                 <CollapsibleContent className="mt-2">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg border border-orange-200 dark:border-orange-700 p-3 space-y-2">
+                  <div className="bg-card rounded-md border-2 border-border shadow-brutal-sm p-3 space-y-2">
                     {group.schedules.map((schedule, _) => (
-                      <div 
-                        key={schedule.ID} 
-                        className="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-700 rounded border"
+                      <div
+                        key={schedule.ID}
+                        className="flex items-center justify-between p-2 bg-muted rounded-md border-2 border-border"
                       >
                         <div className="flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-medium">
+                            <span className="text-sm font-bold">
                               {schedule.TenNhom}
                             </span>
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${
-                                schedule.TinhTrang === 0 
-                                  ? 'border-green-300 text-green-700 dark:border-green-600 dark:text-green-300'
+                            <Badge
+                              variant="outline"
+                              className={`text-xs border-2 border-border text-black ${
+                                schedule.TinhTrang === 0
+                                  ? 'bg-[hsl(142_71%_45%)]'
                                   : schedule.TinhTrang === 1
-                                  ? 'border-yellow-300 text-yellow-700 dark:border-yellow-600 dark:text-yellow-300'
-                                  : 'border-red-300 text-red-700 dark:border-red-600 dark:text-red-300'
+                                  ? 'bg-[hsl(50_100%_50%)]'
+                                  : 'bg-[hsl(0_84%_60%)]'
                               }`}
                             >
                               {schedule.TinhTrang === 0 ? 'Bình thường' : 'Báo nghỉ'}
                             </Badge>
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1 text-center">
+                          <div className="text-xs text-muted-foreground mt-1 text-center">
                             Phòng: {schedule.TenPhong} • GV: {schedule.GiaoVien}
                           </div>
                         </div>
                         {schedule.TinhTrang === 0 && (
-                          <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
+                          <Badge className="bg-[hsl(142_71%_45%)] text-black border-2 border-border text-xs">
                             Chính
                           </Badge>
                         )}
                       </div>
                     ))}
-                    
-                    <div className="pt-2 border-t border-gray-200 dark:border-gray-600">
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+
+                    <div className="pt-2 border-t-2 border-border">
+                      <div className="text-xs text-muted-foreground">
                         <strong>Khuyến nghị:</strong> Ưu tiên theo lịch "Bình thường" nếu có. 
                         Nếu không có lịch bình thường, theo dõi lịch "Dời lịch".
                       </div>

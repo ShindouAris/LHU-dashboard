@@ -46,19 +46,19 @@ const ngoaiTruongStatusConfig = (status: number) => {
     switch (status) {
         case 3:
         case 5:
-            return { bg: 'bg-green-100 dark:bg-green-900', text: 'text-green-800 dark:text-green-200', label: 'Đã duyệt' };
+            return { className: 'bg-[hsl(142_71%_45%)] text-white', label: 'Đã duyệt' };
         case 4:
-            return { bg: 'bg-red-100 dark:bg-red-900', text: 'text-red-800 dark:text-red-200', label: 'Từ chối' };
+            return { className: 'bg-destructive text-destructive-foreground', label: 'Từ chối' };
         case 2:
         default:
-            return { bg: 'bg-yellow-100 dark:bg-yellow-900', text: 'text-yellow-800 dark:text-yellow-200', label: 'Chờ duyệt' };
+            return { className: 'bg-[hsl(27_96%_61%)] text-black', label: 'Chờ duyệt' };
     }
 };
 
 const NgoaiTruongStatusChip = ({ status, label }: { status: number; label?: string }) => {
     const cfg = ngoaiTruongStatusConfig(status);
     return (
-        <Badge className={`px-3 py-1 rounded-full text-xs font-medium ${cfg.bg} ${cfg.text}`}>
+        <Badge className={cfg.className}>
             {label || cfg.label}
         </Badge>
     );
@@ -100,7 +100,7 @@ function DayPicker({
             <PopoverContent className="w-auto overflow-hidden p-0 z-50" align="start">
                 <Calendar
                     mode="single"
-                    className="dark:bg-black bg-white border rounded-md"
+                    className="bg-popover border-2 border-border rounded-md shadow-brutal"
                     selected={date}
                     captionLayout="dropdown"
                     disabled={(d) => {
@@ -167,13 +167,13 @@ function MinhChungUploader({
         <div className="space-y-2">
             <div
                 onClick={() => !isUploading && inputRef.current?.click()}
-                className="cursor-pointer border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 text-center hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                className="cursor-pointer border-2 border-dashed border-border rounded-md p-4 text-center bg-muted hover:bg-accent transition-colors"
             >
-                <Upload className="mx-auto h-6 w-6 text-slate-500 mb-1" />
-                <div className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                <Upload className="mx-auto h-6 w-6 text-foreground mb-1" strokeWidth={2.5} />
+                <div className="text-sm font-bold text-foreground">
                     Tải tài liệu minh chứng
                 </div>
-                <div className="text-xs text-slate-500 mt-1">
+                <div className="text-xs text-muted-foreground mt-1">
                     Hỗ trợ: jpg, jpeg, png, webp, pdf
                 </div>
                 <input
@@ -188,9 +188,9 @@ function MinhChungUploader({
 
             {isUploading && (
                 <div>
-                    <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
+                    <div className="flex justify-between text-xs text-muted-foreground mb-1">
                         <span className="truncate mr-2">Đang tải: {currentName}</span>
-                        <span>{progress}%</span>
+                        <span className="tabular-nums font-bold">{progress}%</span>
                     </div>
                     <Progress value={progress} className="h-2" />
                 </div>
@@ -201,13 +201,13 @@ function MinhChungUploader({
                     {files.map((f) => (
                         <div
                             key={f.FileID}
-                            className="flex items-center justify-between gap-2 px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 min-w-0"
+                            className="flex items-center justify-between gap-2 px-3 py-2 border-2 rounded-md bg-card border-border min-w-0"
                         >
                             <a
                                 href={drlService.getMinhChungPreviewUrl(f.FileID)}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="flex items-center gap-2 min-w-0 flex-1 text-blue-600 dark:text-blue-300 hover:underline"
+                                className="flex items-center gap-2 min-w-0 flex-1 text-foreground font-medium hover:underline underline-offset-4"
                                 title={f.FileName}
                             >
                                 <FileText className="h-4 w-4 flex-shrink-0" />
@@ -216,10 +216,10 @@ function MinhChungUploader({
                             <button
                                 type="button"
                                 onClick={() => removeFile(f.FileID)}
-                                className="p-1 hover:bg-red-100 dark:hover:bg-red-900 text-red-600 dark:text-red-300 rounded transition-colors shrink-0"
+                                className="p-1 border-2 border-border rounded-sm bg-destructive text-destructive-foreground hover:translate-x-[1px] hover:translate-y-[1px] transition-transform shrink-0"
                                 title="Xoá"
                             >
-                                <X className="h-4 w-4" />
+                                <X className="h-4 w-4" strokeWidth={2.5} />
                             </button>
                         </div>
                     ))}
@@ -428,19 +428,18 @@ const DiemRL: React.FC = () => {
 
     if (error) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                    <h2 className="text-2xl font-bold text-red-600 mb-4">Đã xảy ra sự cố!</h2>
-                    <p className="text-lg text-gray-700 mb-4">{error}</p>
-                    <button
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6 text-center">
+                    <h2 className="text-2xl font-display font-black text-destructive mb-4">Đã xảy ra sự cố!</h2>
+                    <p className="text-lg text-foreground mb-4">{error}</p>
+                    <Button
                         onClick={() => {
                             setError(null);
                             fetchData();
                         }}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium"
                     >
                         Thử lại
-                    </button>
+                    </Button>
                 </div>
             </div>
         );
@@ -450,7 +449,7 @@ const DiemRL: React.FC = () => {
     const ActivityForm = (
         <div className="space-y-4">
             <div>
-                <label className="block text-sm font-medium mb-1">Tên chương trình hoạt động</label>
+                <label className="block text-sm font-bold mb-1">Tên chương trình hoạt động</label>
                 <Input
                     type="text"
                     value={tenChuongTrinh}
@@ -459,7 +458,7 @@ const DiemRL: React.FC = () => {
                 />
             </div>
             <div>
-                <label className="block text-sm font-medium mb-1">Tên tổ chức</label>
+                <label className="block text-sm font-bold mb-1">Tên tổ chức</label>
                 <Input
                     type="text"
                     value={tenToChuc}
@@ -469,7 +468,7 @@ const DiemRL: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div className="min-w-0">
-                    <label className="block text-sm font-medium mb-1">Từ ngày</label>
+                    <label className="block text-sm font-bold mb-1">Từ ngày</label>
                     <DayPicker
                         open={fromOpen}
                         date={tuNgay}
@@ -483,7 +482,7 @@ const DiemRL: React.FC = () => {
                     />
                 </div>
                 <div className="min-w-0">
-                    <label className="block text-sm font-medium mb-1">Đến ngày</label>
+                    <label className="block text-sm font-bold mb-1">Đến ngày</label>
                     <DayPicker
                         open={toOpen}
                         date={denNgay}
@@ -496,7 +495,7 @@ const DiemRL: React.FC = () => {
                 </div>
             </div>
             <div>
-                <label className="block text-sm font-medium mb-1">Minh chứng</label>
+                <label className="block text-sm font-bold mb-1">Minh chứng</label>
                 <MinhChungUploader files={minhChung} onChange={setMinhChung} />
             </div>
         </div>
@@ -585,48 +584,49 @@ const DiemRL: React.FC = () => {
             {/* ===== Main content ===== */}
             <div className="max-w-7xl mx-auto">
                 {/* Header card */}
-                <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-none p-4 sm:p-6 mb-4 sm:mb-6">
+                <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-4 sm:p-6 mb-4 sm:mb-6">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                         <div className="min-w-0 flex-1">
-                            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-2">
+                            <h1 className="inline-block bg-primary text-primary-foreground border-2 border-border rounded-md shadow-brutal-sm px-3 py-1 text-lg sm:text-2xl md:text-3xl font-display font-black mb-3">
                                 PHỤC VỤ CỘNG ĐỒNG
                             </h1>
-                            <p className="text-sm sm:text-base text-gray-700 dark:text-gray-200 break-words">
-                                <span className="font-semibold">Họ tên:</span> {user?.FullName}
+                            <p className="text-sm sm:text-base text-foreground break-words">
+                                <span className="font-bold">Họ tên:</span> {user?.FullName}
                             </p>
-                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 break-all">
-                                <span className="font-semibold">Mã:</span> {user?.UserID}
+                            <p className="text-xs sm:text-sm text-muted-foreground break-all">
+                                <span className="font-bold">Mã:</span> {user?.UserID}
                             </p>
                             {hocKyInfo?.HocKy && hocKyInfo?.Nam && (
-                                <div className="mt-2 text-xs sm:text-sm text-blue-600 dark:text-blue-300 flex items-center flex-wrap gap-x-2 gap-y-1">
-                                    <span className="inline-flex items-center gap-1">
-                                        <CalendarIcon className="h-4 w-4" />
+                                <div className="mt-2 text-xs sm:text-sm text-foreground flex items-center flex-wrap gap-x-2 gap-y-1">
+                                    <span className="inline-flex items-center gap-1 font-bold">
+                                        <CalendarIcon className="h-4 w-4" strokeWidth={2.5} />
                                         Học kỳ {hocKyInfo.HocKy} | {hocKyInfo.Nam}
                                     </span>
                                     {periodMin && periodMax && (
-                                        <span className="text-gray-500">
+                                        <span className="text-muted-foreground">
                                             ({fmt(hocKyInfo.TuNgay)} - {fmt(hocKyInfo.DenNgay)})
                                         </span>
                                     )}
                                 </div>
                             )}
                         </div>
-                        <button
+                        <Button
                             onClick={openCreate}
                             disabled={!isPeriodOpen}
-                            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed dark:bg-blue-500 dark:hover:bg-blue-600 dark:disabled:bg-gray-400 text-white px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg font-medium text-sm sm:text-base transition-colors w-full sm:w-auto shrink-0"
+                            size="lg"
+                            className="w-full sm:w-auto shrink-0"
                         >
                             <Plus size={20} />
                             <span>Khai báo hoạt động</span>
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
                 {/* Period closed warning */}
                 {!isPeriodOpen && (
-                    <div className="bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6 flex items-center gap-3">
-                        <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-300" />
-                        <span className="text-red-700 dark:text-red-200 font-medium">
+                    <div className="bg-destructive text-destructive-foreground border-2 border-border rounded-md shadow-brutal p-4 mb-6 flex items-center gap-3">
+                        <AlertTriangle className="h-5 w-5 shrink-0" strokeWidth={2.5} />
+                        <span className="font-bold">
                             Chưa đến kỳ / đã kết thúc khai báo hoạt động
                         </span>
                     </div>
@@ -634,23 +634,23 @@ const DiemRL: React.FC = () => {
 
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
-                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tổng điểm</div>
-                        <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
-                            <span className={tongDiem >= 40 ? 'text-green-500' : 'text-red-500'}>
+                    <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm font-bold text-muted-foreground uppercase">Tổng điểm</div>
+                        <div className="text-lg sm:text-2xl font-black tabular-nums text-foreground">
+                            <span className={tongDiem >= 40 ? 'text-[hsl(142_71%_45%)]' : 'text-destructive'}>
                                 {tongDiem}
                             </span> / 45
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
-                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Trong trường</div>
-                        <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
+                    <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm font-bold text-muted-foreground uppercase">Trong trường</div>
+                        <div className="text-lg sm:text-2xl font-black tabular-nums text-foreground">
                             {diemTrongTruong}
                         </div>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4">
-                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Tự khai báo</div>
-                        <div className="text-lg sm:text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-3 sm:p-4">
+                        <div className="text-xs sm:text-sm font-bold text-muted-foreground uppercase">Tự khai báo</div>
+                        <div className="text-lg sm:text-2xl font-black tabular-nums text-foreground">
                             {diemNgoaiTruong}
                         </div>
                     </div>
@@ -676,40 +676,40 @@ const DiemRL: React.FC = () => {
                     {/* ===== Trong trường ===== */}
                     <TabsContent value="trong">
                         {trongTruong.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                                <CalendarIcon className="mx-auto h-12 w-12 mb-3 opacity-50" />
-                                <div>Chưa có hoạt động nào</div>
+                            <div className="text-center py-12 text-muted-foreground">
+                                <CalendarIcon className="mx-auto h-12 w-12 mb-3 opacity-50" strokeWidth={2.5} />
+                                <div className="font-bold">Chưa có hoạt động nào</div>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                 {trongTruong.map((item) => (
                                     <div
                                         key={item.HoatDongID}
-                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
+                                        className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-3 sm:p-4 flex flex-col"
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0 break-words text-sm sm:text-base">
+                                            <div className="font-bold text-foreground flex-1 min-w-0 break-words text-sm sm:text-base">
                                                 {item.TenChuongTrinh}
                                             </div>
-                                            <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-semibold shrink-0 whitespace-nowrap">
+                                            <Badge variant="secondary" className="shrink-0 whitespace-nowrap">
                                                 {item.Diem} điểm
                                             </Badge>
                                         </div>
                                         {item.TenToChuc && (
-                                            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
+                                            <div className="text-xs sm:text-sm text-muted-foreground break-words">
                                                 🏢 {item.TenToChuc}
                                             </div>
                                         )}
                                         {item.ViTri && (
-                                            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
+                                            <div className="text-xs sm:text-sm text-muted-foreground break-words">
                                                 📍 {item.ViTri}
                                             </div>
                                         )}
-                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                        <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                                             📅 {fmt(item.TuNgay)} - {fmt(item.DenNgay)}
                                         </div>
                                         {item.HocKy && item.Nam && (
-                                            <div className="text-[11px] sm:text-xs text-gray-500 mt-1">
+                                            <div className="text-[11px] sm:text-xs text-muted-foreground mt-1">
                                                 🎓 HK{item.HocKy} - {item.Nam}
                                             </div>
                                         )}
@@ -725,30 +725,30 @@ const DiemRL: React.FC = () => {
                         <div className="grid grid-cols-3 sm:flex sm:flex-wrap gap-2 mb-4">
                             <button
                                 onClick={() => setStatusFilter('pending')}
-                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
+                                className={`px-2 sm:px-3 py-1.5 border-2 border-border rounded-md text-xs sm:text-sm font-bold transition-all text-center ${
                                     statusFilter === 'pending'
-                                        ? 'bg-yellow-500 text-white'
-                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900 dark:text-yellow-200'
+                                        ? 'bg-[hsl(27_96%_61%)] text-black shadow-brutal-sm'
+                                        : 'bg-card text-foreground hover:bg-muted'
                                 }`}
                             >
                                 Chờ duyệt ({countPending})
                             </button>
                             <button
                                 onClick={() => setStatusFilter('approved')}
-                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
+                                className={`px-2 sm:px-3 py-1.5 border-2 border-border rounded-md text-xs sm:text-sm font-bold transition-all text-center ${
                                     statusFilter === 'approved'
-                                        ? 'bg-green-600 text-white'
-                                        : 'bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900 dark:text-green-200'
+                                        ? 'bg-[hsl(142_71%_45%)] text-white shadow-brutal-sm'
+                                        : 'bg-card text-foreground hover:bg-muted'
                                 }`}
                             >
                                 Đã duyệt ({countApproved})
                             </button>
                             <button
                                 onClick={() => setStatusFilter('rejected')}
-                                className={`px-2 sm:px-3 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors text-center ${
+                                className={`px-2 sm:px-3 py-1.5 border-2 border-border rounded-md text-xs sm:text-sm font-bold transition-all text-center ${
                                     statusFilter === 'rejected'
-                                        ? 'bg-red-600 text-white'
-                                        : 'bg-red-100 text-red-800 hover:bg-red-200 dark:bg-red-900 dark:text-red-200'
+                                        ? 'bg-destructive text-destructive-foreground shadow-brutal-sm'
+                                        : 'bg-card text-foreground hover:bg-muted'
                                 }`}
                             >
                                 Từ chối ({countRejected})
@@ -756,19 +756,19 @@ const DiemRL: React.FC = () => {
                         </div>
 
                         {filteredNgoai.length === 0 ? (
-                            <div className="text-center py-12 text-gray-500 dark:text-gray-400">
-                                <CalendarIcon className="mx-auto h-12 w-12 mb-3 opacity-50" />
-                                <div>Không có hoạt động nào</div>
+                            <div className="text-center py-12 text-muted-foreground">
+                                <CalendarIcon className="mx-auto h-12 w-12 mb-3 opacity-50" strokeWidth={2.5} />
+                                <div className="font-bold">Không có hoạt động nào</div>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                                 {filteredNgoai.map((item) => (
                                     <div
                                         key={item.HoatDongID}
-                                        className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-3 sm:p-4 border border-slate-200 dark:border-slate-700 flex flex-col"
+                                        className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-3 sm:p-4 flex flex-col"
                                     >
                                         <div className="flex justify-between items-start gap-2 mb-2">
-                                            <div className="font-semibold text-gray-900 dark:text-gray-100 flex-1 min-w-0 break-words text-sm sm:text-base">
+                                            <div className="font-bold text-foreground flex-1 min-w-0 break-words text-sm sm:text-base">
                                                 {item.TenChuongTrinh}
                                             </div>
                                             <div className="shrink-0">
@@ -778,14 +778,14 @@ const DiemRL: React.FC = () => {
                                                 />
                                             </div>
                                         </div>
-                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 break-words">
+                                        <div className="text-xs sm:text-sm text-muted-foreground break-words">
                                             🏢 {item.TenToChuc}
                                         </div>
-                                        <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 mt-1">
+                                        <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                                             📅 {fmt(item.TuNgay)} - {fmt(item.DenNgay)}
                                         </div>
                                         <div className="flex items-center gap-2 mt-2">
-                                            <Badge className="bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-full text-xs font-semibold">
+                                            <Badge variant="secondary">
                                                 {item.Diem || 0} điểm
                                             </Badge>
                                         </div>
@@ -794,7 +794,7 @@ const DiemRL: React.FC = () => {
                                         {item.DanhSachMinhChung &&
                                             item.DanhSachMinhChung.length > 0 && (
                                                 <div className="mt-3">
-                                                    <div className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
+                                                    <div className="text-xs font-bold text-foreground mb-1">
                                                         📎 Minh chứng:
                                                     </div>
                                                     <div className="flex flex-wrap gap-1.5">
@@ -806,7 +806,7 @@ const DiemRL: React.FC = () => {
                                                                 )}
                                                                 target="_blank"
                                                                 rel="noreferrer"
-                                                                className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded text-xs text-blue-600 dark:text-blue-300 max-w-full"
+                                                                className="inline-flex items-center gap-1 px-2 py-1 bg-muted border-2 border-border rounded-sm hover:bg-accent text-xs font-medium text-foreground max-w-full transition-colors"
                                                                 title={mc.FileName}
                                                             >
                                                                 <ExternalLink className="h-3 w-3 shrink-0" />
@@ -821,23 +821,27 @@ const DiemRL: React.FC = () => {
 
                                         {/* Actions */}
                                         {canUpdate(item) && (
-                                            <div className="flex gap-2 mt-3 pt-3 border-t border-slate-200 dark:border-slate-700">
-                                                <button
+                                            <div className="flex gap-2 mt-3 pt-3 border-t-2 border-border">
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
                                                     onClick={() => openEdit(item)}
-                                                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 text-blue-700 dark:text-blue-200 rounded-lg text-sm font-medium transition-colors"
+                                                    className="flex-1 sm:flex-initial"
                                                     title="Chỉnh sửa"
                                                 >
                                                     <Edit2 size={14} />
                                                     Sửa
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
                                                     onClick={() => openDelete(item.HoatDongID)}
-                                                    className="flex-1 sm:flex-initial flex items-center justify-center gap-1 px-3 py-1.5 bg-red-100 hover:bg-red-200 dark:bg-red-900 dark:hover:bg-red-800 text-red-700 dark:text-red-200 rounded-lg text-sm font-medium transition-colors"
+                                                    className="flex-1 sm:flex-initial"
                                                     title="Xoá"
                                                 >
                                                     <Trash2 size={14} />
                                                     Xoá
-                                                </button>
+                                                </Button>
                                             </div>
                                         )}
                                     </div>

@@ -128,7 +128,7 @@ const EmptyState = memo(function EmptyState({
       <GradientText className="text-2xl font-normal mb-3 font-loveHouse" colors={["#ffdcff", "#A8DF8E", "#1581BF"]} yoyo={false} animationSpeed={0.8}>
       Ciallo, {fullName || 'Người vô danh'}!
       </GradientText>
-      <p className="text-gray-600 dark:text-pink-400 backdrop-blur-sm mb-8 max-w-md">
+      <p className="text-muted-foreground mb-8 max-w-md">
       Em là Chisa. Một trợ lý được phát triển độc lập bởi đội ngũ LHU dashboard.
       </p>
 
@@ -202,7 +202,7 @@ const EmptyState = memo(function EmptyState({
         <PromptInputTextarea
         value={inputValue}
         placeholder="Bắt đầu trò chuyện với ChisaAI..."
-        className="border rounded-md border-pink-300 dark:border-pink-400 pr-16"
+        className="border-2 rounded-md border-border pr-16"
         onChange={(e) => onChangeInput(e.target.value)}
         />
         <PromptInputSubmit
@@ -753,7 +753,7 @@ const ChatbotUI = () => {
   if (loading || userExists === null) {
     return (
       <div className="flex h-screen w-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-2xl shadow-lg">
+        <Card className="w-full max-w-md rounded-md border-2 border-border shadow-brutal">
           <CardContent className="p-6 text-center">
             <LoaderIcon />
             <p className="text-sm sm:text-base">
@@ -768,10 +768,10 @@ const ChatbotUI = () => {
   if (error) {
     return (
       <div className="flex h-screen w-full items-center justify-center p-4">
-        <Card className="w-full max-w-md rounded-2xl shadow-lg">
+        <Card className="w-full max-w-md rounded-md border-2 border-border shadow-brutal">
           <CardContent className="p-6 text-center">
             <img src='bruh.png' className="mx-auto mb-4" />
-            <p className="text-sm text-red-600 sm:text-base">{error}</p>
+            <p className="text-sm text-destructive sm:text-base">{error}</p>
           </CardContent>
         </Card>
       </div>
@@ -784,7 +784,7 @@ const ChatbotUI = () => {
         <Dialog open={showTermsDialog} onOpenChange={(open) => !isCreatingUser && setShowTermsDialog(open)}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle className="text-2xl font-bold">Điều khoản sử dụng ChisaAI</DialogTitle>
+              <DialogTitle className="text-2xl font-display font-bold">Điều khoản sử dụng ChisaAI</DialogTitle>
               <DialogDescription>
                 Vui lòng đọc và đồng ý với các điều khoản dưới đây để sử dụng ChisaAI
               </DialogDescription>
@@ -893,8 +893,8 @@ const ChatbotUI = () => {
       <div className="px-3 sm:px-4 py-2">
         <div className="max-w-screen-md sm:max-w-7xl mx-auto flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <div className="text-xs text-gray-500 dark:text-gray-400">Phiên chat</div>
-            <div className="text-sm font-medium truncate text-gray-800 dark:text-gray-100">
+            <div className="text-xs text-muted-foreground">Phiên chat</div>
+            <div className="text-sm font-medium truncate text-foreground">
               {id ? id.slice(0, 10) : '...'}
             </div>
           </div>
@@ -915,7 +915,7 @@ const ChatbotUI = () => {
                 <DropdownMenuSeparator />
 
                 {chatSummaries.length === 0 ? (
-                  <div className="px-2 py-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="px-2 py-2 text-sm text-muted-foreground">
                     Chưa có lịch sử.
                   </div>
                 ) : (
@@ -938,7 +938,7 @@ const ChatbotUI = () => {
                           <div className="text-sm font-medium truncate">
                             {c.chatId.slice(0, 12)}
                           </div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                          <div className="text-xs text-muted-foreground">
                             {c.messageCount} tin • {formatTime(c.updatedAt)}
                           </div>
                         </div>
@@ -951,7 +951,7 @@ const ChatbotUI = () => {
                           loadMoreChats();
                         }}
                         disabled={isLoadingMore}
-                        className="justify-center text-sm text-blue-600 dark:text-blue-400"
+                        className="justify-center text-sm text-secondary-foreground font-bold"
                       >
                         {isLoadingMore ? 'Đang tải...' : 'Tải thêm chat'}
                       </DropdownMenuItem>
@@ -977,11 +977,11 @@ const ChatbotUI = () => {
       {/* Messages Container */}
       <div ref={scrollContainerRef} className="relative flex-1 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {chatSwitchLoading && (
-          <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/70 backdrop-blur-sm dark:bg-slate-950/60">
-            <Card className="w-full max-w-sm rounded-2xl shadow-lg">
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/90">
+            <Card className="w-full max-w-sm rounded-md border-2 border-border shadow-brutal">
               <CardContent className="p-6 text-center">
                 <LoaderIcon />
-                <p className="mt-2 text-sm sm:text-base text-gray-700 dark:text-gray-200">{chatSwitchLabel}</p>
+                <p className="mt-2 text-sm sm:text-base text-foreground">{chatSwitchLabel}</p>
               </CardContent>
             </Card>
           </div>
@@ -1022,7 +1022,7 @@ const ChatbotUI = () => {
                 className={`flex gap-3 sm:gap-4 items-start ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 {message.role === 'assistant' && (
-                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 items-center justify-center flex-shrink-0 mt-1 overflow-hidden hidden lg:flex dark:from-amber-600 dark:to-orange-700">
+                  <Avatar className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-section border-2 border-border items-center justify-center flex-shrink-0 mt-1 overflow-hidden hidden lg:flex">
                     <img src='/chisaAI.png' alt="Chisa" className="w-full h-full object-cover" />
                   </Avatar>
                 )}
@@ -1030,24 +1030,24 @@ const ChatbotUI = () => {
                 <div className="flex flex-col gap-2 max-w-[90%] sm:max-w-[85%] min-w-0">
                   {/* Reasoning Dropdown */}
                   {message.parts.find((part) => part.type === 'reasoning') && (
-                    <Card className="border border-blue-200 bg-blue-50/50 overflow-hidden dark:border-blue-800 dark:bg-blue-900/20">
+                    <Card className="border-2 border-border bg-secondary overflow-hidden">
                       <button
                         onClick={() => toggleReasoning(message.id)}
-                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-blue-100/50 transition-colors text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-secondary/80 transition-colors text-sm sm:text-base"
                       >
                         {expandedReasoning[message.id] ? (
-                          <ChevronDown className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                          <ChevronDown className="w-4 h-4 text-black" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-300" />
+                          <ChevronRight className="w-4 h-4 text-black" />
                         )}
-                        <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-300" />
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-200">
+                        <Sparkles className="w-4 h-4 text-black" />
+                        <span className="text-sm font-bold text-black">
                           Suy nghĩ của chisa
                         </span>
                       </button>
                       {expandedReasoning[message.id] && (
                         <div className="px-3 sm:px-4 pb-3 pt-1">
-                          <p className="text-sm text-blue-900 leading-relaxed  break-words dark:text-blue-200">
+                          <p className="text-sm text-black leading-relaxed  break-words">
                             {message.parts.map((part, idx) =>
                               part.type === 'reasoning' ? (
                                 <span key={`${message.id}-reasoning-${idx}`}>{part.text}</span>
@@ -1061,23 +1061,23 @@ const ChatbotUI = () => {
 
                   {/* Tool Calls Dropdown */}
                   {message.parts.find((part) => part.type.startsWith('tool-')) && (
-                    <Card className="border border-purple-200 bg-purple-50/50 overflow-hidden dark:border-purple-800 dark:bg-purple-900/20">
+                    <Card className="border-2 border-border bg-section overflow-hidden">
                       <button
                         onClick={() => toggleToolCalls(message.id)}
-                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-purple-100/50 transition-colors text-sm sm:text-base"
+                        className="w-full px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-section/90 transition-colors text-sm sm:text-base"
                       >
                         {expandedToolCalls[message.id] ? (
-                          <ChevronDown className="w-4 h-4 text-purple-600 dark:text-purple-300" />
+                          <ChevronDown className="w-4 h-4 text-section-foreground" />
                         ) : (
-                          <ChevronRight className="w-4 h-4 text-purple-600 dark:text-purple-300" />
+                          <ChevronRight className="w-4 h-4 text-section-foreground" />
                         )}
-                        <Wrench className="w-4 h-4 text-purple-600 dark:text-purple-300" />
-                        <span className="text-sm font-medium text-purple-700 dark:text-purple-200">
+                        <Wrench className="w-4 h-4 text-section-foreground" />
+                        <span className="text-sm font-bold text-section-foreground">
                           Used {message.parts.filter((part) => part.type.includes('tool')).length} tool{message.parts.filter((part) => part.type.includes('tool')).length > 1 ? 's' : ''}
                         </span>
                       </button>
                       {expandedToolCalls[message.id] && (
-                        <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-xs sm:text-sm">
+                        <div className="px-3 sm:px-4 pb-3 pt-1 space-y-3 text-xs sm:text-sm text-section-foreground">
                           {message.parts.map((part, idx) =>
                             part.type.startsWith('tool-') ? (
                               <div key={idx}>
@@ -1088,7 +1088,7 @@ const ChatbotUI = () => {
                                     Sử dụng công cụ {' '}
                                     {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() ||
                                       part.type}
-                                    <pre className="mt-1 overflow-x-auto text-xs bg-muted/40 rounded p-2">{/* @ts-expect-error "This work btw" */
+                                    <pre className="mt-1 overflow-x-auto text-xs bg-card text-foreground border-2 border-border rounded-md p-2">{/* @ts-expect-error "This work btw" */
                                     JSON.stringify(part.output, null, 2)}</pre>
                                   </div>
                                 )}
@@ -1111,10 +1111,10 @@ const ChatbotUI = () => {
 
                   {/* Message Content */}
                   <div
-                    className={`px-3 py-2.5 sm:px-4 sm:py-3 overflow-auto rounded-md ${message.role === 'user' ? 'bg-gray-100 backdrop-blur-sm border border-pink-300 self-end dark:bg-gray-800 dark:border-pink-400' : ''}`} 
+                    className={`px-3 py-2.5 sm:px-4 sm:py-3 overflow-auto rounded-md border-2 border-border ${message.role === 'user' ? 'bg-secondary text-black self-end' : 'bg-card'}`}
                     style={{ wordBreak: 'break-word' }}
                   >
-                    <div className="text-sm sm:text-base text-gray-800 leading-relaxed break-words dark:text-gray-100">
+                    <div className={`text-sm sm:text-base leading-relaxed break-words ${message.role === 'user' ? 'text-black' : 'text-foreground'}`}>
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
                           <Message key={index} message={message} index={index} Part={Part} />
@@ -1129,15 +1129,15 @@ const ChatbotUI = () => {
                         size="icon"
                         onClick={() => regenerate()}
                       >
-                        <VscDebugRestart className="w-7 h-7 text-gray-500" />
+                        <VscDebugRestart className="w-7 h-7 text-muted-foreground" />
                       </Button>
                     </div>
                   )}
                 </div>
 
                 {message.role === 'user' && (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-gray-300 hidden lg:flex items-center justify-center flex-shrink-0 mt-1 dark:bg-gray-600">
-                    <User className="w-4 h-4 text-gray-700 dark:text-gray-200" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-secondary border-2 border-border hidden lg:flex items-center justify-center flex-shrink-0 mt-1">
+                    <User className="w-4 h-4 text-black" />
                   </div>
                 )}
               </div>
@@ -1217,7 +1217,7 @@ const ChatbotUI = () => {
                 
                 <PromptInput
                   onSubmit={handleSend}
-                  className="flex-1 border-gray-300 focus:border-amber-500 focus:ring-amber-500 min-w-0 dark:bg-slate-800 dark:text-gray-100 dark:border-slate-700"
+                  className="flex-1 border-2 border-border min-w-0"
                 >
                 
                 <PromptInputTextarea
@@ -1234,12 +1234,12 @@ const ChatbotUI = () => {
                 </PromptInput>
               </div>
               {/* Footer */}
-              <div className="text-center text-xs text-gray-500 mt-2 space-y-1">
+              <div className="text-center text-xs text-muted-foreground mt-2 space-y-1">
                 <span>AI có thể sai, kiểm chứng trước khi sử dụng.</span>
                 <div>
-                  <a 
-                    href="/chisaAI/privacy" 
-                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline"
+                  <a
+                    href="/chisaAI/privacy"
+                    className="text-foreground font-bold hover:text-section underline"
                     onClick={(e) => {
                       e.preventDefault();
                       window.location.href = '/chisaAI/privacy';

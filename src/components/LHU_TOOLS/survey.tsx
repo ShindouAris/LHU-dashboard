@@ -225,15 +225,15 @@ export const SurveyAutomationTool = () => {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-800 shadow-sm overflow-hidden">
+      <div className="bg-card border-2 border-border rounded-md shadow-brutal overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="px-6 py-5 border-b-2 border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-1">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-50 flex items-center gap-2">
-              <ListChecks className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <h2 className="text-xl font-display font-bold text-foreground flex items-center gap-2">
+              <ListChecks className="w-5 h-5 text-foreground" strokeWidth={2.5} />
               Tự động xử lý khảo sát
             </h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-sm text-muted-foreground">
               Tải danh sách khảo sát còn tồn và xử lý hàng loạt một cách an toàn.
             </p>
           </div>
@@ -258,7 +258,7 @@ export const SurveyAutomationTool = () => {
               <Button
                 onClick={handleProcessBatch}
                 disabled={processing || surveys.length === 0 || loading}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                className="gap-2"
               >
                 <Play className="w-4 h-4" />
                 <span>Xử lý ({surveys.length})</span>
@@ -308,25 +308,25 @@ export const SurveyAutomationTool = () => {
 
           {/* Progress */}
           {processing && (
-            <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50/50 dark:bg-blue-950/20 p-4 space-y-3">
+            <div className="rounded-md border-2 border-border bg-secondary text-secondary-foreground p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-                <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300 font-medium">
+                <div className="flex items-center gap-2 text-black font-bold">
                   <Loader2 className="w-4 h-4 animate-spin" />
                   Đang xử lý {Math.ceil((currentProgress / 100) * (surveys.length + processedCount))}/
                   {surveys.length + processedCount}
                 </div>
-                <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 font-mono text-xs">
+                <div className="flex items-center gap-2 text-black font-mono text-xs">
                   <Clock className="w-3.5 h-3.5" />
                   Còn lại ~{formatTime(estimatedTimeLeft)}
                 </div>
               </div>
-              <div className="w-full h-2 bg-blue-100 dark:bg-blue-900/40 rounded-full overflow-hidden">
+              <div className="w-full h-3 bg-card border-2 border-border rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-blue-600 dark:bg-blue-500 transition-all duration-500"
+                  className="h-full bg-primary transition-all duration-500"
                   style={{ width: `${currentProgress}%` }}
                 />
               </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+              <div className="text-xs text-black flex items-center gap-1.5">
                 <Info className="w-3.5 h-3.5" />
                 Mỗi khảo sát: xử lý → chờ ngẫu nhiên 10–16s → submit
               </div>
@@ -339,44 +339,44 @@ export const SurveyAutomationTool = () => {
               {/* Survey List */}
               <div className="lg:col-span-3 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="text-sm font-bold text-foreground flex items-center gap-2">
                     <ListChecks className="w-4 h-4" />
                     Danh sách khảo sát
-                    <span className="text-xs text-gray-400 font-normal">
+                    <span className="text-xs text-muted-foreground font-normal">
                       ({surveys.length})
                     </span>
                   </div>
                 </div>
 
-                <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-900/30">
+                <div className="border-2 border-border rounded-md bg-muted">
                   {surveys.length > 0 ? (
-                    <div className="max-h-[420px] overflow-y-auto divide-y divide-gray-200 dark:divide-gray-800">
+                    <div className="max-h-[420px] overflow-y-auto divide-y-2 divide-border">
                       {surveys.map((survey, idx) => {
                         const info = extractSurveyInfoFromHtml(survey.MoTa);
                         return (
                           <div
                             key={survey.KhaoSatID || idx}
-                            className="p-3 hover:bg-white dark:hover:bg-gray-800/50 transition-colors flex items-start gap-3"
+                            className="p-3 hover:bg-card transition-colors flex items-start gap-3"
                           >
-                            <div className="flex-shrink-0 w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-xs font-medium flex items-center justify-center">
+                            <div className="flex-shrink-0 w-7 h-7 rounded-full border-2 border-border bg-secondary text-black text-xs font-bold flex items-center justify-center">
                               {idx + 1}
                             </div>
                             <div className="flex-1 min-w-0">
                               <div
-                                className="font-medium text-sm text-gray-800 dark:text-gray-200 truncate"
+                                className="font-bold text-sm text-foreground truncate"
                                 title={survey.TenKhaoSat}
                               >
                                 {survey.TenKhaoSat}
                               </div>
-                              <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
+                              <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5">
                                 <span className="truncate">GV: {info.teacher}</span>
                                 <span className="truncate">Môn: {info.subject}</span>
                               </div>
                               <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[10px]">
-                                <span className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-mono">
+                                <span className="px-1.5 py-0.5 rounded-md border-2 border-border bg-card text-foreground font-mono">
                                   ID {survey.KhaoSatID}
                                 </span>
-                                <span className="px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 font-mono">
+                                <span className="px-1.5 py-0.5 rounded-md border-2 border-border bg-card text-foreground font-mono">
                                   TPL {survey.templateID}
                                 </span>
                               </div>
@@ -386,7 +386,7 @@ export const SurveyAutomationTool = () => {
                       })}
                     </div>
                   ) : (
-                    <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div className="p-8 text-center text-sm text-muted-foreground">
                       Chưa có khảo sát nào trong danh sách.
                     </div>
                   )}
@@ -396,10 +396,10 @@ export const SurveyAutomationTool = () => {
               {/* Logs */}
               <div className="lg:col-span-2 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <div className="text-sm font-bold text-foreground flex items-center gap-2">
                     <Terminal className="w-4 h-4" />
                     Nhật ký
-                    <span className="text-xs text-gray-400 font-normal">
+                    <span className="text-xs text-muted-foreground font-normal">
                       ({logs.length})
                     </span>
                   </div>
@@ -407,14 +407,14 @@ export const SurveyAutomationTool = () => {
                     <button
                       onClick={clearLogs}
                       disabled={processing}
-                      className="text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                      className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       Xóa
                     </button>
                   )}
                 </div>
 
-                <div className="border border-gray-200 dark:border-gray-800 rounded-xl bg-gray-50/50 dark:bg-gray-900/30">
+                <div className="border-2 border-border rounded-md bg-muted">
                   {logs.length > 0 ? (
                     <div className="max-h-[420px] overflow-y-auto p-2 space-y-1 text-xs">
                       {logs.map((log, idx) => (
@@ -423,7 +423,7 @@ export const SurveyAutomationTool = () => {
                       <div ref={logsEndRef} />
                     </div>
                   ) : (
-                    <div className="p-8 text-center text-sm text-gray-500 dark:text-gray-400">
+                    <div className="p-8 text-center text-sm text-muted-foreground">
                       Nhật ký xử lý sẽ hiển thị tại đây.
                     </div>
                   )}
@@ -434,15 +434,15 @@ export const SurveyAutomationTool = () => {
 
           {/* Empty State */}
           {!loading && surveys.length === 0 && logs.length === 0 && (
-            <div className="text-center py-16 px-4 border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-3">
-                <Inbox className="w-6 h-6" />
+            <div className="text-center py-16 px-4 border-2 border-dashed border-border rounded-md">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-full border-2 border-border bg-secondary text-black mb-3">
+                <Inbox className="w-6 h-6" strokeWidth={2.5} />
               </div>
-              <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <div className="text-sm font-bold text-foreground">
                 Chưa có dữ liệu
               </div>
-              <div className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Nhấn <span className="font-medium">"Lấy danh sách"</span> để bắt đầu tải khảo sát.
+              <div className="text-sm text-muted-foreground mt-1">
+                Nhấn <span className="font-bold">"Lấy danh sách"</span> để bắt đầu tải khảo sát.
               </div>
             </div>
           )}
@@ -451,18 +451,18 @@ export const SurveyAutomationTool = () => {
 
       {/* Warning Modal */}
       <Dialog open={showWarning} onOpenChange={setShowWarning}>
-        <DialogContent className="max-w-md dark:bg-gray-900 dark:border-gray-800">
+        <DialogContent className="max-w-md">
           <DialogHeader>
-            <div className="flex items-center gap-3 text-amber-600 dark:text-amber-400">
-              <div className="p-2 rounded-full bg-amber-100 dark:bg-amber-900/40">
-                <AlertTriangle className="w-5 h-5" />
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-md border-2 border-border bg-[hsl(27_96%_61%)] text-black">
+                <AlertTriangle className="w-5 h-5" strokeWidth={2.5} />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h3 className="text-lg font-display font-bold text-foreground">
                 Hủy tiến trình?
               </h3>
             </div>
           </DialogHeader>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-muted-foreground">
             Tiến trình đang chạy sẽ dừng ngay lập tức. Các khảo sát đã xử lý xong vẫn được giữ
             nguyên, nhưng những khảo sát đang chờ sẽ không tiếp tục.
           </p>
@@ -486,29 +486,29 @@ type Tone = 'blue' | 'green' | 'red' | 'amber' | 'gray';
 
 const toneClasses: Record<Tone, { bg: string; text: string; ring: string }> = {
   blue: {
-    bg: 'bg-blue-50 dark:bg-blue-900/30',
-    text: 'text-blue-600 dark:text-blue-300',
-    ring: 'ring-blue-100 dark:ring-blue-900/50',
+    bg: 'bg-secondary',
+    text: 'text-black',
+    ring: '',
   },
   green: {
-    bg: 'bg-green-50 dark:bg-green-900/30',
-    text: 'text-green-600 dark:text-green-300',
-    ring: 'ring-green-100 dark:ring-green-900/50',
+    bg: 'bg-[hsl(142_71%_45%)]',
+    text: 'text-black',
+    ring: '',
   },
   red: {
-    bg: 'bg-red-50 dark:bg-red-900/30',
-    text: 'text-red-600 dark:text-red-300',
-    ring: 'ring-red-100 dark:ring-red-900/50',
+    bg: 'bg-destructive',
+    text: 'text-destructive-foreground',
+    ring: '',
   },
   amber: {
-    bg: 'bg-amber-50 dark:bg-amber-900/30',
-    text: 'text-amber-600 dark:text-amber-300',
-    ring: 'ring-amber-100 dark:ring-amber-900/50',
+    bg: 'bg-[hsl(27_96%_61%)]',
+    text: 'text-black',
+    ring: '',
   },
   gray: {
-    bg: 'bg-gray-100 dark:bg-gray-800',
-    text: 'text-gray-600 dark:text-gray-300',
-    ring: 'ring-gray-200 dark:ring-gray-700',
+    bg: 'bg-muted',
+    text: 'text-foreground',
+    ring: '',
   },
 };
 
@@ -529,18 +529,18 @@ const StatCard = ({
 }) => {
   const t = toneClasses[tone];
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-3">
+    <div className="rounded-md border-2 border-border bg-card shadow-brutal-sm p-3">
       <div className="flex items-center gap-2">
-        <div className={`p-1.5 rounded-md ${t.bg} ${t.text}`}>{icon}</div>
-        <div className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+        <div className={`p-1.5 rounded-md border-2 border-border ${t.bg} ${t.text}`}>{icon}</div>
+        <div className="text-xs font-bold text-muted-foreground uppercase tracking-wide">
           {label}
         </div>
       </div>
-      <div className="mt-2 text-2xl font-semibold text-gray-900 dark:text-gray-100 leading-none">
+      <div className="mt-2 text-2xl font-black tabular-nums text-foreground leading-none">
         {value !== undefined ? value : valueText}
       </div>
       {hint && (
-        <div className="mt-1 text-xs text-gray-500 dark:text-gray-400 truncate">{hint}</div>
+        <div className="mt-1 text-xs text-muted-foreground truncate">{hint}</div>
       )}
     </div>
   );
@@ -550,26 +550,26 @@ const LogRow = ({ log }: { log: LogEntry }) => {
   const config: Record<LogType, { icon: React.ReactNode; color: string }> = {
     success: {
       icon: <CheckCircle2 className="w-3.5 h-3.5" />,
-      color: 'text-green-600 dark:text-green-400',
+      color: 'text-[hsl(142_71%_45%)]',
     },
     error: {
       icon: <AlertCircle className="w-3.5 h-3.5" />,
-      color: 'text-red-600 dark:text-red-400',
+      color: 'text-destructive',
     },
     warning: {
       icon: <AlertTriangle className="w-3.5 h-3.5" />,
-      color: 'text-amber-600 dark:text-amber-400',
+      color: 'text-[hsl(27_96%_61%)]',
     },
     info: {
       icon: <Info className="w-3.5 h-3.5" />,
-      color: 'text-blue-600 dark:text-blue-400',
+      color: 'text-foreground',
     },
   };
   const c = config[log.type];
   return (
-    <div className="flex items-start gap-2 px-2 py-1.5 rounded hover:bg-white dark:hover:bg-gray-800/50 transition-colors">
+    <div className="flex items-start gap-2 px-2 py-1.5 rounded-md hover:bg-card transition-colors">
       <div className={`flex-shrink-0 mt-0.5 ${c.color}`}>{c.icon}</div>
-      <span className="font-mono text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 flex-shrink-0">
+      <span className="font-mono text-[10px] text-muted-foreground mt-0.5 flex-shrink-0">
         {log.time}
       </span>
       <div className={`flex-1 min-w-0 break-words ${c.color}`}>{log.message}</div>

@@ -37,7 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   isDark = false
 }) => {
   return (
-    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-50 bg-card border-b-2 border-border shadow-brutal">
       <div className="max-w-7xl mx-auto px-3 sm:px-6">
         {/* Main Header */}
         <div className="flex items-center justify-between h-14 sm:h-16">
@@ -48,7 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onBack}
                 variant="ghost"
                 size="sm"
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 hover:bg-accent"
               >
                 <ArrowLeft className="h-4 w-4" />
                 <span className="hidden sm:inline ml-2">Quay lại</span>
@@ -56,10 +56,10 @@ export const Header: React.FC<HeaderProps> = ({
             )}
             
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-section border-2 border-border rounded-md flex items-center justify-center">
+                <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5 text-section-foreground" />
               </div>
-              <h1 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white truncate">
+              <h1 className="text-lg sm:text-xl font-display font-bold text-foreground truncate">
                 {title}
               </h1>
             </div>
@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onRefresh}
                 variant="ghost"
                 size="sm"
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 hover:bg-accent"
               >
                 <RefreshCw className="h-4 w-4" />
                 <span className="hidden md:inline ml-2">Làm mới</span>
@@ -84,19 +84,19 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={onThemeToggle}
                 variant="ghost"
                 size="sm"
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800"
+                className="p-2 hover:bg-accent"
               >
                 {isDark ? (
-                  <Sun className="h-4 w-4 text-yellow-500" />
+                  <Sun className="h-4 w-4 text-[hsl(50_100%_50%)]" />
                 ) : (
-                  <Moon className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  <Moon className="h-4 w-4 text-muted-foreground" />
                 )}
               </Button>
             )}
 
             {/* Status Badge - Hidden on mobile */}
             <Badge variant="outline" className="hidden lg:flex items-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-[hsl(142_71%_45%)] border-2 border-border rounded-full"></div>
               <span className="text-xs">Đang học</span>
             </Badge>
           </div>

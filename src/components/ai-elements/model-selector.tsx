@@ -42,7 +42,7 @@ export const ModelSelectorContent = ({
 }: ModelSelectorContentProps) => (
   <DialogContent
     className={cn(
-      "outline! border-none! p-0 outline-border! outline-solid!",
+      "border-2 border-border shadow-brutal rounded-md p-0",
       className
     )}
     {...props}

@@ -13,6 +13,7 @@ const Elib = lazy(() => import('./components/Elib'));
 const ToolLHU = lazy(() => import('./components/ToolLHU'));
 const ChisaAI = lazy(() => import('./components/ChisaAI'));
 const ChisaAIPrivacy = lazy(() => import('./components/ChisaAIPrivacy'));
+const StyleGuide = lazy(() => import('./components/StyleGuide'));
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { Layout } from './components/Layout';
@@ -187,6 +188,11 @@ function App() {
             <div className="md:py-8 md:px-4">
               <ChisaAI />
             </div>
+          </Suspense>
+        } />
+        <Route path="/styleguide" element={
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <StyleGuide />
           </Suspense>
         } />
         <Route path="*" element={<StudentSchedule />} />

@@ -1,6 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Lock, Database, Eye, UserCheck, AlertCircle, FileText, Mail } from 'lucide-react';
-import GradientText from './ui/GradientText';
 import { Button } from './ui/button';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,8 +18,8 @@ const ChisaAIPrivacy = () => {
           >
             ← Quay lại ChisaAI
           </Button>
-          <h1 className="text-4xl font-bold mb-4">
-            <GradientText>Chính sách Bảo mật</GradientText>
+          <h1 className="text-4xl font-display font-bold mb-4 text-foreground">
+            Chính sách Bảo mật
           </h1>
           <p className="text-muted-foreground">
             ChisaAI - Trợ lý AI thông minh cho sinh viên LHU
@@ -33,8 +32,10 @@ const ChisaAIPrivacy = () => {
         {/* Introduction */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-green-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(142_71%_45%)] p-1.5">
+                <Shield className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Giới thiệu
             </CardTitle>
           </CardHeader>
@@ -50,8 +51,10 @@ const ChisaAIPrivacy = () => {
         {/* Data Collection */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-secondary p-1.5">
+                <Database className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Thông tin chúng tôi lưu trữ
             </CardTitle>
           </CardHeader>
@@ -84,38 +87,40 @@ const ChisaAIPrivacy = () => {
         {/* Data Usage */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(258_90%_66%)] p-1.5">
+                <Eye className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Cách chúng tôi sử dụng thông tin
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-600 mt-2" />
+              <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] mt-2" />
               <p className="text-muted-foreground">
                 Cung cấp và cải thiện dịch vụ ChisaAI
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-600 mt-2" />
+              <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] mt-2" />
               <p className="text-muted-foreground">
                 Duy trì và quản lý lịch sử cuộc trò chuyện của bạn
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-600 mt-2" />
+              <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] mt-2" />
               <p className="text-muted-foreground">
                 Phân tích và cải thiện hiệu suất của AI models
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-600 mt-2" />
+              <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] mt-2" />
               <p className="text-muted-foreground">
                 Khắc phục sự cố kỹ thuật và bảo mật hệ thống
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-600 mt-2" />
+              <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] mt-2" />
               <p className="text-muted-foreground">
                 Tuân thủ các yêu cầu pháp lý và quy định
               </p>
@@ -126,8 +131,10 @@ const ChisaAIPrivacy = () => {
         {/* Data Security */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="w-5 h-5 text-red-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-destructive p-1.5">
+                <Lock className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Bảo mật dữ liệu
             </CardTitle>
           </CardHeader>
@@ -136,8 +143,10 @@ const ChisaAIPrivacy = () => {
               Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn công nghiệp để bảo vệ dữ liệu của bạn:
             </p>
             <div className="grid gap-3 mt-4">
-              <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                <Lock className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-3 bg-muted border-2 border-border rounded-md">
+                <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-destructive p-1 flex-shrink-0">
+                  <Lock className="w-5 h-5 text-black" strokeWidth={2.5} />
+                </span>
                 <div>
                   <h4 className="font-semibold">Mã hóa</h4>
                   <p className="text-sm text-muted-foreground">
@@ -145,8 +154,10 @@ const ChisaAIPrivacy = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                <UserCheck className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-3 bg-muted border-2 border-border rounded-md">
+                <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-secondary p-1 flex-shrink-0">
+                  <UserCheck className="w-5 h-5 text-black" strokeWidth={2.5} />
+                </span>
                 <div>
                   <h4 className="font-semibold">Kiểm soát truy cập</h4>
                   <p className="text-sm text-muted-foreground">
@@ -154,8 +165,10 @@ const ChisaAIPrivacy = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
-                <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="flex items-start gap-3 p-3 bg-muted border-2 border-border rounded-md">
+                <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-primary p-1 flex-shrink-0">
+                  <AlertCircle className="w-5 h-5 text-black" strokeWidth={2.5} />
+                </span>
                 <div>
                   <h4 className="font-semibold">Giám sát liên tục</h4>
                   <p className="text-sm text-muted-foreground">
@@ -170,8 +183,10 @@ const ChisaAIPrivacy = () => {
         {/* Third Party Services */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-orange-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(27_96%_61%)] p-1.5">
+                <FileText className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Dịch vụ bên thứ ba
             </CardTitle>
           </CardHeader>
@@ -194,8 +209,10 @@ const ChisaAIPrivacy = () => {
         {/* Data Retention */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-cyan-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-secondary p-1.5">
+                <Database className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Lưu trữ dữ liệu
             </CardTitle>
           </CardHeader>
@@ -223,8 +240,10 @@ const ChisaAIPrivacy = () => {
         {/* User Rights */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCheck className="w-5 h-5 text-green-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(142_71%_45%)] p-1.5">
+                <UserCheck className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Quyền của bạn
             </CardTitle>
           </CardHeader>
@@ -234,25 +253,25 @@ const ChisaAIPrivacy = () => {
             </p>
             <div className="space-y-2">
               <div className="flex items-start gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-600 mt-2" />
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(142_71%_45%)] mt-2" />
                 <p className="text-muted-foreground">
                   <strong>Quyền truy cập:</strong> Yêu cầu bản sao dữ liệu của bạn
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-600 mt-2" />
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(142_71%_45%)] mt-2" />
                 <p className="text-muted-foreground">
                   <strong>Quyền xóa:</strong> Yêu cầu xóa dữ liệu cá nhân của bạn
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-600 mt-2" />
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(142_71%_45%)] mt-2" />
                 <p className="text-muted-foreground">
                   <strong>Quyền sửa đổi:</strong> Cập nhật hoặc sửa đổi thông tin của bạn
                 </p>
               </div>
               <div className="flex items-start gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-600 mt-2" />
+                <div className="w-2.5 h-2.5 rounded-full border-2 border-border bg-[hsl(142_71%_45%)] mt-2" />
                 <p className="text-muted-foreground">
                   <strong>Quyền hạn chế:</strong> Yêu cầu hạn chế xử lý dữ liệu của bạn
                 </p>
@@ -264,8 +283,10 @@ const ChisaAIPrivacy = () => {
         {/* Contact */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Mail className="w-5 h-5 text-blue-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-secondary p-1.5">
+                <Mail className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Liên hệ
             </CardTitle>
           </CardHeader>
@@ -275,7 +296,7 @@ const ChisaAIPrivacy = () => {
               vui lòng liên hệ với chúng tôi:
             </p>
             <div className="space-y-2 text-muted-foreground ml-4">
-              <p><strong>Discord Server:</strong> <a href='https://discord.chisadin.site' className='text-blue-500 cursor-pointer'>Chisadin chan's playfield</a></p>
+              <p><strong>Discord Server:</strong> <a href='https://discord.chisadin.site' className='font-bold underline underline-offset-4 text-foreground cursor-pointer hover:opacity-70'>Chisadin chan's playfield</a></p>
             </div>
           </CardContent>
         </Card>
@@ -283,8 +304,10 @@ const ChisaAIPrivacy = () => {
         {/* Changes to Policy */}
         <Card className="mb-6">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <AlertCircle className="w-5 h-5 text-amber-600" />
+            <CardTitle className="flex items-center gap-3">
+              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(27_96%_61%)] p-1.5">
+                <AlertCircle className="w-5 h-5 text-black" strokeWidth={2.5} />
+              </span>
               Thay đổi chính sách
             </CardTitle>
           </CardHeader>
@@ -299,7 +322,7 @@ const ChisaAIPrivacy = () => {
         </Card>
 
         {/* Footer */}
-        <div className="text-center py-6 border-t">
+        <div className="text-center py-6 border-t-2 border-border">
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} ChisaAI - LHU Dashboard. Bảo lưu mọi quyền.
           </p>

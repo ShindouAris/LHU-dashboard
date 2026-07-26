@@ -354,10 +354,10 @@ export const StudentSchedule: React.FC = () => {
       <div className="min-h-screen py-6 sm:py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full mb-6 shadow-lg">
-              <GraduationCap className="h-10 w-10 text-white" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-section border-2 border-border rounded-md mb-6 shadow-brutal">
+              <GraduationCap className="h-10 w-10 text-section-foreground" strokeWidth={2.5} />
             </div>
-            <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 bg-clip-text text-transparent mb-3 sm:mb-4 font-loveHouse">
+            <h1 className="text-3xl sm:text-5xl font-display font-black text-foreground mb-3 sm:mb-4">
               <GradientText
                 yoyo={false}
                 animationSpeed={0.8}
@@ -366,14 +366,14 @@ export const StudentSchedule: React.FC = () => {
                 LHU Dashboard
               </GradientText>
             </h1>
-            <p className="text-base sm:text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Tra cứu lịch học nhanh chóng
             </p>
           </div>
 
           {loading ? (
             <div className="flex justify-center items-center h-64">
-              <div className="text-lg text-gray-600 dark:text-gray-300">Đang tải...</div>
+              <div className="text-lg text-muted-foreground">Đang tải...</div>
             </div>
           ) : (
             <div className="max-w-2xl mx-auto">
@@ -485,47 +485,47 @@ export const StudentSchedule: React.FC = () => {
       <div className="max-w-6xl mx-auto">
 
         {/* Student Info Card */}
-        <Card className="mb-8 overflow-hidden border-0 shadow-xl bg-gradient-to-r from-white to-blue-50 dark:from-gray-800 dark:to-gray-900">
+        <Card className="mb-8 overflow-hidden border-2 border-border shadow-brutal bg-card rounded-md">
           <CardHeader className="relative pb-1">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
-                    {avatar ? <img src={avatar} alt='avatar' onError={() => setAvatar("")} /> : <User className="h-8 w-8 text-white" /> }
+                  <div className="w-16 h-16 bg-secondary border-2 border-border rounded-md flex items-center justify-center shadow-brutal-sm overflow-hidden">
+                    {avatar ? <img src={avatar} alt='avatar' onError={() => setAvatar("")} /> : <User className="h-8 w-8 text-black" strokeWidth={2.5} /> }
                   </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white"></div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-[hsl(142_71%_45%)] rounded-full border-2 border-border"></div>
                 </div>
                 <div>
-                  <CardTitle className="text-left text-xl sm:text-2xl text-gray-900 dark:text-white mb-2">
+                  <CardTitle className="text-left text-xl sm:text-2xl font-display font-bold text-foreground mb-2">
                     {studentInfo?.HoTen || 'Không có thông tin'}
                   </CardTitle>
-                  <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      Mã SV: <span className="font-mono font-semibold">{currentStudentId}</span>
+                      <BookOpen className="h-4 w-4" strokeWidth={2.5} />
+                      Mã SV: <span className="font-mono font-semibold text-foreground">{currentStudentId}</span>
                     </span>
                   </div>
-                  {user && user.UserID === currentStudentId && 
+                  {user && user.UserID === currentStudentId &&
                       <>
-                        <div className='flex flex-wrap gap-1 text-sm'>
-                          <TestTubes className='h-4 w-4' />
-                          Thuộc: <span className='font-mono font-semibold'>{user.DepartmentName}</span>
+                        <div className='flex flex-wrap gap-1 text-sm text-muted-foreground'>
+                          <TestTubes className='h-4 w-4' strokeWidth={2.5} />
+                          Thuộc: <span className='font-mono font-semibold text-foreground'>{user.DepartmentName}</span>
                         </div>
-                        <div className='flex flex-wrap gap-1 text-sm'>
-                          <School className='h-4 w-4' />
-                          Lớp: <span className='font-mono font-semibold'>{user.Class}</span>
+                        <div className='flex flex-wrap gap-1 text-sm text-muted-foreground'>
+                          <School className='h-4 w-4' strokeWidth={2.5} />
+                          Lớp: <span className='font-mono font-semibold text-foreground'>{user.Class}</span>
                         </div>
                       </>
-                  } 
+                  }
                 </div>
               </div>
 
               <div className="text-center md:text-right">
-                <div className="flex items-center justify-center md:justify-end gap-2 text-sm text-gray-600 dark:text-gray-300 mb-1">
-                  <CalendarDays className="h-4 w-4" />
+                <div className="flex items-center justify-center md:justify-end gap-2 text-sm text-muted-foreground mb-1">
+                  <CalendarDays className="h-4 w-4" strokeWidth={2.5} />
                   <span>Kì học hiện tại</span>
                 </div>
-                <p className="font-semibold text-gray-900 dark:text-white">
+                <p className="font-bold text-foreground">
                   {weekInfo?.TuanBD && formatDate(weekInfo.TuanBD)} - {weekInfo?.TuanKT && formatDate(weekInfo.TuanKT)}
                 </p>
               </div>
@@ -534,9 +534,9 @@ export const StudentSchedule: React.FC = () => {
           
             <CardContent className="relative">
               <div className="flex items-center justify-center mb-3">
-                <span className="relative text-xl sm:text-2xl text-gray-500 dark:text-gray-400 font-Purrfect">
+                <span className="relative text-xl sm:text-2xl font-display font-bold text-foreground font-Purrfect">
                   Quick Actions
-                  <span className="absolute left-0 bottom-0 w-full h-0.5 bg-gradient-to-r from-blue-400 via-purple-400 to-blue-400 opacity-30"></span>
+                  <span className="absolute left-0 bottom-0 w-full h-0.5 bg-section"></span>
                 </span>
               </div>
               <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 sm:gap-3">
@@ -550,10 +550,10 @@ export const StudentSchedule: React.FC = () => {
                     size="sm"
                     title={item.description}
                     onClick={() => navigate(item.path)}
-                    className="h-auto w-full hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors flex flex-col items-center justify-center gap-1 px-1 py-2 sm:py-3 aspect-square sm:aspect-auto"
+                    className="h-auto w-full transition-colors flex flex-col items-center justify-center gap-1 px-1 py-2 sm:py-3 aspect-square sm:aspect-auto"
                     >
-                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
-                    <span className="font-medium text-[10px] sm:text-xs leading-tight text-center truncate w-full">{item.label}</span>
+                    <item.icon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" strokeWidth={2.5} />
+                    <span className="font-bold text-[10px] sm:text-xs leading-tight text-center truncate w-full">{item.label}</span>
                     </Button>
                   )
                 })
@@ -562,8 +562,8 @@ export const StudentSchedule: React.FC = () => {
             </CardContent>
           <CardFooter className="w-full">
             {currentWeather && (
-              <div className="flex items-center justify-center gap-3 p-3 rounded-xl bg-gradient-to-r from-sky-50 to-cyan-50 dark:from-sky-950/30 dark:to-cyan-950/30 min-h-[72px] w-full">
-                <div className="w-10 h-10 rounded-full bg-sky-500 flex items-center justify-center">
+              <div className="flex items-center justify-center gap-3 p-3 rounded-md border-2 border-border bg-muted min-h-[72px] w-full">
+                <div className="w-10 h-10 rounded-md border-2 border-border bg-secondary flex items-center justify-center">
                   {/* icon ảnh từ API */}
                   {currentWeather.current.condition?.icon && (
                     <img
@@ -574,8 +574,8 @@ export const StudentSchedule: React.FC = () => {
                   )}
                 </div>
                 <div className="min-w-0 text-center w-full">
-                  <div className="text-xs text-gray-500 dark:text-gray-400">Thời tiết hiện tại</div>
-                  <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+                  <div className="text-xs text-muted-foreground">Thời tiết hiện tại</div>
+                  <div className="text-sm sm:text-base font-bold text-foreground truncate">
                     {currentWeather.current.temp_c}°C • {currentWeather.current.condition?.text || 'N/A'}
                   </div>
                 </div>
@@ -592,14 +592,14 @@ export const StudentSchedule: React.FC = () => {
             {/* Exam section */}
             <div className={`mb-6 ${exams?.length !== undefined && exams?.length <= 0 && ("hidden")}`}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Lịch thi riêng</h3>
+                <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground">Lịch thi riêng</h3>
                 <Button variant="outline" size="sm" onClick={() => currentStudentId && fetchPrivateExam(currentStudentId)} disabled={loadingExam}>
                   Tải lại
                 </Button>
               </div>
               {loadingExam ? (
                 <div className="flex justify-center mb-4">
-                  <div className="text-gray-600 dark:text-gray-300">Đang tải...</div>
+                  <div className="text-muted-foreground">Đang tải...</div>
                 </div>
               ) : examError ? (
                 <ErrorMessage message={examError} onRetry={() => currentStudentId && fetchPrivateExam(currentStudentId)} />
@@ -610,17 +610,17 @@ export const StudentSchedule: React.FC = () => {
                   ))}
                 </div>
               ) : (
-                <p className="text-sm text-gray-600 dark:text-gray-300">Không có lịch thi riêng.</p>
+                <p className="text-sm text-muted-foreground">Không có lịch thi riêng.</p>
               )}
             </div>
             {/* Toggle View Button */}
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4 flex-wrap sm:flex-nowrap min-w-0">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <h2 className="text-2xl sm:text-3xl font-display font-black text-foreground mb-2">
                   {showFullSchedule ? 'Lịch học đầy đủ' : 'Lịch học 7 ngày tới'}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 flex items-center gap-2">
-                  <CalendarDays className="h-4 w-4" />
+                <p className="text-muted-foreground flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4" strokeWidth={2.5} />
                   {displaySchedules.length} tiết được tìm thấy
                 </p>
               </div>
@@ -630,7 +630,7 @@ export const StudentSchedule: React.FC = () => {
                   onClick={() => navigate(showFullSchedule ? "/" : "/schedule")}
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto hover:bg-blue-50 dark:hover:bg-blue-950/50 transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
+                  className="w-full sm:w-auto transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
                 >
                   {showFullSchedule ? 'Xem lịch 7 ngày tới' : 'Xem lịch đầy đủ'}
                 </Button>
@@ -638,9 +638,10 @@ export const StudentSchedule: React.FC = () => {
                   <Button
                     onClick={handleExportICS}
                     size="lg"
-                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
+                    variant="secondary"
+                    className="w-full sm:w-auto transition-colors shrink-0 min-w-[180px] sm:min-w-[200px]"
                   >
-                    <Download className="h-4 w-4 mr-2" /> Xuất lịch học
+                    <Download className="h-4 w-4 mr-2" strokeWidth={2.5} /> Xuất lịch học
                   </Button>
                 )}
               </div>
@@ -653,12 +654,12 @@ export const StudentSchedule: React.FC = () => {
             {/* Schedule List */}
             <div className="space-y-4 sm:space-y-6">
               {displaySchedules.length === 0 ? (
-                <Card className="text-center py-16 border-0 shadow-lg bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm">
+                <Card className="text-center py-16 border-2 border-border shadow-brutal bg-card rounded-md">
                   <CardContent>
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MapPin className="h-8 w-8 text-gray-400" />
+                    <div className="w-16 h-16 bg-muted border-2 border-border rounded-md flex items-center justify-center mx-auto mb-4">
+                      <MapPin className="h-8 w-8 text-foreground" strokeWidth={2.5} />
                     </div>
-                    <p className="text-gray-600 dark:text-gray-300 text-lg">Không có lịch học nào</p>
+                    <p className="text-muted-foreground text-lg">Không có lịch học nào</p>
                   </CardContent>
                 </Card>
               ) : (

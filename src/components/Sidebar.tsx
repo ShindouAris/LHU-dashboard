@@ -19,7 +19,6 @@ import { getSettings } from '@/types/settings';
 import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
 import { ChisaAI } from './ui/ChisaAI';
-import GradientText from './ui/GradientText';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 interface SidebarProps {
@@ -181,44 +180,39 @@ export const Sidebar: React.FC<SidebarProps> = ({
     <>
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 bg-[#1e1e2e]/60 z-40 lg:hidden"
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={onToggle}
         />
       )}
 
       {/* Sidebar */}
       <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full w-80 bg-background dark:bg-card border-r border-border transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
+        "fixed top-0 left-0 z-50 h-full w-80 bg-card border-r-2 border-border transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
         isOpen ? "translate-x-0" : "-translate-x-full"
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center justify-between p-4 border-b-2 border-border">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-[#cba6f7] to-[#89b4fa] rounded-lg flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-[#1e1e2e]" />
+              <div className="w-10 h-10 bg-section text-section-foreground border-2 border-border shadow-brutal-sm rounded-md flex items-center justify-center">
+                <GraduationCap className="h-5 w-5" />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg font-semibold text-foreground truncate font-loveHouse">
-                  <GradientText
-                  yoyo={false}
-                  animationSpeed={0.8}
-                  colors={["#F6B1CE", "#1581BF", "#3DB6B1", "#CCE5CF"]}
-                  >
-                    LHU Dashboard
-                  </GradientText>
+                <h1 className="font-display text-lg font-black text-foreground truncate">
+                  LHU Dashboard
                 </h1>
-                <p className="text-xs text-muted-foreground truncate text-left">
+                <p className="text-xs font-medium text-muted-foreground truncate text-left">
                   {title}
                 </p>
               </div>
             </div>
             <Button
-              variant="ghost"
-              size="sm"
+              variant="outline"
+              size="icon"
               onClick={onToggle}
-              className="lg:hidden p-2"
+              className="lg:hidden"
+              aria-label="Đóng menu"
             >
               <X className="h-5 w-5" />
             </Button>
@@ -230,7 +224,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="space-y-1">
               <button
                 onClick={() => toggleExpanded('navigation')}
-                className="flex items-center justify-between w-full p-2 text-sm font-medium text-foreground hover:bg-muted rounded-lg transition-colors"
+                className="flex items-center justify-between w-full p-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-accent rounded-md transition-colors"
               >
                 <span>Điều hướng</span>
                 {expandedItems.includes('navigation') ? (
@@ -268,29 +262,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           }
                         }}
                         className={cn(
-                          "flex items-center gap-3 w-full p-3 text-left rounded-lg transition-colors group",
-                          isActive 
-                            ? "bg-[#f5f0ff] dark:bg-[#cba6f7]/10 text-[#8839ef] dark:text-[#cba6f7] border border-[#cba6f7]/30 dark:border-[#cba6f7]/20" 
-                            : "hover:bg-muted text-foreground",
+                          "flex items-center gap-3 w-full p-3 text-left rounded-md border-2 transition-all group",
+                          isActive
+                            ? "bg-section text-section-foreground border-border shadow-brutal-sm font-bold"
+                            : "border-transparent hover:border-border hover:bg-accent text-foreground",
                             !isAuth && item.authrequired && "hidden"
                         )}
                       >
                         <Icon className={cn(
                           "h-5 w-5 flex-shrink-0",
-                          isActive ? "text-[#8839ef] dark:text-[#cba6f7]" : "text-muted-foreground group-hover:text-foreground"
+                          isActive ? "text-section-foreground" : "text-muted-foreground group-hover:text-foreground"
                         )} />
                         <div className="min-w-0 flex-1">
-                          <div className="font-medium">{item.label}</div>
-                          <div className="text-xs text-muted-foreground truncate">
+                          <div className="font-bold">{item.label}</div>
+                          <div className={cn(
+                            "text-xs truncate",
+                            isActive ? "text-section-foreground/80" : "text-muted-foreground"
+                          )}>
                             {item.description}
                           </div>
                         </div>
-                        {isActive && (
-                          <div className="w-2 h-2 bg-[#8839ef] dark:bg-[#cba6f7] rounded-full flex-shrink-0" />
-                        )}
                         {
                           (item.isBetaItem) && (
-                            <Badge>Beta</Badge>
+                            <Badge variant={isActive ? 'outline' : 'section'}>Beta</Badge>
                           )
                         }
                       </button>
@@ -301,10 +295,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             {/* Status Section */}
-            <div className="pt-4 border-t border-border">
-              <div className="flex items-center gap-2 p-3 bg-[#a6e3a1]/20 rounded-lg">
-                <div className="w-2 h-2 bg-[#a6e3a1] rounded-full"></div>
-                <span className="text-sm font-medium text-[#40a02b] dark:text-[#a6e3a1]">
+            <div className="pt-4 mt-2 border-t-2 border-border">
+              <div className="flex items-center gap-2 p-3 border-2 border-border bg-[hsl(142_71%_45%)] text-black rounded-md shadow-brutal-sm">
+                <div className="w-2.5 h-2.5 bg-black rounded-full animate-pulse"></div>
+                <span className="text-sm font-bold">
                   Đang học
                 </span>
               </div>

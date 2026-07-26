@@ -72,7 +72,7 @@ export default function ToolsLocket() {
     return (
         <div className="flex flex-col h-screen w-full p-3 pb-20 md:pb-3">
             {/* Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 text-center mb-2">
+            <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground text-center mb-2">
                 Tool LHU by Chisadin Chan
             </h1>
 
@@ -80,17 +80,17 @@ export default function ToolsLocket() {
             <div className="flex flex-col md:flex-row w-full mx-auto gap-4 md:gap-6 py-3 flex-1">
                 {/* Sidebar */}
                 <div className="hidden md:block md:w-64 lg:w-72 shrink-0">
-                    <div className="flex flex-col gap-2 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 sticky top-3">
+                    <div className="flex flex-col gap-2 bg-card p-4 rounded-md shadow-brutal border-2 border-border sticky top-3">
                         {toolsList.map((tool) => (
                             <button
                                 key={tool.key}
                                 onClick={() => setActiveTab(tool.key)}
                                 disabled={tool.content === null}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-left font-medium transition-all
+                                className={`flex items-center gap-3 px-4 py-3 rounded-md text-left font-bold border-2 transition-all disabled:opacity-50
                                     ${
                                         activeTab === tool.key
-                                            ? "bg-blue-600 dark:bg-blue-700 text-white shadow border border-blue-600 dark:border-blue-700"
-                                            : "hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200"
+                                            ? "bg-section text-section-foreground border-border shadow-brutal-sm"
+                                            : "bg-card text-foreground border-transparent hover:border-border hover:bg-accent"
                                     }`}
                             >
                                 {React.cloneElement(tool.icon, { size: 20 })}
@@ -101,17 +101,17 @@ export default function ToolsLocket() {
                 </div>
 
                 {/* Content */}
-                <div className="flex-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-2xl shadow-md overflow-hidden flex flex-col h-[calc(100vh-16rem)] md:h-[calc(100vh-12rem)]">
+                <div className="flex-1 bg-card border-2 border-border rounded-md shadow-brutal overflow-hidden flex flex-col h-[calc(100vh-16rem)] md:h-[calc(100vh-12rem)]">
                     <div className="h-full overflow-hidden">
                         {toolsList.find((t) => t.key === activeTab)?.content || (
-                            <div className="flex items-center justify-center h-full dark:text-gray-300">🔍 Không tìm thấy nội dung</div>
+                            <div className="flex items-center justify-center h-full text-muted-foreground">🔍 Không tìm thấy nội dung</div>
                         )}
                     </div>
                 </div>
             </div>
 
             {/* Footer */}
-            <div className="text-sm text-center mt-6 text-gray-700 dark:text-gray-300">
+            <div className="text-sm text-center mt-6 text-muted-foreground">
                 Đăng nhập dưới tên:{" "}
                 <strong>
                     {user?.FullName} • {user?.UserID}

@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 
 interface DiemDanhOut {
   TenMonHoc: string;
@@ -29,29 +30,20 @@ const DiemDanhCard: React.FC<{ item: DiemDanhOut }> = ({ item }) => {
     if (trangThai === 2) {
       return {
         text: 'Đã điểm danh',
-        icon: <CheckCircle className="w-5 h-5" />,
-        bgColor: 'bg-green-50 dark:bg-green-900/20',
-        borderColor: 'border-green-200 dark:border-green-800',
-        textColor: 'text-green-700 dark:text-green-400',
-        iconColor: 'text-green-500 dark:text-green-400'
+        icon: <CheckCircle className="w-4 h-4" strokeWidth={2.5} />,
+        badgeBg: 'bg-[hsl(142_71%_45%)] text-black',
       };
     } else if (trangThai === 1) {
       return {
         text: 'Vắng có phép',
-        icon: <AlertCircle className="w-5 h-5" />,
-        bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
-        borderColor: 'border-yellow-200 dark:border-yellow-800',
-        textColor: 'text-yellow-700 dark:text-yellow-400',
-        iconColor: 'text-yellow-500 dark:text-yellow-400'
+        icon: <AlertCircle className="w-4 h-4" strokeWidth={2.5} />,
+        badgeBg: 'bg-[hsl(27_96%_61%)] text-black',
       };
     } else {
       return {
         text: 'Vắng không phép',
-        icon: <XCircle className="w-5 h-5" />,
-        bgColor: 'bg-red-50 dark:bg-red-900/20',
-        borderColor: 'border-red-200 dark:border-red-800',
-        textColor: 'text-red-700 dark:text-red-400',
-        iconColor: 'text-red-500 dark:text-red-400'
+        icon: <XCircle className="w-4 h-4" strokeWidth={2.5} />,
+        badgeBg: 'bg-destructive text-destructive-foreground',
       };
     }
   };
@@ -81,44 +73,42 @@ const DiemDanhCard: React.FC<{ item: DiemDanhOut }> = ({ item }) => {
   };
 
   return (
-    <div className={`rounded-lg border-2 ${statusInfo.borderColor} ${statusInfo.bgColor} p-4 shadow-sm hover:shadow-md transition-shadow`}>
-      <div className="flex items-start justify-between mb-3">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-100 flex-1 pr-2">
+    <div className="rounded-md border-2 border-border bg-card text-card-foreground p-4 shadow-brutal">
+      <div className="flex items-start justify-between gap-2 mb-3">
+        <h3 className="text-lg font-display font-bold text-foreground flex-1 pr-2">
           {item.TenMonHoc}
         </h3>
-        <div className={`flex items-center gap-1.5 ${statusInfo.iconColor} flex-shrink-0`}>
+        <Badge className={`gap-1.5 flex-shrink-0 whitespace-nowrap ${statusInfo.badgeBg}`}>
           {statusInfo.icon}
-          <span className={`font-medium text-sm ${statusInfo.textColor} whitespace-nowrap`}>
-            {statusInfo.text}
-          </span>
-        </div>
+          {statusInfo.text}
+        </Badge>
       </div>
 
       <div className="mb-3">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-medium">Giảng viên:</span> {item.HoTenGV}
+        <p className="text-sm text-muted-foreground">
+          <span className="font-bold text-foreground">Giảng viên:</span> {item.HoTenGV}
         </p>
       </div>
 
       <div className="space-y-2 text-sm">
         <div className="flex items-start justify-between">
-          <span className="text-gray-600 dark:text-gray-400">Ngày học:</span>
-          <span className="font-medium text-gray-800 dark:text-gray-200 text-right">
+          <span className="text-muted-foreground">Ngày học:</span>
+          <span className="font-bold text-foreground text-right">
             {formatDate(item.NgayHoc)}
           </span>
         </div>
-        
+
         {item.ThoiGianQuetQRCode && (<div className="flex items-center justify-between">
-          <span className="text-gray-600 dark:text-gray-400">Quét QR:</span>
-          <span className="font-medium text-gray-800 dark:text-gray-200">
+          <span className="text-muted-foreground">Quét QR:</span>
+          <span className="font-bold text-foreground tabular-nums">
             {formatDateTime(item.ThoiGianQuetQRCode)}
           </span>
         </div>)}
 
         {item.ThoiGianDiemDanh && (
           <div className="flex items-center justify-between">
-            <span className="text-gray-600 dark:text-gray-400">Điểm danh:</span>
-            <span className="font-medium text-gray-800 dark:text-gray-200">
+            <span className="text-muted-foreground">Điểm danh:</span>
+            <span className="font-bold text-foreground tabular-nums">
               {formatDateTime(item.ThoiGianDiemDanh)}
             </span>
           </div>
@@ -192,8 +182,8 @@ export const LmsDiemDanhPage: React.FC = () => {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 mx-auto mb-4 text-blue-600 dark:text-blue-400 animate-spin" />
-          <p className="text-gray-600 dark:text-gray-300 text-lg">Đang tải dữ liệu điểm danh...</p>
+          <Loader2 className="w-12 h-12 mx-auto mb-4 text-foreground animate-spin" strokeWidth={2.5} />
+          <p className="text-muted-foreground text-lg font-bold">Đang tải dữ liệu điểm danh...</p>
         </div>
       </div>
     );
@@ -203,10 +193,10 @@ export const LmsDiemDanhPage: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center">
-        <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md">
-          <XCircle className="w-16 h-16 mx-auto mb-4 text-red-500 dark:text-red-400" />
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Có lỗi xảy ra</h2>
-          <p className="text-gray-600 dark:text-gray-300">{error}</p>
+        <div className="text-center bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-8 max-w-md">
+          <XCircle className="w-16 h-16 mx-auto mb-4 text-destructive" strokeWidth={2.5} />
+          <h2 className="text-2xl font-display font-black text-foreground mb-2">Có lỗi xảy ra</h2>
+          <p className="text-muted-foreground">{error}</p>
         </div>
       </div>
     );
@@ -216,10 +206,10 @@ export const LmsDiemDanhPage: React.FC = () => {
   if (!data || !data.data || data.data.length === 0) {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center">
-        <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 max-w-md">
-          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">Chưa có dữ liệu</h2>
-          <p className="text-gray-600 dark:text-gray-300">Bạn chưa có buổi học nào được điểm danh</p>
+        <div className="text-center bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-8 max-w-md">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" strokeWidth={2.5} />
+          <h2 className="text-2xl font-display font-black text-foreground mb-2">Chưa có dữ liệu</h2>
+          <p className="text-muted-foreground">Bạn chưa có buổi học nào được điểm danh</p>
         </div>
       </div>
     );
@@ -230,16 +220,18 @@ export const LmsDiemDanhPage: React.FC = () => {
     <div className="min-h-screen p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">Lịch sử điểm danh</h1>
-          <p className="text-gray-600 dark:text-gray-300">
-            Kết quả: {filteredData.length}/{data.data.length} buổi học
-          </p>
+        <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6 mb-6">
+          <div className="bg-secondary text-secondary-foreground border-2 border-border rounded-md shadow-brutal-sm px-4 py-3 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-display font-black">Lịch sử điểm danh</h1>
+            <p className="font-bold">
+              Kết quả: <span className="tabular-nums">{filteredData.length}/{data.data.length}</span> buổi học
+            </p>
+          </div>
 
           {/* Filters */}
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-300">Môn học</p>
+              <p className="text-sm font-bold text-foreground">Môn học</p>
               <Select value={selectedMonHoc} onValueChange={setSelectedMonHoc}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn môn học" />
@@ -258,7 +250,7 @@ export const LmsDiemDanhPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <p className="text-sm text-gray-600 dark:text-gray-300">Trạng thái</p>
+              <p className="text-sm font-bold text-foreground">Trạng thái</p>
               <Select value={selectedTrangThai} onValueChange={setSelectedTrangThai}>
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn trạng thái" />
@@ -277,10 +269,10 @@ export const LmsDiemDanhPage: React.FC = () => {
         {/* List */}
         <div className="space-y-4 overflow-y-scroll max-h-[75vh]">
           {filteredData.length === 0 ? (
-            <div className="text-center bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8">
-              <AlertCircle className="w-16 h-16 mx-auto mb-4 text-gray-400 dark:text-gray-500" />
-              <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Không có kết quả</h2>
-              <p className="text-gray-600 dark:text-gray-300">Không tìm thấy buổi học phù hợp với bộ lọc</p>
+            <div className="text-center bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-8">
+              <AlertCircle className="w-16 h-16 mx-auto mb-4 text-muted-foreground" strokeWidth={2.5} />
+              <h2 className="text-xl font-display font-black text-foreground mb-2">Không có kết quả</h2>
+              <p className="text-muted-foreground">Không tìm thấy buổi học phù hợp với bộ lọc</p>
             </div>
           ) : (
             filteredData.map((item, index) => <DiemDanhCard key={index} item={item} />)

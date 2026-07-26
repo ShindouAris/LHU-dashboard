@@ -193,8 +193,8 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
           {items.map((it) => (
             <div key={it.STT} className="flex items-center justify-between gap-2">
               <span className="truncate">{it.HinhThuc}</span>
-              <span className="ml-auto font-medium">{caculateDiem(formatScore(it.Diem), hediem)}</span>
-              <span className="text-gray-500">({formatScore(it.ptDiem, 0)}%)</span>
+              <span className="ml-auto font-bold tabular-nums">{caculateDiem(formatScore(it.Diem), hediem)}</span>
+              <span className="text-muted-foreground">({formatScore(it.ptDiem, 0)}%)</span>
             </div>
           ))}
         </div>
@@ -207,13 +207,13 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          <GraduationCap className="h-6 w-6" /> Kết quả học tập
+        <h2 className="text-2xl sm:text-3xl font-display font-black text-foreground flex items-center gap-2">
+          <GraduationCap className="h-6 w-6" strokeWidth={2.5} /> Kết quả học tập
         </h2>
         <div className="flex items-center gap-3 w-full sm:w-auto">
           {!loading && !error && marks && (
             <select
-              className="w-full sm:w-64 px-3 py-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full sm:w-64 px-3 py-2 rounded-md border-2 border-border bg-card text-foreground shadow-brutal-sm font-bold focus:outline-none focus:ring-2 focus:ring-ring"
               value={selectedSemester ?? ''}
               onChange={(e) => setSelectedSemester(Number(e.target.value))}
             >
@@ -236,28 +236,28 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
       </div>
 
       {loading && (
-        <Card className="border-0 shadow-lg">
+        <Card>
           <CardContent className="py-8 text-center">Đang tải dữ liệu điểm…</CardContent>
         </Card>
       )}
 
       {error && (
-        <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">{error}</CardContent>
+        <Card>
+          <CardContent className="py-8 text-center font-bold text-destructive">{error}</CardContent>
         </Card>
       )}
 
       {error === "Bạn chưa hoàn thành hết các đánh giá giáo viên và môn học" && (
-        <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-red-600 dark:text-red-400">
+        <Card>
+          <CardContent className="py-8 text-center font-bold text-destructive">
             <a>
               Vui lòng hoàn thành khảo sát đánh giá giảng viên và môn học tại{' '}
               <a
                 href="https://qa.lhu.edu.vn"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 underline"
-              >Trang khảo sát của trường 
+                className="text-foreground underline underline-offset-4"
+              >Trang khảo sát của trường
               </a>{' '}
               trước khi xem điểm.
             </a>
@@ -267,41 +267,41 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
 
       {!loading && !error && marks && (
         <>
-          <Card className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+          <Card className="overflow-hidden">
             <CardContent className="py-6">
               <div className="flex flex-col sm:flex-row gap-6 items-center sm:items-start">
                 <img
                   src={imgsrc}
                   alt={marks.HoTen}
-                  className="w-28 h-28 rounded-md object-cover border border-gray-200 dark:border-gray-700"
+                  className="w-28 h-28 rounded-md object-cover border-2 border-border shadow-brutal-sm"
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full">
                   <div>
-                    <div className="text-sm text-gray-500">Họ tên</div>
-                    <div className="font-medium">{marks.HoTen}</div>
+                    <div className="text-sm text-muted-foreground">Họ tên</div>
+                    <div className="font-bold">{marks.HoTen}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">Mã SV</div>
-                    <div className="font-medium">{marks.StudentID}</div>
+                    <div className="text-sm text-muted-foreground">Mã SV</div>
+                    <div className="font-bold">{marks.StudentID}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">Lớp</div>
-                    <div className="font-medium">{marks.LopID}</div>
+                    <div className="text-sm text-muted-foreground">Lớp</div>
+                    <div className="font-bold">{marks.LopID}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">Ngày sinh</div>
-                    <div className="font-medium">{marks.NgaySinh}</div>
+                    <div className="text-sm text-muted-foreground">Ngày sinh</div>
+                    <div className="font-bold">{marks.NgaySinh}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">Tình trạng</div>
-                    <div className="font-medium">{marks.TinhTrang}</div>
+                    <div className="text-sm text-muted-foreground">Tình trạng</div>
+                    <div className="font-bold">{marks.TinhTrang}</div>
                   </div>
                   <div>
-                    <div className="text-sm text-gray-500">GPA</div>
+                    <div className="text-sm text-muted-foreground">GPA</div>
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <div className="font-medium">{caculateDiem(formatScore(marks.DiemTB), hediem)}</div>
+                          <div className="font-black tabular-nums text-lg">{caculateDiem(formatScore(marks.DiemTB), hediem)}</div>
                         </TooltipTrigger>
                         <TooltipContent>
                           <div className="">
@@ -323,13 +323,11 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
             </CardContent>
           </Card>
 
-          <Card className="border-0 shadow-lg">
-            <CardContent className="py-6 text-center">
-              <span className="text-white text-md font-loveHouse">
-                Lưu ý: Điểm nào được tô đỏ tức là bạn rớt môn!, hoặc là chưa lên đủ điểm
-              </span>
-            </CardContent>
-          </Card>
+          <div className="rounded-md border-2 border-border bg-[hsl(27_96%_61%)] text-black shadow-brutal py-4 px-6 text-center">
+            <span className="text-black text-md font-loveHouse font-bold">
+              Lưu ý: Điểm nào được tô đỏ tức là bạn rớt môn!, hoặc là chưa lên đủ điểm
+            </span>
+          </div>
 
           {selectedSemester !== null && (
             <div className="space-y-6">
@@ -337,20 +335,20 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                 const hocKy = selectedSemester as number;
                 const monHocs = semesters[hocKy] ?? [];
                 return (
-                  <Card key={hocKy} className="overflow-hidden border-0 shadow-lg bg-white/90 dark:bg-gray-800/90 backdrop-blur">
+                  <Card key={hocKy} className="overflow-hidden">
                     <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5 text-blue-600" /> Học kỳ {hocKy}
-                        <PiChalkboardSimpleDuotone className="h-5 w-5 text-green-600" /> Số tín chỉ trong kì {tinchi}
-                        <PiDiceThreeDuotone className="h-5 w-5 text-yellow-600" /> Số tín chỉ tích luỹ {totalAccumulatedCredits}
-                        <LuBookKey className="h-5 w-5 text-red-600" /> Hệ điểm: {hediem === 'he10' ? 'Hệ 10' : hediem === 'he4' ? 'Hệ 4' : 'Chữ'}
+                      <CardTitle className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <BookOpen className="h-5 w-5 text-foreground" strokeWidth={2.5} /> Học kỳ {hocKy}
+                        <PiChalkboardSimpleDuotone className="h-5 w-5 text-foreground" /> Số tín chỉ trong kì {tinchi}
+                        <PiDiceThreeDuotone className="h-5 w-5 text-foreground" /> Số tín chỉ tích luỹ {totalAccumulatedCredits}
+                        <LuBookKey className="h-5 w-5 text-foreground" /> Hệ điểm: {hediem === 'he10' ? 'Hệ 10' : hediem === 'he4' ? 'Hệ 4' : 'Chữ'}
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto rounded-md border-2 border-border">
                         <table className="w-full min-w-[720px] border-collapse text-sm sm:text-base table-auto">
                           <thead>
-                            <tr className="bg-gray-100 dark:bg-gray-700 text-center">
+                            <tr className="bg-muted border-b-2 border-border text-center font-bold uppercase">
                               <th className="px-4 py-2">Mã MH</th>
                               <th className="px-4 py-2">Tên môn học</th>
                               <th className="px-4 py-2">Tín chỉ</th>
@@ -364,13 +362,13 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               monHocs.map((mh: MonHocAPI, idx: number) => (
                                 <tr
                                   key={mh.MonHocID || `${hocKy}-${idx}`}
-                                  className={`border-b text-center ${( mh.DiemThanhPhan === null) ? '' : !mh.Dau && 'text-red-500'} border-gray-200 dark:border-gray-700`}
+                                  className={`border-b-2 border-border text-center last:border-b-0 ${( mh.DiemThanhPhan === null) ? '' : !mh.Dau && 'text-destructive font-bold'}`}
                                 >
                                   <td className="px-4 py-2 font-mono break-words">{String(mh.MonHocID)}</td>
                                   <td className="px-4 py-2 break-words">{safeText(mh.TenMH)}</td>
-                                  <td className="px-4 py-2">{formatScore(mh.HeSo, 0)}</td>
+                                  <td className="px-4 py-2 tabular-nums">{formatScore(mh.HeSo, 0)}</td>
                                   <td className="px-4 py-2">{renderThanhPhan(mh.DiemThanhPhan)}</td>
-                                  <td className="px-4 py-2 font-semibold">{caculateDiem(formatScore(mh.DiemTBMon), hediem)}</td>
+                                  <td className="px-4 py-2 font-black tabular-nums">{caculateDiem(formatScore(mh.DiemTBMon), hediem)}</td>
                                   {canOperateReRegister &&
                                     mh.KyThiID &&
                                     mh.Dau === false &&
@@ -395,7 +393,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                               ))
                             ) : (
                               <tr>
-                                <td colSpan={5} className="px-4 py-4 text-center text-gray-500">
+                                <td colSpan={5} className="px-4 py-4 text-center text-muted-foreground">
                                   Không có dữ liệu môn học cho học kỳ này
                                 </td>
                               </tr>
@@ -413,8 +411,8 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
       )}
 
       {!loading && !error && !marks && (
-        <Card className="border-0 shadow-lg">
-          <CardContent className="py-8 text-center text-gray-500">
+        <Card>
+          <CardContent className="py-8 text-center text-muted-foreground">
             Không có dữ liệu điểm
           </CardContent>
         </Card>
@@ -429,7 +427,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
                 ? 'Bạn có chắc chắn muốn hủy đăng ký thi lại cho môn học này?'
                 : 'Bạn có chắc chắn muốn đăng ký thi lại cho môn học này?'}
             </div>
-            <strong className="text-xl text-blue-500 font-semibold font-loveHouse flex items-center justify-center">{selectedMonHoc}</strong>
+            <strong className="text-xl text-foreground font-bold font-loveHouse flex items-center justify-center">{selectedMonHoc}</strong>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setConfirmDialogOpen(false)}>Hủy</Button>
@@ -447,7 +445,7 @@ export const MarkPage: React.FC<MarkPageProps> = ({ onBackToSchedule }) => {
         <DialogContent>
             <DialogHeader>Lỗi đăng ký thi lại</DialogHeader>
           <div className="p-4">
-            <strong className='text-red-500 font-semibold text-xl'>{errorDialog}</strong>
+            <strong className='text-destructive font-bold text-xl'>{errorDialog}</strong>
           </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setDialogOpen(false)}>Đóng</Button>
