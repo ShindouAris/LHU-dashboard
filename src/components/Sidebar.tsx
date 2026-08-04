@@ -202,8 +202,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     const navigationId = `${instance}-sidebar-navigation`;
 
     return (
-      <div className="flex flex-1 flex-col overflow-y-auto p-4">
-        <div className="flex flex-col gap-1">
+      <div className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-auto p-4">
+        <div className="flex min-w-0 flex-col gap-1">
           <button
             type="button"
             onClick={() => toggleExpanded('navigation')}
@@ -220,7 +220,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           {expandedItems.includes('navigation') && (
-            <div id={navigationId} className="ml-4 flex flex-col gap-1">
+            <div id={navigationId} className="ml-4 flex min-w-0 flex-col gap-1">
               {sidebarItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = location.pathname === item.path ||
@@ -233,7 +233,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     onClick={() => handleNavigation(item, instance === 'mobile')}
                     aria-current={isActive ? 'page' : undefined}
                     className={cn(
-                      "group flex w-full items-center gap-3 rounded-md border-2 p-3 text-left transition-all",
+                      "group flex min-w-0 w-full items-center gap-3 overflow-hidden rounded-md border-2 p-3 text-left transition-all",
                       isActive
                         ? "bg-section text-section-foreground border-border shadow-brutal-sm font-bold"
                         : "border-transparent hover:border-border hover:bg-accent text-foreground",
@@ -254,7 +254,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       </div>
                     </div>
                     {item.isBetaItem && (
-                      <Badge variant={isActive ? 'outline' : 'section'}>Beta</Badge>
+                      <Badge className="shrink-0" variant={isActive ? 'outline' : 'section'}>Beta</Badge>
                     )}
                   </button>
                 );
@@ -291,8 +291,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      <aside className="hidden h-full w-80 flex-shrink-0 border-r-2 border-border bg-card lg:sticky lg:top-0 lg:flex">
-        <div className="flex flex-col h-full">
+      <aside className="hidden h-full w-80 flex-shrink-0 overflow-hidden border-r-2 border-border bg-card lg:sticky lg:top-0 lg:flex">
+        <div className="flex h-full min-w-0 w-full flex-col">
           <div className="border-b-2 border-border p-4">
             {renderBrandMark()}
           </div>
@@ -306,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           if (open !== isOpen) onToggle?.();
         }}
       >
-        <SheetContent side="left" className="flex w-80 max-w-[85vw] flex-col gap-0 border-r-2 border-border bg-card p-0 lg:hidden">
+        <SheetContent side="left" className="flex w-80 max-w-[85vw] flex-col gap-0 overflow-hidden border-r-2 border-border bg-card p-0 lg:hidden">
           <SheetHeader className="border-b-2 border-border p-4 pr-14 text-left">
             <SheetTitle className="sr-only">Menu điều hướng</SheetTitle>
             <SheetDescription className="sr-only">
