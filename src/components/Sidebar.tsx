@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { 
-  X, 
   Home, 
   Calendar, 
   Sun,
@@ -20,6 +18,13 @@ import { MdOutlineBadge, MdOutlineLocalLibrary } from 'react-icons/md';
 import { Badge } from './ui/badge';
 import { ChisaAI } from './ui/ChisaAI';
 import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 interface SidebarProps {
   title?: string;
@@ -172,140 +177,146 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const sidebarItems = navigationItems.filter(item => {
     if (item.forceshow) return true;
-    if (!settings.hiddenSidebarItems === null) return true;
+    if (settings.hiddenSidebarItems == null) return true;
     return !settings.hiddenSidebarItems.includes(item.id);
   });
 
-  return (
-    <>
-      {/* Mobile Overlay */}
-      {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={onToggle}
-        />
-      )}
+  const handleNavigation = (item: NavigationItem, closeAfterNavigation: boolean) => {
+    if (item.url) {
+      window.open(item.url, "_blank", "noopener,noreferrer");
+      return;
+    }
+    if (item.authrequired && !isAuth) {
+      toast.error("Vui lòng đăng nhập để truy cập trang này");
+      return;
+    }
+    if (item.path) {
+      navigate(item.path);
+    }
+    if (closeAfterNavigation) {
+      onToggle?.();
+    }
+  };
 
-      {/* Sidebar */}
-      <aside className={cn(
-        "fixed top-0 left-0 z-50 h-full w-80 bg-card border-r-2 border-border transform transition-transform duration-300 ease-in-out lg:sticky lg:top-0 lg:translate-x-0 lg:z-auto",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b-2 border-border">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-section text-section-foreground border-2 border-border shadow-brutal-sm rounded-md flex items-center justify-center">
-                <GraduationCap className="h-5 w-5" />
-              </div>
-              <div className="min-w-0">
-                <h1 className="font-display text-lg font-black text-foreground truncate">
-                  LHU Dashboard
-                </h1>
-                <p className="text-xs font-medium text-muted-foreground truncate text-left">
-                  {title}
-                </p>
-              </div>
-            </div>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={onToggle}
-              className="lg:hidden"
-              aria-label="Đóng menu"
-            >
-              <X className="h-5 w-5" />
-            </Button>
-          </div>
+  const renderSidebarNavigation = (instance: 'desktop' | 'mobile') => {
+    const navigationId = `${instance}-sidebar-navigation`;
 
-          {/* Navigation */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-2">
-            {/* Navigation Section */}
-            <div className="space-y-1">
-              <button
-                onClick={() => toggleExpanded('navigation')}
-                className="flex items-center justify-between w-full p-2 text-xs font-bold uppercase tracking-wide text-muted-foreground hover:bg-accent rounded-md transition-colors"
-              >
-                <span>Điều hướng</span>
-                {expandedItems.includes('navigation') ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </button>
-              
-              {expandedItems.includes('navigation') && (
-                <div className="ml-4 space-y-1">
-                  {sidebarItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = location.pathname === item.path || 
-                                   (item.path === '/' && location.pathname === '/home');
-                    
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          if (item.url) {
-                            window.open(item.url, "_blank", "noopener,noreferrer")
-                            return;
-                          }
-                          if (item.authrequired && !isAuth) {
-                            toast.error("Vui lòng đăng nhập để truy cập trang này")
-                            return;
-                          }
-                          if (item.path) {
-                            navigate(item.path);
-                          }
-                          // Close sidebar on mobile after selection
-                          if (window.innerWidth < 1024) {
-                            onToggle?.();
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center gap-3 w-full p-3 text-left rounded-md border-2 transition-all group",
-                          isActive
-                            ? "bg-section text-section-foreground border-border shadow-brutal-sm font-bold"
-                            : "border-transparent hover:border-border hover:bg-accent text-foreground",
-                            !isAuth && item.authrequired && "hidden"
-                        )}
-                      >
-                        <Icon className={cn(
-                          "h-5 w-5 flex-shrink-0",
-                          isActive ? "text-section-foreground" : "text-muted-foreground group-hover:text-foreground"
-                        )} />
-                        <div className="min-w-0 flex-1">
-                          <div className="font-bold">{item.label}</div>
-                          <div className={cn(
-                            "text-xs truncate",
-                            isActive ? "text-section-foreground/80" : "text-muted-foreground"
-                          )}>
-                            {item.description}
-                          </div>
-                        </div>
-                        {
-                          (item.isBetaItem) && (
-                            <Badge variant={isActive ? 'outline' : 'section'}>Beta</Badge>
-                          )
-                        }
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+    return (
+      <div className="flex flex-1 flex-col overflow-y-auto p-4">
+        <div className="flex flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => toggleExpanded('navigation')}
+            aria-expanded={expandedItems.includes('navigation')}
+            aria-controls={navigationId}
+            className="flex w-full items-center justify-between rounded-md p-2 text-xs font-bold uppercase tracking-wide text-muted-foreground transition-colors hover:bg-accent"
+          >
+            <span>Điều hướng</span>
+            {expandedItems.includes('navigation') ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
 
-            {/* Status Section */}
-            <div className="pt-4 mt-2 border-t-2 border-border">
-              <div className="flex items-center gap-2 p-3 border-2 border-border bg-[hsl(142_71%_45%)] text-black rounded-md shadow-brutal-sm">
-                <div className="w-2.5 h-2.5 bg-black rounded-full animate-pulse"></div>
-                <span className="text-sm font-bold">
-                  Đang học
-                </span>
-              </div>
+          {expandedItems.includes('navigation') && (
+            <div id={navigationId} className="ml-4 flex flex-col gap-1">
+              {sidebarItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.path ||
+                  (item.path === '/' && location.pathname === '/home');
+
+                return (
+                  <button
+                    type="button"
+                    key={item.id}
+                    onClick={() => handleNavigation(item, instance === 'mobile')}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={cn(
+                      "group flex w-full items-center gap-3 rounded-md border-2 p-3 text-left transition-all",
+                      isActive
+                        ? "bg-section text-section-foreground border-border shadow-brutal-sm font-bold"
+                        : "border-transparent hover:border-border hover:bg-accent text-foreground",
+                      !isAuth && item.authrequired && "hidden"
+                    )}
+                  >
+                    <Icon className={cn(
+                      "h-5 w-5 flex-shrink-0",
+                      isActive ? "text-section-foreground" : "text-muted-foreground group-hover:text-foreground"
+                    )} />
+                    <div className="min-w-0 flex-1">
+                      <div className="font-bold">{item.label}</div>
+                      <div className={cn(
+                        "truncate text-xs",
+                        isActive ? "text-section-foreground/80" : "text-muted-foreground"
+                      )}>
+                        {item.description}
+                      </div>
+                    </div>
+                    {item.isBetaItem && (
+                      <Badge variant={isActive ? 'outline' : 'section'}>Beta</Badge>
+                    )}
+                  </button>
+                );
+              })}
             </div>
+          )}
+        </div>
+
+        <div className="mt-4 border-t-2 border-border pt-4">
+          <div className="flex items-center gap-2 rounded-md border-2 border-border bg-[hsl(142_71%_45%)] p-3 text-black shadow-brutal-sm">
+            <div className="h-2.5 w-2.5 animate-pulse rounded-full bg-black" />
+            <span className="text-sm font-bold">Đang học</span>
           </div>
         </div>
+      </div>
+    );
+  };
+
+  const renderBrandMark = () => (
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-border bg-section text-section-foreground shadow-brutal-sm">
+        <GraduationCap className="h-5 w-5" />
+      </div>
+      <div className="min-w-0">
+        <div className="truncate font-display text-lg font-black text-foreground">
+          LHU Dashboard
+        </div>
+        <p className="truncate text-left text-xs font-medium text-muted-foreground">
+          {title}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      <aside className="hidden h-full w-80 flex-shrink-0 border-r-2 border-border bg-card lg:sticky lg:top-0 lg:flex">
+        <div className="flex flex-col h-full">
+          <div className="border-b-2 border-border p-4">
+            {renderBrandMark()}
+          </div>
+          {renderSidebarNavigation('desktop')}
+        </div>
       </aside>
+
+      <Sheet
+        open={isOpen}
+        onOpenChange={(open) => {
+          if (open !== isOpen) onToggle?.();
+        }}
+      >
+        <SheetContent side="left" className="flex w-80 max-w-[85vw] flex-col gap-0 border-r-2 border-border bg-card p-0 lg:hidden">
+          <SheetHeader className="border-b-2 border-border p-4 pr-14 text-left">
+            <SheetTitle className="sr-only">Menu điều hướng</SheetTitle>
+            <SheetDescription className="sr-only">
+              Chọn trang bạn muốn mở trong LHU Dashboard.
+            </SheetDescription>
+            {renderBrandMark()}
+          </SheetHeader>
+          {renderSidebarNavigation('mobile')}
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

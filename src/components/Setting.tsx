@@ -363,14 +363,15 @@ const SettingsPage: React.FC = () => {
     title: string;
     description: string;
     action: React.ReactNode;
-  }> = ({ icon: Icon, title, description, action }) => (
+    controlId?: string;
+  }> = ({ icon: Icon, title, description, action, controlId }) => (
     <div className="flex items-center justify-between py-4">
       <div className="flex items-center gap-4 flex-1">
         <div className="p-2 border-2 border-border bg-secondary rounded-md">
           <Icon className="h-5 w-5 text-black" />
         </div>
         <div className="flex-1">
-          <Label className="text-base font-medium cursor-pointer">{title}</Label>
+          <Label htmlFor={controlId} className="text-base font-medium cursor-pointer">{title}</Label>
           <p className="text-sm text-muted-foreground mt-1">{description}</p>
         </div>
       </div>
@@ -405,8 +406,10 @@ const SettingsPage: React.FC = () => {
                 icon={isDarkMode ? Moon : Sun}
                 title="Chế độ tối"
                 description="Chuyển đổi giữa chế độ sáng và tối"
+                controlId="dark-mode-switch"
                 action={
                   <Switch
+                    id="dark-mode-switch"
                     checked={isDarkMode}
                     onCheckedChange={toggleTheme}
                   />
@@ -427,9 +430,10 @@ const SettingsPage: React.FC = () => {
                 icon={MdOutlineBadge}
                 title="Chế độ hiển thị điểm"
                 description="Chọn hệ điểm"
+                controlId="grade-display-select"
                 action={
                   <Select defaultValue={hediem} onValueChange={(val) => { saveHeDiem(val); }}>
-                    <SelectTrigger className="w-[79px] md:w-[120px]">
+                    <SelectTrigger id="grade-display-select" className="w-[79px] md:w-[120px]">
                         <SelectValue placeholder="Chọn chế độ hiển thị điểm" />
                       </SelectTrigger>
                     <SelectContent>
@@ -460,8 +464,10 @@ const SettingsPage: React.FC = () => {
                 icon={settings?.autoStart ? Power : PowerOff}
                 title="Tự động khởi động"
                 description="Tự động khởi động app khi mở máy"
+                controlId="auto-start-switch"
                 action={
                   <Switch
+                  id="auto-start-switch"
                   checked={settings?.autoStart}
                   onCheckedChange={toggleAutoStart}
                   />
@@ -476,8 +482,10 @@ const SettingsPage: React.FC = () => {
                 icon={settings?.minimizeToTray ? PiTrayArrowDown  : PiTrayArrowUpLight }
                 title="Tự động ẩn vào khay"
                 description="Tự động ẩn app sau khi autostart"
+                controlId="minimize-to-tray-switch"
                 action={
                   <Switch
+                  id="minimize-to-tray-switch"
                   checked={settings?.minimizeToTray}
                   onCheckedChange={toggleAutoMinimizeToTray}
                   />
@@ -492,8 +500,10 @@ const SettingsPage: React.FC = () => {
                 icon={settings?.checkForUpdatesOnStart ? MdUpdate  : MdUpdateDisabled }
                 title="Tự động kiểm tra cập nhật"
                 description="Tự động kiểm tra cập nhật sau khi khởi động ứng dụng"
+                controlId="check-updates-switch"
                 action={
                   <Switch
+                  id="check-updates-switch"
                   checked={settings?.checkForUpdatesOnStart}
                   onCheckedChange={toggleCheckForUpdatesOnStart}
                   />
@@ -508,8 +518,10 @@ const SettingsPage: React.FC = () => {
                 icon={settings?.notifyNextClassStartedSoon ? IoIosNotifications  : IoIosNotificationsOff }
                 title="Nhận thông báo khi lớp học tiếp theo sắp bắt đầu"
                 description="Nhận thông báo nhắc nhở trước khi lớp học tiếp theo bắt đầu"
+                controlId="next-class-notification-switch"
                 action={
                   <Switch
+                  id="next-class-notification-switch"
                   checked={settings?.notifyNextClassStartedSoon}
                   onCheckedChange={toggleNotifyNextClassStartedSoon}
                   />
@@ -524,8 +536,10 @@ const SettingsPage: React.FC = () => {
                 icon={settings?.minimizeOnClose ? BsWindowDesktop  : FaRegWindowClose }
                 title="Tự động thu nhỏ khi đóng ứng dụng"
                 description="Thu nhỏ ứng dụng vào khay hệ thống khi đóng cửa sổ chính"
+                controlId="minimize-on-close-switch"
                 action={
                   <Switch
+                  id="minimize-on-close-switch"
                   checked={settings?.minimizeOnClose}
                   onCheckedChange={toggleMinimizeOnClose}
                   />
@@ -540,8 +554,10 @@ const SettingsPage: React.FC = () => {
                 icon={IoHardwareChipOutline}
                 title="Kích hoạt tăng tốc phần cứng"
                 description="Sử dụng GPU để cải thiện hiệu suất ứng dụng, tắt nếu gặp sự cố hiển thị (Cần khởi động lại ứng dụng)"
+                controlId="hardware-acceleration-switch"
                 action={
                   <Switch
+                  id="hardware-acceleration-switch"
                   checked={settings?.hardwareAcceleration}
                   onCheckedChange={toggleHardwareAcceleration}
                   />
@@ -556,8 +572,10 @@ const SettingsPage: React.FC = () => {
                     icon={MdOutlineBadge}
                     title="Sử dụng Discord Rich Presence"
                     description="Hiển thị trạng thái học tập của bạn trên Discord (Cần khởi động lại ứng dụng)"
+                    controlId="discord-presence-switch"
                     action={
                       <Switch
+                      id="discord-presence-switch"
                       checked={settings?.useDiscordRpc}
                       onCheckedChange={setUseDiscordRpc}
                       />
@@ -615,8 +633,13 @@ const SettingsPage: React.FC = () => {
                       icon={item.icon}
                       title={item.label}
                       description={item.description}
+                      controlId={`sidebar-${item.id}-switch`}
                       action={
-                        <Switch checked={enabled} onCheckedChange={() => toggleSidebarItem(item.id)} />
+                        <Switch
+                          id={`sidebar-${item.id}-switch`}
+                          checked={enabled}
+                          onCheckedChange={() => toggleSidebarItem(item.id)}
+                        />
                       }
                     />
                   )

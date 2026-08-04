@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ import {
 } from '@/utils/scheduleUtils';
 import { getTinhTrangInfo, isTinhTrangCancelled } from '@/utils/tinhtrang';
 import { PiExam } from 'react-icons/pi';
+import { cn } from '@/lib/utils';
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /* Types                                                                      */
@@ -126,6 +127,9 @@ const getStudyPlace = (schedule: ScheduleItem): string => {
     return schedule.TenCoSo.replace('Cơ sở ', '').trim();
 };
 
+const formatGroupName = (groupName: string): string =>
+    groupName.replace(/\]\[/g, '] [');
+
 /** Border/accent của card theo trạng thái */
 const getCardAccent = (
     cancelType: 'none' | 'holiday' | 'cancelled',
@@ -159,22 +163,6 @@ const useStartCountdown = (startTime: string) => {
         return () => clearInterval(t);
     }, [startTime]);
     return text;
-};
-
-const useOverflow = <T extends HTMLElement>() => {
-    const ref = useRef<T | null>(null);
-    const [overflow, setOverflow] = useState(false);
-    useEffect(() => {
-        const check = () => {
-            const el = ref.current;
-            if (!el) return;
-            setOverflow(el.scrollWidth > el.clientWidth);
-        };
-        check();
-        window.addEventListener('resize', check);
-        return () => window.removeEventListener('resize', check);
-    }, []);
-    return { ref, overflow };
 };
 
 const useDuplicateInfo = (
@@ -229,7 +217,6 @@ interface InfoRowProps {
     label: string;
     value: React.ReactNode;
     tooltip?: string;
-    valueRef?: React.Ref<HTMLDivElement>;
     valueClassName?: string;
 }
 
@@ -239,13 +226,14 @@ const InfoRow: React.FC<InfoRowProps> = ({
     label,
     value,
     tooltip,
-    valueRef,
     valueClassName = '',
 }) => {
     const valueEl = (
         <div
-            ref={valueRef}
-            className={`text-sm font-semibold text-foreground truncate ${valueClassName}`}
+            className={cn(
+                'text-sm font-semibold text-foreground',
+                valueClassName || 'truncate'
+            )}
         >
             {value}
         </div>
@@ -320,8 +308,6 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
 
     const studyPlace = getStudyPlace(schedule);
     const countdown = useStartCountdown(schedule.ThoiGianBD);
-    const { ref: groupRef, overflow: shouldMarquee } =
-        useOverflow<HTMLDivElement>();
     const duplicate = useDuplicateInfo(schedule, allSchedules);
     const forecast = useWeatherForecast(schedule.ThoiGianBD);
 
@@ -456,14 +442,9 @@ const ScheduleCardInner: React.FC<ScheduleCardProps> = ({
                     <InfoRow
                         icon={BookOpen}
                         label="Nhóm"
-                        value={schedule.TenNhom}
+                        value={formatGroupName(schedule.TenNhom)}
                         tooltip={schedule.TenNhom}
-                        valueRef={groupRef}
-                        valueClassName={
-                            shouldMarquee
-                                ? 'animate-marquee'
-                                : 'truncate'
-                        }
+                        valueClassName="whitespace-normal break-words leading-snug sm:truncate"
                     />
 
                     {forecast && (

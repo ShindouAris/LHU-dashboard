@@ -67,17 +67,6 @@
   }
 }
 
-@keyframes marquee {
-  0%   { transform: translateX(100%); }
-  40%  { transform: translateX(0%); }     /* dừng ở giữa */
-  50%  { transform: translateX(0%); }     
-  100% { transform: translateX(-100%); }
-}
-
-.animate-marquee {
-  animation: marquee 10s linear infinite;
-}
-
 .animate-blob {
   animation: blob 7s infinite;
 }

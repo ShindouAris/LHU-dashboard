@@ -51,6 +51,17 @@ export const Layout: React.FC<LayoutProps> = ({
     }
   }, []);
 
+  useEffect(() => {
+    const closeMobileSidebarAtDesktopBreakpoint = () => {
+      if (window.innerWidth >= 1024) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', closeMobileSidebarAtDesktopBreakpoint);
+    return () => window.removeEventListener('resize', closeMobileSidebarAtDesktopBreakpoint);
+  }, []);
+
   const Footer: React.FC = () => {
   return (
     <footer className="relative z-10 mt-auto border-t-2 border-border bg-background hidden lg:block">

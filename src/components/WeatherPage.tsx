@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CalendarDays, CloudRain, Thermometer, Wind, Droplets, ArrowLeft, Sun, Leaf } from 'lucide-react';
 import { FaHouseFloodWater } from "react-icons/fa6";
 import { ApiService } from '@/services/apiService';
@@ -20,27 +21,32 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
   const [autoforecastResp, setAutoforecastResp] = useState<HourForecast | null>(null);
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const [forecastResp, currentResp, autoforecastResp] = await Promise.all([
-          ApiService.get_3_day_forecast_weather(),
-          ApiService.get_current_weather(),
-          ApiService.get_forecast_weather_auto(),
-        ]);
-        setForecastDays(forecastResp);
-        setCurrentWeather(currentResp);
-        setAutoforecastResp(autoforecastResp)
-      } catch (e) {
-        setError(e instanceof Error ? e.message : 'Không thể tải dữ liệu thời tiết');
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
+  const loadWeather = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [forecastResp, currentResp, autoForecastResponse] = await Promise.all([
+        ApiService.get_3_day_forecast_weather(),
+        ApiService.get_current_weather(),
+        ApiService.get_forecast_weather_auto(),
+      ]);
+      setForecastDays(forecastResp);
+      setCurrentWeather(currentResp);
+      setAutoforecastResp(autoForecastResponse);
+    } catch {
+      setError(
+        navigator.onLine
+          ? 'Không thể kết nối tới dịch vụ thời tiết. Hãy thử lại sau ít phút.'
+          : 'Thiết bị đang ngoại tuyến. Hãy kiểm tra kết nối mạng rồi thử lại.'
+      );
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    void loadWeather();
+  }, [loadWeather]);
 
   const formatHour = (t: string) => {
     try {
@@ -112,9 +118,16 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
       )}
 
       {error && (
-        <Card className="border-2 border-border rounded-md shadow-brutal">
-          <CardContent className="py-8 text-center text-destructive">{error}</CardContent>
-        </Card>
+        <Alert variant="destructive" className="border-2 border-border shadow-brutal">
+          <CloudRain />
+          <AlertTitle>Không thể tải dữ liệu thời tiết</AlertTitle>
+          <AlertDescription className="flex flex-col items-start gap-3">
+            <p>{error}</p>
+            <Button type="button" variant="outline" size="sm" onClick={loadWeather}>
+              Thử lại
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       {!loading && !error && (
@@ -149,7 +162,7 @@ export const WeatherPage: React.FC<WeatherPageProps> = ({ onBackToSchedule }) =>
                   <div className="mt-2 border-t-2 border-border pt-3">
                     <div className="text-xs text-muted-foreground mb-2">Một số mốc giờ</div>
                     <div className="grid grid-cols-4 gap-2 text-xs">
-                      {d.hour.filter((_, __) => [6, 9, 12, 15].includes(new Date(_.time).getHours())).map((h) => (
+                      {d.hour.filter((hour) => [6, 9, 12, 15].includes(new Date(hour.time).getHours())).map((h) => (
                         <div key={h.time} className="p-2 rounded-md border-2 border-border bg-muted">
                           <div className="font-semibold">{formatHour(h.time)}</div>
                           <div className="flex items-center gap-1">
