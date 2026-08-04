@@ -3,10 +3,16 @@ const DB_VERSION = 1;
 const TOKEN_STORE = 'access_tokens';
 const USER_STORE = 'users';
 
-interface SessionData {
+import type { UserResponse } from '@/types/user';
+
+export interface SessionData {
   token: string;
   user_id: string;
   created_at: number;
+}
+
+export interface UserSession extends SessionData {
+  user: UserResponse;
 }
 
 class MultiSessionService {
@@ -53,10 +59,13 @@ class MultiSessionService {
     });
   }
 
-  async createSession(token: string, user: any): Promise<void> {
+  async createSession(token: string, user: UserResponse): Promise<void> {
     if (!this.db) await this.init();
 
+    await this.deleteSessionsByUser(user.UserID);
+
     const tx = this.db!.transaction([TOKEN_STORE, USER_STORE], 'readwrite');
+    const completed = this.transactionComplete(tx);
 
     const tokenRequest = tx.objectStore(TOKEN_STORE).put({
       token,
@@ -73,10 +82,10 @@ class MultiSessionService {
     ]);
 
     // Wait for transaction to complete
-    await this.transactionComplete(tx);
+    await completed;
   }
 
-  async getUserByToken(token: string): Promise<any | null> {
+  async getUserByToken(token: string): Promise<UserResponse | null> {
     if (!this.db) await this.init();
 
     const tx = this.db!.transaction([TOKEN_STORE], 'readonly');
@@ -87,7 +96,7 @@ class MultiSessionService {
 
     const userTx = this.db!.transaction([USER_STORE], 'readonly');
     const userStore = userTx.objectStore(USER_STORE);
-    return await this.requestToPromise(userStore.get(session.user_id));
+    return await this.requestToPromise<UserResponse | undefined>(userStore.get(session.user_id)) ?? null;
   }
 
   async getAllSessions(): Promise<SessionData[]> {
@@ -98,7 +107,7 @@ class MultiSessionService {
     return await this.requestToPromise(store.getAll());
   }
 
-  async getAllUsers(): Promise<any[]> {
+  async getAllUsers(): Promise<UserResponse[]> {
     if (!this.db) await this.init();
 
     const tx = this.db!.transaction([USER_STORE], 'readonly');
@@ -106,7 +115,30 @@ class MultiSessionService {
     return await this.requestToPromise(store.getAll());
   }
 
-  async updateUser(user: any): Promise<void> {
+  async getAllUserSessions(): Promise<UserSession[]> {
+    const [sessions, users] = await Promise.all([
+      this.getAllSessions(),
+      this.getAllUsers(),
+    ]);
+
+    const usersById = new Map(users.map((user) => [user.UserID, user]));
+    const newestSessionByUser = new Map<string, SessionData>();
+
+    sessions
+      .sort((a, b) => b.created_at - a.created_at)
+      .forEach((session) => {
+        if (!newestSessionByUser.has(session.user_id)) {
+          newestSessionByUser.set(session.user_id, session);
+        }
+      });
+
+    return Array.from(newestSessionByUser.values()).flatMap((session) => {
+      const user = usersById.get(session.user_id);
+      return user ? [{ ...session, user }] : [];
+    });
+  }
+
+  async updateUser(user: UserResponse): Promise<void> {
     if (!this.db) await this.init();
 
     const tx = this.db!.transaction([USER_STORE], 'readwrite');

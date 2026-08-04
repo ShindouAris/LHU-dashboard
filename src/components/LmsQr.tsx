@@ -3,7 +3,7 @@ import QrScanner from "qr-scanner";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, /* CardHeader */ } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle, UserPlus, CheckCircle2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, QrCode, RefreshCw, AlertTriangle } from "lucide-react";
 import { ApiService } from "@/services/apiService";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -11,16 +11,19 @@ import dayjs from "dayjs"
 import { FaRegQuestionCircle } from "react-icons/fa";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog.tsx";
 import { authService } from "@/services/authService";
-import { multiSessionService } from "@/services/multisession";
-import { UserResponse } from "@/types/user";
-import { DiemDanhOut } from "@/types/schedule";
+import { multiSessionService, type UserSession } from "@/services/multisession";
+import { AuthStorage } from "@/types/user";
+import { LoginQrCard } from "@/components/LHU_UI/LoginQrCard";
+import {
+  AttendanceResultsPanel,
+  LinkedAccountsPanel,
+  type AttendanceResult,
+} from "@/components/LHU_UI/LinkedAccountsPanel";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const trackRef = useRef<MediaStreamTrack | null>(null)
   const [qrScanner, setQrScanner] = useState<QrScanner | null>(null);
-  // @ts-ignore
-  const [isLoginQR, setIsLoginQR] = useState(false)
   const [scanned, setScanned] = useState<string>("");
   const [scale, setScale] = useState<number>(1);
   const [error, setError] = useState<null | string>(null)
@@ -28,11 +31,14 @@ export const QRScanner: React.FC = () => {
   const [success, setIsSuccess] = useState<boolean>(false)
   const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
   const [dialogExpiredQROpen, setDialogExpiredQROpen] = useState<boolean>(false)
-  const [usersList, setUsersList] = useState<UserResponse[]>([])
-  const [newlyAddedUser, setNewlyAddedUser] = useState<UserResponse | null>(null)
-  const [showUserListAnimation, setShowUserListAnimation] = useState<boolean>(false)
-  const [snapshotData, setSnapshotData] = useState<DiemDanhOut[] | null>(null)
+  const [accountSessions, setAccountSessions] = useState<UserSession[]>([])
+  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+  const [attendanceResults, setAttendanceResults] = useState<AttendanceResult[]>([])
+  const [isBatchSubmitting, setIsBatchSubmitting] = useState(false)
+  const accountSessionsRef = useRef<UserSession[]>([])
+  const selectedUserIdsRef = useRef<Set<string>>(new Set())
   const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
+  const [zoomRange, setZoomRange] = useState<{min: number, max: number} | null>(null);
   const nav = useNavigate()
   const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
 
@@ -85,7 +91,7 @@ export const QRScanner: React.FC = () => {
     return {};
   }, []);
 
-  const openReactNativeCamera = () => {
+  const openReactNativeCamera = useCallback(() => {
     if (!isReactNativeWebView) return;
     window.ReactNativeWebView.postMessage(
       JSON.stringify({
@@ -93,9 +99,9 @@ export const QRScanner: React.FC = () => {
         payload: "",
     })
     )
-  }
+  }, [isReactNativeWebView])
 
-  const getCamera = async () => {
+  const getCamera = useCallback(async () => {
     // Try React Native camera first, then attempt web camera regardless of React Native response.
     // This provides a graceful fallback if React Native camera is unavailable or fails.
     if (isReactNativeWebView) {
@@ -107,78 +113,60 @@ export const QRScanner: React.FC = () => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
-        trackRef.current = stream.getVideoTracks()[0];
+        const track = stream.getVideoTracks()[0];
+        trackRef.current = track;
+        const capabilities = track.getCapabilities?.();
+        // @ts-expect-error Zoom can be unavailable on some devices
+        if (capabilities?.zoom) {
+          setZoomRange({
+            // @ts-expect-error Zoom can be unavailable on some devices
+            min: capabilities.zoom.min,
+            // @ts-expect-error Zoom can be unavailable on some devices
+            max: capabilities.zoom.max,
+          });
+        }
       } catch (err) {
         console.error("Lỗi khi truy cập camera:", err);
       }
-  };
+  }, [isReactNativeWebView, openReactNativeCamera]);
 
-  const [zoomRange, setZoomRange] = useState<{min: number, max: number} | null>(null);
+  const refreshAccountSessions = useCallback(async (selectUserId?: string) => {
+    const currentToken = AuthStorage.getUserToken();
+    const currentUser = AuthStorage.getUser();
 
-// Get capabilities when track is ready
-  useEffect(() => {
-    const track = trackRef.current;
-    if (track) {
-      const capabilities = track.getCapabilities?.();
-     // @ts-expect-error Zoom can be unavailable on some devices
-      if (capabilities?.zoom) {
-        setZoomRange({
-         // @ts-expect-error Zoom can be unavailable on some devices
-          min: capabilities.zoom.min,
-         // @ts-expect-error Zoom can be unavailable on some devices
-          max: capabilities.zoom.max
-        });
-       // @ts-expect-error Zoom can be unavailable on some devices
-        console.log('Camera zoom range:', capabilities.zoom);
+    if (currentToken && currentUser) {
+      await multiSessionService.createSession(currentToken, currentUser);
+    }
+
+    const sessions = await multiSessionService.getAllUserSessions();
+    setAccountSessions(sessions);
+    setSelectedUserIds((previous) => {
+      const availableIds = new Set(sessions.map((session) => session.user_id));
+      const next = new Set(Array.from(previous).filter((userId) => availableIds.has(userId)));
+
+      if (next.size === 0 && currentUser?.UserID && availableIds.has(currentUser.UserID)) {
+        next.add(currentUser.UserID);
       }
-    }
-  }, [trackRef.current]);
-
-  const loadSnapshot = async () => {
-
-      const access_token = localStorage.getItem("access_token")
-      if (!access_token) return;
-      try {
-        const res = await ApiService.get_lms_diem_danh(access_token)
-
-        if (res && res.data.length > 0) {
-          setSnapshotData(res.data)
-        }
-
-      } catch (error) {
-        console.error("Lỗi khi lấy snapshot điểm danh:", error);
+      if (selectUserId && availableIds.has(selectUserId)) {
+        next.add(selectUserId);
       }
-    }
-
-  const filterData = useCallback((oldSnapshot: DiemDanhOut[], newSnapshot: DiemDanhOut[]) => {
-
-    let changed = null;
-
-    const getKey = (item: DiemDanhOut) =>
-    `${item.TenMonHoc}|${item.NgayHoc}|${item.HoTenGV}`;
-
-    const oldMap = new Map<string, DiemDanhOut>();
-    oldSnapshot.filter(item => {(item.TrangThai === 2 || item.TrangThai === 1)}).forEach(item => oldMap.set(getKey(item), item));
-
-    if (oldSnapshot.length < newSnapshot.length) {
-      for (const item of newSnapshot) {
-        if (!oldMap.has(getKey(item))) {
-          changed = item;
-          break;
-        }
-    }
-    } else if (oldSnapshot.length === newSnapshot.length) {
-        for (const item of newSnapshot) {
-          const oldItem = oldMap.get(getKey(item));
-          if (oldItem && oldItem.TrangThai !== item.TrangThai) {
-            changed = item
-          }
-        }
-    }
-
-    return changed;
-    
+      return next;
+    });
   }, []);
+
+  useEffect(() => {
+    refreshAccountSessions().catch((cause) => {
+      console.error('Không thể tải danh sách tài khoản liên kết:', cause);
+    });
+  }, [refreshAccountSessions]);
+
+  useEffect(() => {
+    accountSessionsRef.current = accountSessions;
+  }, [accountSessions]);
+
+  useEffect(() => {
+    selectedUserIdsRef.current = selectedUserIds;
+  }, [selectedUserIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -262,13 +250,9 @@ export const QRScanner: React.FC = () => {
       }
       
     };
-  }, []);
+  }, [getCamera]);
 
   useEffect(() => {
-    const load = async () => {
-        await loadSnapshot().catch(e =>  console.error("Lỗi khi tải snapshot điểm danh:", e)); // Catch immediately so it doesn't block main function (send_diem_danh)
-    };
-
     const onMessage = (event: MessageEvent) => {
       const { type, code } = extractQrFromMessage(event.data);
 
@@ -281,8 +265,6 @@ export const QRScanner: React.FC = () => {
     // In React Native WebView, messages may arrive on `document` instead of `window`.
     window.addEventListener("message", onMessage as EventListener);
     document.addEventListener("message", onMessage as EventListener);
-    load();
-
     return () => {
       window.removeEventListener("message", onMessage as EventListener);
       document.removeEventListener("message", onMessage as EventListener);
@@ -291,7 +273,7 @@ export const QRScanner: React.FC = () => {
 
   useEffect(() => {
 
-    const useScanned = async () => {
+    const processScanned = async () => {
 
       setError(null)
       setIsExpiredQR(false)
@@ -320,90 +302,71 @@ export const QRScanner: React.FC = () => {
       })
 
       if (SUBSTR === "STB") {
+        const targets = accountSessionsRef.current.filter((session) =>
+          selectedUserIdsRef.current.has(session.user_id)
+        );
+
+        if (targets.length === 0) {
+          setError("Chọn ít nhất một tài khoản trước khi điểm danh");
+          return;
+        }
+
+        setIsBatchSubmitting(true);
+        setAttendanceResults([]);
         try {
-          const res = await ApiService.send_diem_danh(scanned, access_token);
-          if (!res) return;
+          const results = await Promise.all(
+            targets.map(async (session): Promise<AttendanceResult> => {
+              try {
+                const response = await ApiService.send_diem_danh(scanned, session.token);
+                if (response?.success) {
+                  return {
+                    user: session.user,
+                    status: 'success',
+                    message: `Đã gửi lúc ${dayjs().format('HH:mm:ss')}`,
+                  };
+                }
+                return {
+                  user: session.user,
+                  status: 'error',
+                  message: String(response?.error || 'Không nhận được phản hồi'),
+                };
+              } catch (cause) {
+                return {
+                  user: session.user,
+                  status: 'error',
+                  message: cause instanceof Error ? cause.message : 'Lỗi không xác định',
+                };
+              }
+            })
+          );
 
-          if (!res.success) {
-            const errorMessage = String(res.error);
-            setError(errorMessage);
-            // Check if it's an expired QR code error
-            if (
-              errorMessage.includes("Mã QR điểm danh đã hết hạn") ||
-              errorMessage.includes("hết hạn")
-            ) {
-              setIsExpiredQR(true);
-              setDialogExpiredQROpen(true);
-              toast.error("⚠️ Mã QR điểm danh đã hết hạn!", {
-                duration: 5000,
-                style: {
-                  background: "#f38ba8",
-                  color: "#1e1e2e",
-                  fontWeight: "bold",
-                },
-              });
-            } else {
-              setIsExpiredQR(false);
-              setDialogExpiredQROpen(false);
-            }
+          setAttendanceResults(results);
+          const successCount = results.filter((result) => result.status === 'success').length;
+          const expired = results.some((result) => result.message.toLowerCase().includes('hết hạn'));
+          setIsSuccess(successCount > 0);
+          setMonHocDaDiemDanh(`${successCount}/${targets.length} tài khoản`);
+          setIsExpiredQR(expired);
+          setDialogExpiredQROpen(expired);
+
+          if (successCount > 0) {
+            toast.success(`Điểm danh thành công ${successCount}/${targets.length} tài khoản`);
           } else {
-            setIsSuccess(true);
-            setIsExpiredQR(false);
-            const nowSnapShot = await ApiService.get_lms_diem_danh(access_token); // Fetch latest data for snapshot comparison
-            const changedItem = filterData(snapshotData || [], nowSnapShot.data || []);
-            try {
-                if (changedItem) {
-                toast.success(`Điểm danh thành công cho môn ${changedItem.TenMonHoc}}`);
-                setMonHocDaDiemDanh(changedItem.TenMonHoc)
-              } else {
-                toast.success(
-                  `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-                );
-            }
-
-            } catch (e) {
-              toast.success(
-                  `Điểm danh thành công - ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`
-                );
-                console.log("Lỗi khi hiển thị thông báo môn học đã điểm danh: ", e);
-            }
-            
+            setError(
+              results.find((result) => result.status === 'error')?.message ||
+                'Không tài khoản nào điểm danh thành công',
+            );
+            toast.error('Điểm danh thất bại cho tất cả tài khoản');
           }
-        } catch (error) {
-          if (error instanceof Error) {
-            if (error.message.toLowerCase() === "failed to fetch") {
-              toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối");
-            } else {
-              toast.error(
-                "Đã xảy ra lỗi không mong muốn, hãy điểm danh lại bằng Quét QR trong ME"
-              );
-            }
-          }
+        } finally {
+          setIsBatchSubmitting(false);
         }
       } else if (SUBSTR === "LGN") {
-        // Fetch users before login
-        multiSessionService.getAllUsers().then(async (existingUsers) => {
-          setUsersList(existingUsers)
-          
-          // Perform login
+        Promise.resolve().then(async () => {
           const newUser = await authService.send_login(scanned)
-          
           if (newUser) {
-            // Fetch updated users list after login
-            const updatedUsers = await multiSessionService.getAllUsers()
-            setUsersList(updatedUsers)
-            setNewlyAddedUser(newUser)
-            setShowUserListAnimation(true)
+            await refreshAccountSessions(newUser.UserID)
             setIsSuccess(true)
-            setIsLoginQR(true)
-            
-            // Hide animation after 4 seconds
-            setTimeout(() => {
-              setShowUserListAnimation(false)
-              setNewlyAddedUser(null)
-            }, 4000)
-            
-            toast.success("Đăng nhập thành công")
+            toast.success(`Đã liên kết ${newUser.FullName || newUser.UserID}`)
           }
         }).catch((error) => {
           if (error instanceof Error) {
@@ -436,31 +399,27 @@ export const QRScanner: React.FC = () => {
         }
     }}
 
-    useScanned();
+    processScanned();
 
     return () => {
       setScanned("");
       setIsSuccess(false)
-      setIsLoginQR(false)
       setError(null)
       setIsExpiredQR(false)
       setDialogExpiredQROpen(false)
-      setSnapshotData(null)
     }
 
-  }, [scanned])
+  }, [scanned, qrScanner, refreshAccountSessions])
 
   const handleReset = async () => {
     setScanned("");
     setIsSuccess(false)
-    setIsLoginQR(false)
     setError(null)
     setMonHocDaDiemDanh(null)
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
-    setShowUserListAnimation(false)
-    setNewlyAddedUser(null)
-    setUsersList([])
+    setAttendanceResults([])
+    setIsBatchSubmitting(false)
     await toast.promise(
       async () => {qrScanner?.start(); await getCamera()},
       {
@@ -511,10 +470,42 @@ export const QRScanner: React.FC = () => {
       console.log(dialogTutorialOpen);
   }
 
+  const handleToggleAccount = (userId: string, checked: boolean) => {
+    setSelectedUserIds((previous) => {
+      const next = new Set(previous);
+      if (checked) next.add(userId);
+      else next.delete(userId);
+      return next;
+    });
+  };
+
+  const handleSelectAllAccounts = () => {
+    setSelectedUserIds((previous) =>
+      previous.size === accountSessions.length
+        ? new Set()
+        : new Set(accountSessions.map((session) => session.user_id))
+    );
+  };
+
+  const handleRemoveAccount = async (userId: string) => {
+    try {
+      await multiSessionService.deleteUserCompletely(userId);
+      setSelectedUserIds((previous) => {
+        const next = new Set(previous);
+        next.delete(userId);
+        return next;
+      });
+      await refreshAccountSessions();
+      toast.success('Đã xóa tài khoản liên kết');
+    } catch (cause) {
+      toast.error(cause instanceof Error ? cause.message : 'Không thể xóa tài khoản');
+    }
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-foreground select-none p-4">
+    <div className="flex min-h-screen w-full max-w-6xl flex-col items-center py-4 text-foreground sm:py-6">
       {/* App Bar */}
-      <div className="w-full max-w-md mb-4">
+      <div className="mb-4 w-full">
         <div className="bg-section text-section-foreground border-2 border-border rounded-t-md shadow-brutal px-4 py-4">
           <div className="flex items-center gap-3">
             <QrCode className="w-6 h-6" strokeWidth={2.5} />
@@ -524,8 +515,10 @@ export const QRScanner: React.FC = () => {
         </div>
       </div>
 
+      <div className="grid w-full items-start gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+        <div className="flex min-w-0 flex-col gap-4">
       {/* Main Card */}
-      <Card className="w-full max-w-md bg-card overflow-hidden">
+      <Card className="w-full overflow-hidden bg-card">
         <CardContent className="p-0">
           {/* Scanner Container */}
           <div className="relative mx-2 mt-2 bg-black overflow-hidden border-2 border-border rounded-md">
@@ -569,13 +562,13 @@ export const QRScanner: React.FC = () => {
                       <p className="font-bold text-sm">
                         {
                         scanned.substring(0,3) === "STB" ? "Điểm danh thành công" :
-                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" :
+                        scanned.substring(0,3) === "LGN" ? "Liên kết tài khoản thành công" :
                         scanned.substring(0,3) === "LIB" ? "Quét mã thư viện thành công" : "Thành công"
                         }
                       </p>
                       <p className="text-black/80 text-xs mt-1 break-all">
-                        {scanned.substring(0,3) === "STB" ? monHocDaDiemDanh ? `Môn học: ${monHocDaDiemDanh}` : scanned :
-                        scanned.substring(0,3) === "LGN" ? "Đăng nhập thành công" :
+                        {scanned.substring(0,3) === "STB" ? monHocDaDiemDanh ? `Kết quả: ${monHocDaDiemDanh}` : scanned :
+                        scanned.substring(0,3) === "LGN" ? "Đã thêm tài khoản vào thiết bị này" :
                         scanned.substring(0,3) === "LIB" ? "Đã checkin phòng thành công" : ""
                         }
                       </p>
@@ -626,7 +619,9 @@ export const QRScanner: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
                     <p className="text-black font-bold text-sm">
-                      Đang quét QR...
+                      {isBatchSubmitting
+                        ? `Đang điểm danh cho ${selectedUserIds.size} tài khoản...`
+                        : "Đang quét QR..."}
                     </p>
                   </div>
                 </motion.div>
@@ -646,7 +641,7 @@ export const QRScanner: React.FC = () => {
               variant="outline"
               className="flex-1 py-6 font-medium"
             >
-              <ArrowLeft className="w-5 h-5 mr-2" />
+              <ArrowLeft data-icon="inline-start" />
               Trở về
             </Button>
             <Button
@@ -654,80 +649,29 @@ export const QRScanner: React.FC = () => {
               variant="section"
               className="flex-1 py-6 font-bold"
             >
-              <RefreshCw className="w-5 h-5 mr-2" />
+              <RefreshCw data-icon="inline-start" />
               Reset
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* User List Card - Shows when LGN QR is scanned */}
-      {showUserListAnimation && newlyAddedUser && (
-        <Card className="w-full max-w-md mt-4 bg-card">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="inline-flex items-center justify-center border-2 border-border rounded-md bg-[hsl(142_71%_45%)] p-1.5">
-                <UserPlus className="w-5 h-5 text-black" strokeWidth={2.5} />
-              </span>
-              <h3 className="font-display font-bold text-foreground">Người dùng đã được thêm</h3>
-            </div>
-            
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {usersList.map((user) => {
-                const isNewUser = user.UserID === newlyAddedUser.UserID;
-                return (
-                  <div
-                    key={user.UserID}
-                    className={`flex items-center gap-3 p-2 rounded-md ${
-                      isNewUser ? "bg-[hsl(142_71%_45%)] text-black border-2 border-border shadow-brutal-sm" : "border-2 border-transparent"
-                    }`}
-                  >
-                    <div className="relative">
-                      {user.Avatar ? (
-                        <img
-                          src={user.Avatar}
-                          alt={user.FullName}
-                          className="w-10 h-10 rounded-full object-cover border-2 border-border"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-full border-2 border-border bg-[hsl(258_90%_66%)] flex items-center justify-center text-black font-bold">
-                          {user.FullName?.charAt(0) || user.UserName?.charAt(0) || "?"}
-                        </div>
-                      )}
-                      {isNewUser && (
-                        <div className="absolute -top-1 -right-1 bg-primary border-2 border-border rounded-full p-0.5">
-                          <CheckCircle2 className="w-4 h-4 text-black" strokeWidth={2.5} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`font-bold text-sm truncate ${
-                        isNewUser ? "text-black" : "text-foreground"
-                      }`}>
-                        {user.FullName || user.UserName || "Người dùng"}
-                      </p>
-                      <p className={`text-xs truncate ${isNewUser ? "text-black/70" : "text-muted-foreground"}`}>
-                        {user.UserID} {user.Class ? `• ${user.Class}` : ""}
-                      </p>
-                    </div>
-                    {isNewUser && (
-                      <div className="text-black text-xs font-bold uppercase tracking-wide">
-                        Mới
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-            
-            <div className="mt-3 pt-3 border-t-2 border-border">
-              <p className="text-xs text-center text-muted-foreground">
-                Tổng số: <span className="font-bold text-foreground">{usersList.length}</span> người dùng
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+          <AttendanceResultsPanel results={attendanceResults} />
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4">
+          <LinkedAccountsPanel
+            sessions={accountSessions}
+            selectedUserIds={selectedUserIds}
+            currentUserId={AuthStorage.getUser()?.UserID}
+            disabled={isBatchSubmitting}
+            onToggle={handleToggleAccount}
+            onSelectAll={handleSelectAllAccounts}
+            onRemove={handleRemoveAccount}
+          />
+          <LoginQrCard />
+        </div>
+      </div>
 
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (

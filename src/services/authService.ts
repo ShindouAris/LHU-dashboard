@@ -1,7 +1,7 @@
 import { DepositHistory, PaymentHistory, PlateData } from '@/types/parking';
 import {AuthStorage, MarkApiResponse, UserResponse} from '@/types/user';
 import { multiSessionService } from './multisession';
-import { QRSubmitResponse } from '@/types/session';
+import { LoginQrResponse, QRSubmitResponse } from '@/types/session';
 
 const API_URL = import.meta.env.VITE_API_URL;
 const SCHOOL_TAPI = import.meta.env.VITE_LHU_TAPI;
@@ -172,6 +172,27 @@ export const authService = {
     await multiSessionService.createSession(data.access_token, data.user_data)
     return data.user_data
 
+  },
+  async createLoginQr(): Promise<LoginQrResponse> {
+    const access_token = AuthStorage.getUserToken();
+    if (!access_token) {
+      throw new Error("Bạn cần đăng nhập trước khi tạo mã liên kết");
+    }
+
+    const response = await fetch(`${API_URL}/login_create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ access_token }),
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(message || "Không thể tạo mã liên kết tài khoản");
+    }
+
+    return await response.json() as LoginQrResponse;
   }
 };
 

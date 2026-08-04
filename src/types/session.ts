@@ -4,3 +4,8 @@ export interface QRSubmitResponse {
     access_token: string,
     user_data: UserResponse
 }
+
+export interface LoginQrResponse {
+    data: string;
+    expired_at: number;
+}
