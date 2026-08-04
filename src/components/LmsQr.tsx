@@ -19,6 +19,13 @@ import {
   LinkedAccountsPanel,
   type AttendanceResult,
 } from "@/components/LHU_UI/LinkedAccountsPanel";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { ChevronDownIcon, ChevronUpIcon, PersonIcon } from "@radix-ui/react-icons";
+import { cn } from "@/lib/utils";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -35,6 +42,7 @@ export const QRScanner: React.FC = () => {
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
   const [attendanceResults, setAttendanceResults] = useState<AttendanceResult[]>([])
   const [isBatchSubmitting, setIsBatchSubmitting] = useState(false)
+  const [isMultiAccountOpen, setIsMultiAccountOpen] = useState(false)
   const accountSessionsRef = useRef<UserSession[]>([])
   const selectedUserIdsRef = useRef<Set<string>>(new Set())
   const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
@@ -502,6 +510,17 @@ export const QRScanner: React.FC = () => {
     }
   };
 
+  const handleMultiAccountOpenChange = (open: boolean) => {
+    setIsMultiAccountOpen(open);
+    if (open) return;
+
+    const currentUserId = AuthStorage.getUser()?.UserID;
+    const defaultUserId = accountSessions.some((session) => session.user_id === currentUserId)
+      ? currentUserId
+      : accountSessions[0]?.user_id;
+    setSelectedUserIds(defaultUserId ? new Set([defaultUserId]) : new Set());
+  };
+
   return (
     <div className="flex min-h-screen w-full max-w-6xl flex-col items-center py-4 text-foreground sm:py-6">
       {/* App Bar */}
@@ -515,7 +534,36 @@ export const QRScanner: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid w-full items-start gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+      <Collapsible
+        open={isMultiAccountOpen}
+        onOpenChange={handleMultiAccountOpenChange}
+        className="w-full"
+      >
+        <div className="mb-2 flex justify-end px-1">
+          <CollapsibleTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isBatchSubmitting}
+              aria-label={isMultiAccountOpen ? "Ẩn điểm danh nhiều người" : "Mở điểm danh nhiều người"}
+            >
+              <PersonIcon data-icon="inline-start" />
+              Nhiều tài khoản
+              {isMultiAccountOpen
+                ? <ChevronUpIcon data-icon="inline-end" />
+                : <ChevronDownIcon data-icon="inline-end" />}
+            </Button>
+          </CollapsibleTrigger>
+        </div>
+
+      <div
+        className={cn(
+          "grid w-full items-start gap-4",
+          isMultiAccountOpen
+            ? "lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]"
+            : "mx-auto max-w-2xl",
+        )}
+      >
         <div className="flex min-w-0 flex-col gap-4">
       {/* Main Card */}
       <Card className="w-full overflow-hidden bg-card">
@@ -659,19 +707,22 @@ export const QRScanner: React.FC = () => {
           <AttendanceResultsPanel results={attendanceResults} />
         </div>
 
-        <div className="flex min-w-0 flex-col gap-4">
-          <LinkedAccountsPanel
-            sessions={accountSessions}
-            selectedUserIds={selectedUserIds}
-            currentUserId={AuthStorage.getUser()?.UserID}
-            disabled={isBatchSubmitting}
-            onToggle={handleToggleAccount}
-            onSelectAll={handleSelectAllAccounts}
-            onRemove={handleRemoveAccount}
-          />
-          <LoginQrCard />
-        </div>
+        <CollapsibleContent className="min-w-0">
+          <div className="flex min-w-0 flex-col gap-4">
+            <LinkedAccountsPanel
+              sessions={accountSessions}
+              selectedUserIds={selectedUserIds}
+              currentUserId={AuthStorage.getUser()?.UserID}
+              disabled={isBatchSubmitting}
+              onToggle={handleToggleAccount}
+              onSelectAll={handleSelectAllAccounts}
+              onRemove={handleRemoveAccount}
+            />
+            <LoginQrCard />
+          </div>
+        </CollapsibleContent>
       </div>
+      </Collapsible>
 
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (
