@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import Timetable from './Timetable';
 import { StudentIdInput } from './StudentIdInput';
@@ -11,12 +11,15 @@ import { AuthStorage } from '@/types/user';
 import { GraduationCap } from 'lucide-react';
 import GradientText from './ui/GradientText';
 
+const CACHE_RECHECK_INTERVAL = 60 * 1000;
+
 export const TimetablePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scheduleData, setScheduleData] = useState<ApiResponse | null>(null);
   const [currentStudentId, setCurrentStudentId] = useState<string>('');
   const [exams, setExams] = useState<ExamInfo[] | null>(null);
+  const scheduleRefreshInFlight = useRef(false);
 
   useEffect(() => {
     cacheService.init();
@@ -31,7 +34,7 @@ export const TimetablePage: React.FC = () => {
     }
   }, []);
 
-  const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
+  const fetchSchedule = useCallback(async (studentId: string, useCache = true, silent = false) => {
     setLoading(true);
     setError(null);
 
@@ -42,10 +45,8 @@ export const TimetablePage: React.FC = () => {
     }
 
     try {
-      const hasnet = await ApiService.testnet();
-      
       if (useCache) {
-        const cachedData = await cacheService.get(studentId, hasnet);
+        const cachedData = await cacheService.get(studentId);
         if (cachedData) {
           setScheduleData(cachedData);
           setCurrentStudentId(studentId);
@@ -76,7 +77,9 @@ export const TimetablePage: React.FC = () => {
         if (stale) {
           setScheduleData(stale);
           setCurrentStudentId(studentId);
-          toast.error('Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.');
+          if (!silent) {
+            toast.error('Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.');
+          }
         } else {
           setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
         }
@@ -87,6 +90,55 @@ export const TimetablePage: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (!currentStudentId) return;
+
+    let cancelled = false;
+
+    const refreshIfStale = async (force = false) => {
+      if (
+        cancelled ||
+        scheduleRefreshInFlight.current ||
+        document.visibilityState === 'hidden' ||
+        !navigator.onLine
+      ) return;
+
+      scheduleRefreshInFlight.current = true;
+      try {
+        const freshData = force ? null : await cacheService.get(currentStudentId);
+        if (!freshData && !cancelled) {
+          await fetchSchedule(currentStudentId, false, true);
+        }
+      } finally {
+        scheduleRefreshInFlight.current = false;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshIfStale();
+      }
+    };
+
+    const handleOnline = () => {
+      void refreshIfStale(true);
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshIfStale();
+    }, CACHE_RECHECK_INTERVAL);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [currentStudentId, fetchSchedule]);
 
   const fetchPrivateExam = useCallback(async (studentId: string) => {
     try {

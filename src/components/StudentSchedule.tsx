@@ -26,6 +26,7 @@ import { PiExamDuotone } from 'react-icons/pi';
 import { CalendarDays, User, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode, CloudSun, Car, Award, Library, Wrench, ClipboardList } from 'lucide-react';
 import GradientText from './ui/GradientText';
 
+const CACHE_RECHECK_INTERVAL = 60 * 1000;
 
 export const StudentSchedule: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,7 @@ export const StudentSchedule: React.FC = () => {
   const [showEnded, setShowEnded] = useState(false);
   const [currentWeather, setCurrentWeather] = useState<WeatherCurrentAPIResponse | null>(null);
   const [avatar, setAvatar] = useState("");
+  const scheduleRefreshInFlight = useRef(false);
   const user = AuthStorage.getUser();
 
   // Exam state
@@ -173,7 +175,7 @@ export const StudentSchedule: React.FC = () => {
     }
   ];
 
-  const fetchSchedule = useCallback(async (studentId: string, useCache = true) => {
+  const fetchSchedule = useCallback(async (studentId: string, useCache = true, silent = false) => {
     setLoading(true);
     setError(null);
 
@@ -184,10 +186,10 @@ export const StudentSchedule: React.FC = () => {
     }
     
     try {
-        const hasnet = await ApiService.testnet()
-        // Check cache first
+      // Check cache first. Expired entries return null and are only used below
+      // as an offline fallback if the real request fails.
       if (useCache) {
-        const cachedData = await cacheService.get(studentId, hasnet);
+        const cachedData = await cacheService.get(studentId);
         if (cachedData) {
           setScheduleData(cachedData);
           setCurrentStudentId(studentId);
@@ -221,7 +223,9 @@ export const StudentSchedule: React.FC = () => {
         if (stale) {
           setScheduleData(stale);
           setCurrentStudentId(studentId);
-          toast.error('Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.');
+          if (!silent) {
+            toast.error('Không thể kết nối máy chủ. Đang dùng dữ liệu đã lưu.');
+          }
         } else {
           setError(err instanceof Error ? err.message : 'Không thể tải lịch học');
         }
@@ -232,6 +236,57 @@ export const StudentSchedule: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
+  // A mounted PWA can stay alive for hours, so an IndexedDB TTL alone is not
+  // enough: React would otherwise keep rendering the old in-memory state.
+  useEffect(() => {
+    if (!currentStudentId) return;
+
+    let cancelled = false;
+
+    const refreshIfStale = async (force = false) => {
+      if (
+        cancelled ||
+        scheduleRefreshInFlight.current ||
+        document.visibilityState === 'hidden' ||
+        !navigator.onLine
+      ) return;
+
+      scheduleRefreshInFlight.current = true;
+      try {
+        const freshData = force ? null : await cacheService.get(currentStudentId);
+        if (!freshData && !cancelled) {
+          await fetchSchedule(currentStudentId, false, true);
+        }
+      } finally {
+        scheduleRefreshInFlight.current = false;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void refreshIfStale();
+      }
+    };
+
+    const handleOnline = () => {
+      void refreshIfStale(true);
+    };
+
+    const intervalId = window.setInterval(() => {
+      void refreshIfStale();
+    }, CACHE_RECHECK_INTERVAL);
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, [currentStudentId, fetchSchedule]);
 
   // Precompute schedule-related data early so hooks below are unconditional
   const studentInfo = scheduleData?.data?.[0]?.[0];

@@ -10,6 +10,7 @@ export class ApiService {
   static async getSchedule(request: ApiRequest): Promise<ApiResponse> {
     const response = await fetch(SCHOOL_ENDPOINT, {
       method: 'POST',
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
       },
