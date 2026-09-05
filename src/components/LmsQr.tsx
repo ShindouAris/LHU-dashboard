@@ -10,22 +10,6 @@ import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs"
 import { FaRegQuestionCircle } from "react-icons/fa";
 import {Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog.tsx";
-import { authService } from "@/services/authService";
-import { multiSessionService, type UserSession } from "@/services/multisession";
-import { AuthStorage } from "@/types/user";
-import { LoginQrCard } from "@/components/LHU_UI/LoginQrCard";
-import {
-  AttendanceResultsPanel,
-  LinkedAccountsPanel,
-  type AttendanceResult,
-} from "@/components/LHU_UI/LinkedAccountsPanel";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { ChevronDownIcon, ChevronUpIcon, PersonIcon } from "@radix-ui/react-icons";
-import { cn } from "@/lib/utils";
 
 export const QRScanner: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -38,13 +22,6 @@ export const QRScanner: React.FC = () => {
   const [success, setIsSuccess] = useState<boolean>(false)
   const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
   const [dialogExpiredQROpen, setDialogExpiredQROpen] = useState<boolean>(false)
-  const [accountSessions, setAccountSessions] = useState<UserSession[]>([])
-  const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
-  const [attendanceResults, setAttendanceResults] = useState<AttendanceResult[]>([])
-  const [isBatchSubmitting, setIsBatchSubmitting] = useState(false)
-  const [isMultiAccountOpen, setIsMultiAccountOpen] = useState(false)
-  const accountSessionsRef = useRef<UserSession[]>([])
-  const selectedUserIdsRef = useRef<Set<string>>(new Set())
   const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
   const [zoomRange, setZoomRange] = useState<{min: number, max: number} | null>(null);
   const nav = useNavigate()
@@ -138,43 +115,6 @@ export const QRScanner: React.FC = () => {
       }
   }, [isReactNativeWebView, openReactNativeCamera]);
 
-  const refreshAccountSessions = useCallback(async (selectUserId?: string) => {
-    const currentToken = AuthStorage.getUserToken();
-    const currentUser = AuthStorage.getUser();
-
-    if (currentToken && currentUser) {
-      await multiSessionService.createSession(currentToken, currentUser);
-    }
-
-    const sessions = await multiSessionService.getAllUserSessions();
-    setAccountSessions(sessions);
-    setSelectedUserIds((previous) => {
-      const availableIds = new Set(sessions.map((session) => session.user_id));
-      const next = new Set(Array.from(previous).filter((userId) => availableIds.has(userId)));
-
-      if (next.size === 0 && currentUser?.UserID && availableIds.has(currentUser.UserID)) {
-        next.add(currentUser.UserID);
-      }
-      if (selectUserId && availableIds.has(selectUserId)) {
-        next.add(selectUserId);
-      }
-      return next;
-    });
-  }, []);
-
-  useEffect(() => {
-    refreshAccountSessions().catch((cause) => {
-      console.error('Không thể tải danh sách tài khoản liên kết:', cause);
-    });
-  }, [refreshAccountSessions]);
-
-  useEffect(() => {
-    accountSessionsRef.current = accountSessions;
-  }, [accountSessions]);
-
-  useEffect(() => {
-    selectedUserIdsRef.current = selectedUserIds;
-  }, [selectedUserIds]);
 
   useEffect(() => {
     let cancelled = false;
@@ -296,9 +236,9 @@ export const QRScanner: React.FC = () => {
 
       const access_token = localStorage.getItem("access_token")
       if (!access_token) {setError("Đăng nhập để sử dụng"); return}
-      // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LGN (đăng nhập) hoặc LIB (điểm danh sử dụng phòng thư viện) thì nổ lỗi
+      // Nếu không phải là QR STB (điểm danh sổ đầu bài) hoặc LIB (điểm danh sử dụng phòng thư viện) thì nổ lỗi
       const SUBSTR = scanned.substring(0,3)
-      if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LGN" && SUBSTR !== "LIB") {
+      if (scanned !== "" && SUBSTR !== "STB" && SUBSTR !== "LIB") {
         setError("QR này không được hỗ trợ...")
         return
       }
@@ -310,77 +250,33 @@ export const QRScanner: React.FC = () => {
       })
 
       if (SUBSTR === "STB") {
-        const targets = accountSessionsRef.current.filter((session) =>
-          selectedUserIdsRef.current.has(session.user_id)
-        );
-
-        if (targets.length === 0) {
-          setError("Chọn ít nhất một tài khoản trước khi điểm danh");
-          return;
-        }
-
-        setIsBatchSubmitting(true);
-        setAttendanceResults([]);
         try {
-          const results = await Promise.all(
-            targets.map(async (session): Promise<AttendanceResult> => {
-              try {
-                const response = await ApiService.send_diem_danh(scanned, session.token);
-                if (response?.success) {
-                  return {
-                    user: session.user,
-                    status: 'success',
-                    message: `Đã gửi lúc ${dayjs().format('HH:mm:ss')}`,
-                  };
-                }
-                return {
-                  user: session.user,
-                  status: 'error',
-                  message: String(response?.error || 'Không nhận được phản hồi'),
-                };
-              } catch (cause) {
-                return {
-                  user: session.user,
-                  status: 'error',
-                  message: cause instanceof Error ? cause.message : 'Lỗi không xác định',
-                };
-              }
-            })
-          );
+          const res = await ApiService.send_diem_danh(scanned, access_token);
+          if (!res) return;
 
-          setAttendanceResults(results);
-          const successCount = results.filter((result) => result.status === 'success').length;
-          const expired = results.some((result) => result.message.toLowerCase().includes('hết hạn'));
-          setIsSuccess(successCount > 0);
-          setMonHocDaDiemDanh(`${successCount}/${targets.length} tài khoản`);
-          setIsExpiredQR(expired);
-          setDialogExpiredQROpen(expired);
-
-          if (successCount > 0) {
-            toast.success(`Điểm danh thành công ${successCount}/${targets.length} tài khoản`);
+          if (!res.success) {
+            const errorMessage = String(res.error || "Điểm danh thất bại");
+            setError(errorMessage);
+            if (errorMessage.toLowerCase().includes("hết hạn")) {
+              setIsExpiredQR(true);
+              setDialogExpiredQROpen(true);
+              toast.error("⚠️ Mã QR điểm danh đã hết hạn!");
+            } else {
+              setIsExpiredQR(false);
+              setDialogExpiredQROpen(false);
+              toast.error(errorMessage);
+            }
           } else {
-            setError(
-              results.find((result) => result.status === 'error')?.message ||
-                'Không tài khoản nào điểm danh thành công',
-            );
-            toast.error('Điểm danh thất bại cho tất cả tài khoản');
+            setIsSuccess(true);
+            setIsExpiredQR(false);
+            setMonHocDaDiemDanh("Thành công");
+            toast.success("🎉 Điểm danh thành công!");
           }
-        } finally {
-          setIsBatchSubmitting(false);
+        } catch (cause) {
+          const message = cause instanceof Error ? cause.message : "Lỗi không xác định";
+          setError(message);
+          toast.error("Điểm danh thất bại: " + message);
         }
-      } else if (SUBSTR === "LGN") {
-        Promise.resolve().then(async () => {
-          const newUser = await authService.send_login(scanned)
-          if (newUser) {
-            await refreshAccountSessions(newUser.UserID)
-            setIsSuccess(true)
-            toast.success(`Đã liên kết ${newUser.FullName || newUser.UserID}`)
-          }
-        }).catch((error) => {
-          if (error instanceof Error) {
-            setError(error.message)
-          }
-        })
       } else if (SUBSTR === "LIB") {
         try {
           const res = await ApiService.elib_scanCode(scanned, access_token)
@@ -405,19 +301,20 @@ export const QRScanner: React.FC = () => {
             }
           }
         }
-    }}
+      }
+    };
 
     processScanned();
 
     return () => {
       setScanned("");
-      setIsSuccess(false)
-      setError(null)
-      setIsExpiredQR(false)
-      setDialogExpiredQROpen(false)
-    }
+      setIsSuccess(false);
+      setError(null);
+      setIsExpiredQR(false);
+      setDialogExpiredQROpen(false);
+    };
 
-  }, [scanned, qrScanner, refreshAccountSessions])
+  }, [scanned, qrScanner]);
 
   const handleReset = async () => {
     setScanned("");
@@ -426,8 +323,6 @@ export const QRScanner: React.FC = () => {
     setMonHocDaDiemDanh(null)
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
-    setAttendanceResults([])
-    setIsBatchSubmitting(false)
     await toast.promise(
       async () => {qrScanner?.start(); await getCamera()},
       {
@@ -478,49 +373,6 @@ export const QRScanner: React.FC = () => {
       console.log(dialogTutorialOpen);
   }
 
-  const handleToggleAccount = (userId: string, checked: boolean) => {
-    setSelectedUserIds((previous) => {
-      const next = new Set(previous);
-      if (checked) next.add(userId);
-      else next.delete(userId);
-      return next;
-    });
-  };
-
-  const handleSelectAllAccounts = () => {
-    setSelectedUserIds((previous) =>
-      previous.size === accountSessions.length
-        ? new Set()
-        : new Set(accountSessions.map((session) => session.user_id))
-    );
-  };
-
-  const handleRemoveAccount = async (userId: string) => {
-    try {
-      await multiSessionService.deleteUserCompletely(userId);
-      setSelectedUserIds((previous) => {
-        const next = new Set(previous);
-        next.delete(userId);
-        return next;
-      });
-      await refreshAccountSessions();
-      toast.success('Đã xóa tài khoản liên kết');
-    } catch (cause) {
-      toast.error(cause instanceof Error ? cause.message : 'Không thể xóa tài khoản');
-    }
-  };
-
-  const handleMultiAccountOpenChange = (open: boolean) => {
-    setIsMultiAccountOpen(open);
-    if (open) return;
-
-    const currentUserId = AuthStorage.getUser()?.UserID;
-    const defaultUserId = accountSessions.some((session) => session.user_id === currentUserId)
-      ? currentUserId
-      : accountSessions[0]?.user_id;
-    setSelectedUserIds(defaultUserId ? new Set([defaultUserId]) : new Set());
-  };
-
   return (
     <div className="flex min-h-screen w-full max-w-6xl flex-col items-center py-4 text-foreground sm:py-6">
       {/* App Bar */}
@@ -534,37 +386,7 @@ export const QRScanner: React.FC = () => {
         </div>
       </div>
 
-      <Collapsible
-        open={isMultiAccountOpen}
-        onOpenChange={handleMultiAccountOpenChange}
-        className="w-full"
-      >
-        <div className="mb-2 flex justify-end px-1">
-          <CollapsibleTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={isBatchSubmitting}
-              aria-label={isMultiAccountOpen ? "Ẩn điểm danh nhiều người" : "Mở điểm danh nhiều người"}
-            >
-              <PersonIcon data-icon="inline-start" />
-              Nhiều tài khoản
-              {isMultiAccountOpen
-                ? <ChevronUpIcon data-icon="inline-end" />
-                : <ChevronDownIcon data-icon="inline-end" />}
-            </Button>
-          </CollapsibleTrigger>
-        </div>
-
-      <div
-        className={cn(
-          "grid w-full items-start gap-4",
-          isMultiAccountOpen
-            ? "lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]"
-            : "mx-auto max-w-2xl",
-        )}
-      >
-        <div className="flex min-w-0 flex-col gap-4">
+      <div className="w-full max-w-2xl">
       {/* Main Card */}
       <Card className="w-full overflow-hidden bg-card">
         <CardContent className="p-0">
@@ -667,9 +489,7 @@ export const QRScanner: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-7 h-7 border-4 border-black/20 border-t-black rounded-full animate-spin"></div>
                     <p className="text-black font-bold text-sm">
-                      {isBatchSubmitting
-                        ? `Đang điểm danh cho ${selectedUserIds.size} tài khoản...`
-                        : "Đang quét QR..."}
+                      Đang quét QR...
                     </p>
                   </div>
                 </motion.div>
@@ -703,26 +523,7 @@ export const QRScanner: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-          <AttendanceResultsPanel results={attendanceResults} />
-        </div>
-
-        <CollapsibleContent className="min-w-0">
-          <div className="flex min-w-0 flex-col gap-4">
-            <LinkedAccountsPanel
-              sessions={accountSessions}
-              selectedUserIds={selectedUserIds}
-              currentUserId={AuthStorage.getUser()?.UserID}
-              disabled={isBatchSubmitting}
-              onToggle={handleToggleAccount}
-              onSelectAll={handleSelectAllAccounts}
-              onRemove={handleRemoveAccount}
-            />
-            <LoginQrCard />
-          </div>
-        </CollapsibleContent>
       </div>
-      </Collapsible>
 
       {/* FAB-style zoom reset (optional) */}
       {scale > 1 && (
