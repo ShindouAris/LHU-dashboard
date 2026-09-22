@@ -5,7 +5,9 @@ export class LocalStorageService {
   static getStudentIdHistory(): string[] {
     try {
       const history = localStorage.getItem(STUDENT_ID_HISTORY_KEY);
-      return history ? JSON.parse(history) : [];
+      if (!history) return [];
+      const parsed: unknown = JSON.parse(history);
+      return Array.isArray(parsed) ? parsed.filter((id): id is string => typeof id === 'string') : [];
     } catch {
       return [];
     }

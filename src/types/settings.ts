@@ -33,7 +33,7 @@ export enum NavigationInstruction {
 }
 
 export const getSettings = (): UserSettings => {
-    let settings = localStorage.getItem("userSettings");
+    const settings = localStorage.getItem("userSettings");
     if (settings) {
         return JSON.parse(settings) as UserSettings;
     }

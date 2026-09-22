@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, UserPlus, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -22,25 +22,7 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState('');
 
-  // Fetch danh sách học sinh đã thêm ban đầu
-  useEffect(() => {
-    fetchInitialStudents();
-  }, [dangKyID]);
-
-  // Tìm kiếm khi người dùng nhập
-  useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (searchTerm.trim()) {
-        searchStudents(searchTerm);
-      } else {
-        setSearchResults([]);
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
-
-  const fetchInitialStudents = async () => {
+  const fetchInitialStudents = useCallback(async () => {
     try {
       setLoading(true);
       const response = await ELIB_SERVICE.get_members_by_dangky_id(dangKyID);
@@ -56,9 +38,9 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [dangKyID]);
 
-  const searchStudents = async (query: string) => {
+  const searchStudents = useCallback(async (query: string) => {
     try {
       setSearching(true);
       const response = await ELIB_SERVICE.search_user(query);
@@ -79,7 +61,20 @@ const StudentManager = ({ dangKyID, onClose }: StudentManagerProps) => {
     } finally {
       setSearching(false);
     }
-  };
+  }, [addedStudents]);
+
+  useEffect(() => {
+    void fetchInitialStudents();
+  }, [fetchInitialStudents]);
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (searchTerm.trim()) void searchStudents(searchTerm);
+      else setSearchResults([]);
+    }, 500);
+
+    return () => clearTimeout(delayDebounce);
+  }, [searchTerm, searchStudents]);
 
   const addStudentFromSearch = async (student: UserSearch) => {
     try {

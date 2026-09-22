@@ -57,19 +57,8 @@ export const StudentSchedule: React.FC = () => {
   }, [location.pathname]);
 
   useEffect(() => {
-    cacheService.init();
-  }, [AuthStorage.getUser()?.UserID]);
-
-  // lấy lịch của mình luôn
-  useEffect(() => {
-    
-    if (AuthStorage.isLoggedIn() && AuthStorage.getUser()?.UserID ) {
-      const userid = AuthStorage.getUser()?.UserID
-      fetchSchedule(String(userid))
-      fetchPrivateExam(String(userid))
-      console.log("Lấy id sinh viên thành công")
-    }
-  }, []) // mount thì chạy 1 lần fr
+    void cacheService.init().catch(error => console.warn('Không thể khởi tạo cache lịch học:', error));
+  }, []);
 
   useEffect(() => {
     getAvatar();
@@ -208,8 +197,8 @@ export const StudentSchedule: React.FC = () => {
 
       const response = await ApiService.getSchedule(apiRequest);
       
-      // Cache the response
-      await cacheService.set(studentId, response);
+      // Cache is best effort; a storage failure must not discard fresh network data.
+      await cacheService.set(studentId, response).catch(error => console.warn('Không thể lưu cache lịch học:', error));
       
       setScheduleData(response);
       setCurrentStudentId(studentId);
@@ -364,7 +353,7 @@ export const StudentSchedule: React.FC = () => {
       const res = await ApiService.getPrivateExam(numericId);
       if (res && res.length > 0) {
         const list = Array.isArray(res) ? res : [res as unknown as ExamInfo];
-        await examCacheService.set(studentId, list);
+        await examCacheService.set(studentId, list).catch(error => console.warn('Không thể lưu cache lịch thi:', error));
         setExams(list);
       } else {
         // no exams
@@ -386,6 +375,13 @@ export const StudentSchedule: React.FC = () => {
       setLoadingExam(false);
     }
   }, []);
+
+  useEffect(() => {
+    const userId = AuthStorage.isLoggedIn() ? AuthStorage.getUser()?.UserID : null;
+    if (!userId) return;
+    void fetchSchedule(String(userId));
+    void fetchPrivateExam(String(userId));
+  }, [fetchSchedule, fetchPrivateExam]);
 
   const handleRetry = () => {
     if (currentStudentId) {

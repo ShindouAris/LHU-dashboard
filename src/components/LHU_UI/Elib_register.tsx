@@ -52,31 +52,30 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
     const [isAccepted, setIsAccepted] = useState(false);
 
     useEffect(() => {
-        setLoading(true)
-        fetchRoomData();
-        fetchEquipmentData();
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        fetchRoomData();
-        fetchEquipmentData();
+        let cancelled = false;
+        const loadAvailability = async () => {
+            setLoading(true);
+            try {
+                const start = `${dayjs(date).format('YYYY-MM-DD')} ${startTime || '07:00'}`;
+                const end = `${dayjs(date).format('YYYY-MM-DD')} ${endTime || '11:00'}`;
+                const [roomData, equipmentData] = await Promise.all([
+                    ELIB_SERVICE.get_phong_hoc_for_reg(start, end),
+                    ELIB_SERVICE.get_thiet_bi_for_reg(start, end),
+                ]);
+                if (!cancelled) {
+                    setRoomsState(roomData);
+                    setThietBiAvailable(equipmentData);
+                }
+            } catch (error) {
+                console.error('Error fetching room availability:', error);
+                if (!cancelled) toast.error('Lỗi khi tải dữ liệu phòng và thiết bị.');
+            } finally {
+                if (!cancelled) setLoading(false);
+            }
+        };
+        void loadAvailability();
+        return () => { cancelled = true; };
     }, [date, startTime, endTime])
-
-    const fetchRoomData = async () => {
-        try {
-            // if (!date || !startTime || !endTime) return;
-            const start = `${dayjs(date).format('YYYY-MM-DD')} ${startTime || '07:00'}`;
-            const end = `${dayjs(date).format('YYYY-MM-DD')} ${endTime || '11:00'}`;
-            const roomData = await ELIB_SERVICE.get_phong_hoc_for_reg(start, end);
-            setRoomsState(roomData ? roomData : null);
-            
-        } catch (error) {
-            console.error('Error fetching room data:', error);
-            toast.error('Lỗi khi tải dữ liệu phòng học.');
-            window.location.reload();
-        }
-    }
 
     const isStartTimeInPast = () => {
         if (!startTime) return false
@@ -92,20 +91,6 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
 
         return startToday.isBefore(now)
      }
-
-    const fetchEquipmentData = async () => {
-        try {
-            // if (!date || !startTime || !endTime) return;
-            const start = `${dayjs(date).format('YYYY-MM-DD')} ${startTime || '07:00'}`;
-            const end = `${dayjs(date).format('YYYY-MM-DD')} ${endTime || '11:00'}`;
-            const thietBiData = await ELIB_SERVICE.get_thiet_bi_for_reg(start, end);
-            setThietBiAvailable(thietBiData ? thietBiData : null);
-        } catch (error) {
-            console.error('Error fetching equipment data:', error);
-            toast.error('Lỗi khi tải dữ liệu thiết bị.');
-            window.location.reload();
-        }
-    }
 
     const handleRoomSelect = (roomId: number, isBusy: number) => {
         if (isBusy === 1) return; // Không cho phép chọn phòng bận
@@ -273,7 +258,6 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 return
             }
             // Call API
-            toast.success('Đăng ký phòng học nhóm thành công!');
             console.log('Booking payload:', JSON.stringify(bookingPayload, null, 2));
             const result = await ELIB_SERVICE.dang_ky_phong_hoc_nhom(bookingPayload);
             if (result.success) {
@@ -287,7 +271,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
             }
         } catch (error) {
             console.error('Error submitting booking:', error);
-            toast.error('Lỗi khi đăng ký phòng học nhóm.');
+            toast.error(error instanceof Error ? error.message : 'Lỗi khi đăng ký phòng học nhóm.');
         } finally {
             setAcceptDialog(false);
             handleCancel(); // reset form

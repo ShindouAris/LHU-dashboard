@@ -16,6 +16,7 @@ const ChisaAIPrivacy = lazy(() => import('./components/ChisaAIPrivacy'));
 const StyleGuide = lazy(() => import('./components/StyleGuide'));
 import './App.css';
 import { Routes, Route, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { LoadingScreen } from './components/LHU_UI/LoadingScreen';
 
@@ -49,7 +50,7 @@ declare global {
       setUseDiscordRpc: (enabled: boolean) => void;
     };
     ReactNativeWebView: {
-      postMessage: (message: string) => any;
+      postMessage: (message: string) => void;
     }
   }
   
@@ -76,6 +77,16 @@ const pageTitles: Record<string, string> = {
   '/login': 'Đăng nhập',
 };
 
+const NotFound = () => (
+  <main className="min-h-[70vh] grid place-items-center px-4 text-center">
+    <div>
+      <p className="font-display text-7xl font-black">404</p>
+      <h1 className="mt-3 text-2xl font-bold">Không tìm thấy trang</h1>
+      <Link to="/" className="mt-6 inline-block font-bold underline underline-offset-4">Về trang chủ</Link>
+    </div>
+  </main>
+);
+
 function App() {
   const location = useLocation();
 
@@ -95,7 +106,7 @@ function App() {
   };
 
   // Routes that don't need Layout wrapper
-  const noLayoutRoutes = ['/login', '/chat'];
+  const noLayoutRoutes = ['/login'];
   const shouldShowLayout = !noLayoutRoutes.includes(location.pathname);
 
   return shouldShowLayout ? (
@@ -195,7 +206,7 @@ function App() {
             <StyleGuide />
           </Suspense>
         } />
-        <Route path="*" element={<StudentSchedule />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Layout>
   ) : (

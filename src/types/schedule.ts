@@ -64,7 +64,7 @@ export interface ExamInfo {
 }
 
 export interface ExamResponse {
-  data: [ExamInfo]
+  data: ExamInfo[]
 }
 
 export interface DiemDanhData {

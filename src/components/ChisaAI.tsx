@@ -234,6 +234,7 @@ const Message = memo(({message, index, Part}: {message: any, index: number, Part
         },
         code( props ) {
           const {children, className, node, ...rest} = props
+          void node;
           const match = /language-(\w+)/.exec(className || '')
           const code = String(children).replace(/\n$/, '');
 

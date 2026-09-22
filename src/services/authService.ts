@@ -23,7 +23,7 @@ export const authService = {
       body: JSON.stringify(body),
     });
     if (!response.ok) {
-      let msg = await response.text() || "Đăng nhập thất bại";
+    const msg = await response.text() || "Đăng nhập thất bại";
       throw new Error(msg);
     }
     const data = await response.json();
@@ -47,7 +47,7 @@ export const authService = {
       if (response.status === 401 ) {
         throw new Error("Phiên đã hết hạn, vui lòng đăng nhập lại")
       }
-      let msg = await response.text() || "Không lấy được thông tin người dùng";
+      const msg = await response.text() || "Không lấy được thông tin người dùng";
       throw new Error(msg);
     }
     return (await response.json()) as UserResponse;
@@ -141,8 +141,7 @@ export const authService = {
       const status = Number(statusRaw);
       if (Number.isFinite(status) && status > 0) return status;
 
-      // Fallback: assume success if backend doesn't return status
-      return 1;
+      throw new Error("Phản hồi đăng ký thi lại không hợp lệ");
 
     } catch (error) {
       throw error;
@@ -207,9 +206,7 @@ export const parkingAPI = {
         authorization: `Bearer ${access_token}`
       }
     })
-    if (!response.ok) {
-      return 0;
-    }
+    if (!response.ok) throw new Error(`Không thể tải số dư bãi xe: ${response.status}`)
     const data = await response.json()
     return data.credit ?? 0;
   },
@@ -224,9 +221,7 @@ export const parkingAPI = {
         authorization: `Bearer ${access_token}`
       }
     })
-    if (!response.ok) {
-      return [];
-    }
+    if (!response.ok) throw new Error(`Không thể tải danh sách xe: ${response.status}`)
     const data = await response.json()
     return data.data ?? [];
   },
@@ -239,9 +234,7 @@ export const parkingAPI = {
         authorization: `Bearer ${access_token}`
       }
     })
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) throw new Error(`Không thể tải lịch sử thanh toán: ${response.status}`)
     const data = await response.json()
     return data.data ?? [];
   },
@@ -254,9 +247,7 @@ export const parkingAPI = {
         authorization: `Bearer ${access_token}`
       }
     })
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) throw new Error(`Không thể tải lịch sử nạp tiền: ${response.status}`)
     const data = await response.json()
     return data.data ?? [];
   }

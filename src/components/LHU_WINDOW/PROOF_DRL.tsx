@@ -56,7 +56,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
       } else {
         toast.error("Xóa tập tin thất bại");
       }
-    } catch (error) {
+    } catch {
       toast.error("Đã xảy ra lỗi khi xóa tập tin");
     }
   };
@@ -81,14 +81,29 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
     }
 
   useEffect(() => {
-    
-    fetchData()
-    return () => {
-      setFiles([]);
-      setLinks([]);
-      setLoading(false);
-    }
-  }, []);
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        if (hoatdongID === null) throw new Error("Hoạt động không hợp lệ.");
+        const [fetchedFiles, fetchedLinks] = await Promise.all([
+          drlService.getActivityProofUploadFiles(hoatdongID),
+          drlService.getActivityProofText(hoatdongID),
+        ]);
+        if (!cancelled) {
+          setFiles(fetchedFiles.data);
+          setLinks(fetchedLinks.data);
+        }
+      } catch (error) {
+        console.error("Error loading files and links:", error);
+        if (!cancelled) toast.error("Đã xảy ra lỗi khi tải dữ liệu.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    void load();
+    return () => { cancelled = true; };
+  }, [hoatdongID]);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFiles = event.target.files;
@@ -143,7 +158,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
       } else {
         toast.error("Thêm link thất bại.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Đã xảy ra lỗi khi thêm link.");
       return;
     }
@@ -165,7 +180,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
       } else {
         toast.error("Cập nhật link thất bại.");
       }
-    } catch (error) {
+    } catch {
       toast.error("Đã xảy ra lỗi khi cập nhật link.");
       return;
     }
@@ -183,7 +198,7 @@ export const FileManager = ({hoatdongID=null, onClose}: {hoatdongID: number | nu
       } else {
         toast.error("Xoá link thất bại.");
       }
-  } catch (error) {
+  } catch {
       toast.error("Đã xảy ra lỗi khi xoá link.");
       return;
     }

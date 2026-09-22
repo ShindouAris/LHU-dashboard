@@ -48,7 +48,7 @@ class ExamCacheService {
           resolve(cached.data);
         } else {
             if (cached && hasnet) {
-                this.delete(studentId);
+                void this.delete(studentId).catch(error => console.warn('Không thể xóa cache lịch thi:', error));
                 resolve(null);
             } else if (cached && !hasnet) {
                 resolve(cached.data);
@@ -89,33 +89,39 @@ class ExamCacheService {
       expiry: Date.now() + CACHE_DURATION,
     };
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       store.put(cachedData);
       transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 
   async delete(studentId: string): Promise<void> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       store.delete(studentId);
       transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 
   async clearCache(): Promise<void> {
     if (!this.db) await this.init();
 
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction([STORE_NAME], 'readwrite');
       const store = transaction.objectStore(STORE_NAME);
       store.clear();
       transaction.oncomplete = () => resolve();
+      transaction.onerror = () => reject(transaction.error);
+      transaction.onabort = () => reject(transaction.error);
     });
   }
 }

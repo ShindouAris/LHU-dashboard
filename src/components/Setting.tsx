@@ -179,15 +179,15 @@ const SettingsPage: React.FC = () => {
     try {
       // Estimate cache size from localStorage and IndexedDB
       let size = 0;
-      for (let key in localStorage) {
-        if (localStorage.hasOwnProperty(key)) {
+      for (const key in localStorage) {
+        if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
           size += localStorage[key].length + key.length;
         }
       }
       // Convert to readable format
       const sizeInKB = (size / 1024).toFixed(2);
       setCacheSize(`${sizeInKB} KB`);
-    } catch (error) {
+    } catch {
       setCacheSize('Không xác định');
     }
   };
@@ -281,7 +281,8 @@ const SettingsPage: React.FC = () => {
   const toggleSidebarItem = (id: string) => {
     setAppsettings((prev: any) => {
       const hidden = new Set(prev.hiddenSidebarItems);
-      hidden.has(id) ? hidden.delete(id) : hidden.add(id);
+      if (hidden.has(id)) hidden.delete(id);
+      else hidden.add(id);
 
       const newSettings = {
         ...prev,

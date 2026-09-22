@@ -67,10 +67,10 @@ export const chisaAIService = {
                 accessToken: access_token
             })
         })
-        if (!res.ok) {
-            return false;
-        }
+        if (res.status === 404) return false;
+        if (!res.ok) throw new Error(`Lỗi khi kiểm tra người dùng: ${res.status} ${res.statusText}`);
         const data = await res.json();
+        if (typeof data?.exists !== "boolean") throw new Error("Phản hồi kiểm tra người dùng không hợp lệ");
         return data.exists;
     },
     createUserV3: async (access_token: string): Promise<boolean> => {

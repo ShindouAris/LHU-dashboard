@@ -61,7 +61,7 @@ export default function ResponsiveIframe({
           setIntrinsicHeight(newH);
         });
         ro.observe(body);
-      } catch (err) {
+      } catch {
         // cross-origin — we can't access document. Fallback: rely on aspect ratio
         // Optionally: implement postMessage-based resizing on iframe side.
         // No-op here.

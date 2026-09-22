@@ -108,7 +108,6 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   const isMobile = screenSize === 'mobile';
   const isTablet = screenSize === 'tablet';
-  const isDesktop = screenSize === 'desktop';
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -245,7 +244,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
         transition: 'all 0.2s ease-in-out',
       }
     };
-  }, [isMobile, isTablet, isDesktop]);
+  }, [isMobile, isTablet]);
 
   const EventComponent = memo(({ event }: { event: CalendarEvent }) => {
     const status = getRealtimeStatus(

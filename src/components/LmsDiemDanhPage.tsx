@@ -147,7 +147,7 @@ export const LmsDiemDanhPage: React.FC = () => {
       try {
         const res = await ApiService.get_lms_diem_danh(access_token);
         setData(res);
-      } catch (err) {
+      } catch {
         setError("Không thể tải dữ liệu điểm danh");
         toast.error("Có lỗi xảy ra khi tải dữ liệu");
       } finally {

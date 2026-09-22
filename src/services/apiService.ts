@@ -46,8 +46,7 @@ export class ApiService {
     return await response.json();
   };
   // Lấy danh sách thi riêng theo từng người
-  static async getPrivateExam(ID: number): Promise<[ExamInfo] | null> {
-    try {
+  static async getPrivateExam(ID: number): Promise<ExamInfo[]> {
       const res = await fetch(`${API_ENDPOINT}/private-exam`, {
         method: "POST",
         headers: {
@@ -57,20 +56,10 @@ export class ApiService {
           ID: ID
         })
       })
-      if (!res.ok) {
-        return null
-      }
+      if (!res.ok) throw new Error(`Không thể tải lịch thi: ${res.status} ${res.statusText}`)
       const data: ExamResponse = await res.json()
-
-      if (data.data.length < 1) {
-        return null
-      } 
-
+      if (!Array.isArray(data?.data)) throw new Error("Phản hồi lịch thi không hợp lệ")
       return data.data
-      
-    } catch (error) {
-      return null
-    }
   };
   // Lấy thời tiết hiện tại
   static async get_current_weather(): Promise<WeatherCurrentAPIResponse> {
@@ -189,7 +178,6 @@ export class ApiService {
   };
   // Lấy danh sách điểm danh
   static async get_lms_diem_danh(access_token: string): Promise<DiemDanhData> {
-    try {
       const res = await fetch(`${API_ENDPOINT}/lms/diemdanh`, {
           method: "POST",
           headers: {
@@ -199,15 +187,10 @@ export class ApiService {
             accessToken: access_token
           })
         })
-        if (!res.ok) {
-          return {data: []}
-        }
-
-        return await res.json()
-
-      } catch (error) {
-        return {data: []}
-    }
+      if (!res.ok) throw new Error(`Không thể tải điểm danh: ${res.status} ${res.statusText}`)
+      const data: DiemDanhData = await res.json()
+      if (!Array.isArray(data?.data)) throw new Error("Phản hồi điểm danh không hợp lệ")
+      return data
   };
   static async send_diem_danh(qr_code: string, access_token: string) {
     if (qr_code === "") return
@@ -230,8 +213,8 @@ export class ApiService {
         })
 
       if (!res.ok) {
-        const data = await res.json()
-        return {success: false, error: data?.Message || "Điểm danh thất bại"}
+        const data = await res.json().catch(() => null)
+        return {success: false, error: data?.Message || `Điểm danh thất bại (${res.status})`}
       }
 
       return {success: true}
@@ -264,14 +247,14 @@ export class ApiService {
       })
 
       if (!res.ok) {
-        const data = await res.json()
-        return {success: false, error: data?.Message || "Tham gia thất bại"}
+        const data = await res.json().catch(() => null)
+        return {success: false, error: data?.Message || `Tham gia thất bại (${res.status})`}
       }
 
       return {success: true}
 
     } catch (error) {
-
+      return {success: false, error: error instanceof Error ? error.message : "Tham gia thất bại"}
     }
   }
   static async testnet (): Promise<boolean>  {

@@ -5,8 +5,7 @@ import React, { memo, useMemo, useState } from 'react'
 import { tokenize, type TokenizeContext } from '@/components/infsh/code-block/tokenizer'
 import { normalizeLanguage } from '@/components/infsh/code-block/languages'
 import { getTextContent, splitLines, copyToClipboard } from '@/components/infsh/code-block/utils'
-import {duotoneDark} from 'react-syntax-highlighter/dist/esm/styles/prism'
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter'
+import { getTokenStyle } from '@/components/infsh/code-block/styles'
 
 // Re-export types for consumers
 export type { Token, TokenType, LanguageDefinition } from '@/components/infsh/code-block/types'
@@ -37,19 +36,11 @@ const HighlightedLine = memo(function HighlightedLine({
 }: {
   tokens: ReturnType<typeof tokenize>['tokens']
 }) {
-  const code = tokens.map(token => token.content).join('')
-  
-  return (
-    <SyntaxHighlighter
-      language="javascript"
-      style={duotoneDark}
-      className="!bg-transparent !p-0 !m-0"
-      showLineNumbers={false}
-      wrapLines={false}
-    >
-      {code}
-    </SyntaxHighlighter>
-  )
+  return tokens.map((token, index) => (
+    <span key={index} className={getTokenStyle(token.type) ?? undefined}>
+      {token.content}
+    </span>
+  ))
 })
 
 export interface CodeBlockProps {

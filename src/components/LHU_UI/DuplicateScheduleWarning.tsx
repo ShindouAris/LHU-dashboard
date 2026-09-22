@@ -94,7 +94,7 @@ export const DuplicateScheduleWarning: React.FC<DuplicateScheduleWarningProps> =
                 
                 <CollapsibleContent className="mt-2">
                   <div className="bg-card rounded-md border-2 border-border shadow-brutal-sm p-3 space-y-2">
-                    {group.schedules.map((schedule, _) => (
+                    {group.schedules.map((schedule) => (
                       <div
                         key={schedule.ID}
                         className="flex items-center justify-between p-2 bg-muted rounded-md border-2 border-border"

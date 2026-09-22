@@ -22,16 +22,7 @@ export const TimetablePage: React.FC = () => {
   const scheduleRefreshInFlight = useRef(false);
 
   useEffect(() => {
-    cacheService.init();
-  }, [AuthStorage.getUser()?.UserID]);
-
-  // Auto-load schedule if user is logged in
-  useEffect(() => {
-    if (AuthStorage.isLoggedIn() && AuthStorage.getUser()?.UserID) {
-      const userid = AuthStorage.getUser()?.UserID;
-      fetchSchedule(String(userid));
-      fetchPrivateExam(String(userid));
-    }
+    void cacheService.init().catch(error => console.warn('Không thể khởi tạo cache lịch học:', error));
   }, []);
 
   const fetchSchedule = useCallback(async (studentId: string, useCache = true, silent = false) => {
@@ -63,7 +54,7 @@ export const TimetablePage: React.FC = () => {
       };
 
       const response = await ApiService.getSchedule(apiRequest);
-      await cacheService.set(studentId, response);
+      await cacheService.set(studentId, response).catch(error => console.warn('Không thể lưu cache lịch học:', error));
       
       setScheduleData(response);
       setCurrentStudentId(studentId);
@@ -159,7 +150,7 @@ export const TimetablePage: React.FC = () => {
       const res = await ApiService.getPrivateExam(numericId);
       if (res && res.length > 0) {
         const list = Array.isArray(res) ? res : [res as unknown as ExamInfo];
-        await examCacheService.set(studentId, list);
+        await examCacheService.set(studentId, list).catch(error => console.warn('Không thể lưu cache lịch thi:', error));
         setExams(list);
       } else {
         setExams([]);
@@ -175,6 +166,13 @@ export const TimetablePage: React.FC = () => {
       }
     }
   }, []);
+
+  useEffect(() => {
+    const userId = AuthStorage.isLoggedIn() ? AuthStorage.getUser()?.UserID : null;
+    if (!userId) return;
+    void fetchSchedule(String(userId));
+    void fetchPrivateExam(String(userId));
+  }, [fetchSchedule, fetchPrivateExam]);
 
   const handleRetry = () => {
     if (currentStudentId) {

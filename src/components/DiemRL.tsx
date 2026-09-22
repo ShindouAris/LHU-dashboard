@@ -146,7 +146,7 @@ function MinhChungUploader({
                         setProgress(total);
                     });
                     if (item) uploaded.push(item);
-                } catch (e) {
+                } catch {
                     toast.error(`Tải lên ${f.name} thất bại`);
                 }
             }
@@ -232,6 +232,7 @@ function MinhChungUploader({
 // ===== Main =====
 const DiemRL: React.FC = () => {
     const user: UserResponse | null = AuthStorage.getUser();
+    const userId = user?.UserID;
 
     const [hocKyInfo, setHocKyInfo] = useState<HocKyInfo | null>(null);
     const [trongTruong, setTrongTruong] = useState<HoatDongTrongTruong[]>([]);
@@ -267,13 +268,13 @@ const DiemRL: React.FC = () => {
     const periodMax = hocKyInfo?.DenNgay ? new Date(hocKyInfo.DenNgay) : undefined;
 
     useEffect(() => {
-        if (!user) {
+        if (!userId) {
             setError('Bạn chưa đăng nhập');
             setLoading(false);
             return;
         }
         fetchData();
-    }, []);
+    }, [userId]);
 
     const fetchData = async () => {
         try {

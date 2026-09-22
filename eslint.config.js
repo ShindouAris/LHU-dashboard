@@ -19,10 +19,26 @@ export default tseslint.config(
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      // Existing API payloads are only partially typed. Keep lint focused on
+      // behavioral defects until those contracts gain runtime schemas.
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/no-empty-object-type': 'off',
+      'no-useless-catch': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
       ],
     },
-  }
+  },
+  {
+    files: [
+      'src/components/ui/**/*.{ts,tsx}',
+      'src/components/ai-elements/**/*.{ts,tsx}',
+      'src/components/infsh/**/*.{ts,tsx}',
+    ],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
 );

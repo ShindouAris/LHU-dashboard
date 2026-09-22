@@ -576,13 +576,14 @@ const Elib: React.FC = () => {
         }
         break;
         
-      case 'detail':
+      case 'detail': {
         const detailBooking = dataLichCaNhan.find(b => b.DangKyID === bookingId);
         if (detailBooking) {
           setCurrentViewedEvent(detailBooking);
           setShowFocusedEvent(true);
         }
         break;
+      }
         
       case 'expired':
         setDataLichCaNhan(prev => prev.map(b => 

@@ -49,7 +49,7 @@ export const automationService = {
                 });
 
             if (!response.ok) {
-                let msg = await response.text() || "Lấy danh sách khảo sát thất bại";
+                const msg = await response.text() || "Lấy danh sách khảo sát thất bại";
                 throw new Error(msg);
             }
 
