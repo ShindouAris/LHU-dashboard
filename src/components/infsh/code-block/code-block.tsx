@@ -16,6 +16,9 @@ export { getLanguage, normalizeLanguage } from '@/components/infsh/code-block/la
  * This handles multiline constructs like template literals
  */
 function tokenizeLines(lines: string[], language: string) {
+  if (!language || language === 'text') {
+    return lines.map(line => ({ tokens: [{ type: null as any, content: line || ' ' }] }))
+  }
   const tokenizedLines: { tokens: ReturnType<typeof tokenize>['tokens'] }[] = []
   let context: TokenizeContext = {}
 
@@ -75,8 +78,8 @@ export const CodeBlock = memo(function CodeBlock({
   const [copied, setCopied] = useState(false)
 
   const text = getTextContent(children)
-  const lines = splitLines(text)
-  const normalizedLang = normalizeLanguage(language)
+  const lines = useMemo(() => splitLines(text), [text])
+  const normalizedLang = useMemo(() => normalizeLanguage(language), [language])
 
   // Pre-tokenize all lines with context passing for multiline support
   const tokenizedLines = useMemo(
@@ -179,8 +182,8 @@ export const CompactCodeBlock = memo(function CompactCodeBlock({
   const [copied, setCopied] = useState(false)
 
   const text = getTextContent(children)
-  const lines = splitLines(text)
-  const normalizedLang = language ? normalizeLanguage(language) : null
+  const lines = useMemo(() => splitLines(text), [text])
+  const normalizedLang = useMemo(() => language ? normalizeLanguage(language) : null, [language])
 
   // Pre-tokenize if language is provided
   const tokenizedLines = useMemo(

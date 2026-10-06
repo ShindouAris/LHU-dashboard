@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState, useMemo } from 'react';
 import { ChevronDown, ChevronRight, Sparkles, Wrench, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { AuthStorage } from '@/types/user';
@@ -11,7 +11,6 @@ import rehypeKatex from 'rehype-katex'
 import rehypeRaw from 'rehype-raw';
 import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import remarkBreak from 'remark-breaks'
-import remarkToc from 'remark-toc'
 import "katex/dist/katex.min.css";
 import { Avatar } from './ui/avatar';
 import remarkMath from 'remark-math'
@@ -216,92 +215,203 @@ const EmptyState = memo(function EmptyState({
   );
 });
 
-const preprocessLatex = (text: string): string =>
-  text.replace(/\\\[/g, '$$').replace(/\\\]/g, '$$').replace(/\\\(/g, '$').replace(/\\\)/g, '$');
+function countUnescaped(str: string, delimiter: string): number {
+  let count = 0;
+  let idx = 0;
+  while ((idx = str.indexOf(delimiter, idx)) !== -1) {
+    let backslashCount = 0;
+    let b = idx - 1;
+    while (b >= 0 && str[b] === '\\') {
+      backslashCount++;
+      b--;
+    }
+    if (backslashCount % 2 === 0) {
+      count++;
+    }
+    idx += delimiter.length;
+  }
+  return count;
+}
 
-const Message = memo(({message, index, Part}: {message: any, index: number, Part: any}) => {
+const preprocessLatex = (text: string, isStreaming = false): string => {
+  if (!text) return '';
+  let processed = text
+    .replace(/\\\[/g, '$$$$')
+    .replace(/\\\]/g, '$$$$')
+    .replace(/\\\(/g, '$$')
+    .replace(/\\\)/g, '$$');
+
+  if (isStreaming) {
+    const displayCount = countUnescaped(processed, '$$$$');
+    if (displayCount % 2 !== 0) {
+      processed += '\n$$$$';
+    } else {
+      const inlineCount = countUnescaped(processed, '$$');
+      const singleDollarCount = inlineCount - (displayCount * 2);
+      if (singleDollarCount % 2 !== 0) {
+        processed += '$$';
+      }
+    }
+  }
+
+  return processed;
+};
+
+function useThrottledText(text: string, isStreaming: boolean, intervalMs = 80): string {
+  const [throttledText, setThrottledText] = useState(text);
+  const lastUpdateTimeRef = useRef(0);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!isStreaming) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      setThrottledText(text);
+      lastUpdateTimeRef.current = Date.now();
+      return;
+    }
+
+    const now = Date.now();
+    const elapsed = now - lastUpdateTimeRef.current;
+
+    if (elapsed >= intervalMs) {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+      setThrottledText(text);
+      lastUpdateTimeRef.current = now;
+    } else if (!timerRef.current) {
+      timerRef.current = window.setTimeout(() => {
+        setThrottledText(text);
+        lastUpdateTimeRef.current = Date.now();
+        timerRef.current = null;
+      }, intervalMs - elapsed);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+        timerRef.current = null;
+      }
+    };
+  }, [text, isStreaming, intervalMs]);
+
+  return isStreaming ? throttledText : text;
+}
+
+const markdownComponents = {
+  pre({ children }: any) {
+    return <pre className="bg-muted p-2 rounded overflow-x-auto text-xs sm:text-sm dark:bg-muted/20">{children}</pre>;
+  },
+  code(props: any) {
+    const { children, className, node, ...rest } = props;
+    void node;
+    const match = /language-(\w+)/.exec(className || '');
+    const code = String(children).replace(/\n$/, '');
+
+    return match ? (
+      <CodeBlock language={match[1]}>
+        {code}
+      </CodeBlock>
+    ) : (
+      <code {...rest} className={className}>
+        {children}
+      </code>
+    );
+  },
+  table({ children }: any) {
+    return (
+      <div className="overflow-x-auto w-full my-2">
+        <Table className="w-full min-w-[400px]">
+          {children}
+        </Table>
+      </div>
+    );
+  },
+  thead({ children }: any) {
+    return <thead className="bg-muted/50 dark:bg-muted/20">{children}</thead>;
+  },
+  th({ children }: any) {
+    return (
+      <TableHead className="px-3 py-2 border font-semibold text-xs sm:text-sm bg-purple-400 dark:bg-green-600 text-black dark:text-white">
+        {children}
+      </TableHead>
+    );
+  },
+  td({ children }: any) {
+    return (
+      <TableCell className="px-3 py-2 border align-top text-xs sm:text-sm">
+        {children}
+      </TableCell>
+    );
+  },
+  tr({ children }: any) {
+    return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
+  },
+  h2: ({ children }: any) => (
+    <h2 className="mt-5 mb-3 text-lg sm:text-2xl font-bold tracking-tight border-b pb-2">
+      {children}
+    </h2>
+  ),
+  ul: ({ children }: any) => (
+    <ul className="my-4 ml-6 space-y-2 list-disc">
+      {children}
+    </ul>
+  ),
+  li: ({ children }: any) => (
+    <li className="leading-relaxed">
+      {children}
+    </li>
+  ),
+};
+
+const staticRemarkPlugins = [remarkGfm, remarkMath, remarkBreak];
+
+const Message = memo(({
+  message, 
+  index, 
+  Part, 
+  isStreaming = false
+}: {
+  message: any, 
+  index: number, 
+  Part: any, 
+  isStreaming?: boolean
+}) => {
+  const displayText = useThrottledText(Part.text, isStreaming, 80);
+  const formattedContent = preprocessLatex(displayText, isStreaming);
+
+  const rehypePlugins = useMemo(() => {
+    const plugins: any[] = [
+      rehypeRaw,
+      [rehypeKatex, { output: 'html', throwOnError: false, strict: false, errorColor: '#ef4444' }],
+    ];
+    if (!isStreaming) {
+      plugins.push([rehypeSanitize, katexSanitizeSchema]);
+    }
+    return plugins;
+  }, [isStreaming]);
+
   return (
-    <ReactMarkdown key={`${message.id}-streaming-${index}`} 
-      remarkPlugins={[remarkGfm, remarkMath, remarkBreak, remarkToc]}
-      rehypePlugins={[
-        rehypeRaw,
-        [rehypeKatex, { output: 'html' }],
-        [rehypeSanitize, katexSanitizeSchema],
-      ]}
-      components={{
-        pre({ children }) {
-          return <pre className="bg-muted p-2 rounded overflow-x-auto text-xs sm:text-sm dark:bg-muted/20">{children}</pre>;
-        },
-        code( props ) {
-          const {children, className, node, ...rest} = props
-          void node;
-          const match = /language-(\w+)/.exec(className || '')
-          const code = String(children).replace(/\n$/, '');
-
-          return match ? (
-            <CodeBlock language={match[1]}>
-              {code}
-            </CodeBlock>
-            
-          ) : (
-            <code {...rest} className={className}>
-              {children}
-            </code>
-          )
-        },                              
-        table({ children }) {
-          return (
-            <div className="overflow-x-auto w-full my-2">
-              <Table className="w-full min-w-[400px]">
-                {children}
-              </Table>
-            </div>
-          );
-        },
-        thead({ children }) {
-          return <thead className="bg-muted/50 dark:bg-muted/20">{children}</thead>;
-        },
-        th({ children }) {
-          return (
-            <TableHead className="px-3 py-2 border font-semibold text-xs sm:text-sm bg-purple-400 dark:bg-green-600 text-black dark:text-white">
-              {children}
-            </TableHead>
-          );
-        },
-        td({ children }) {
-          return (
-            <TableCell className="px-3 py-2 border align-top text-xs sm:text-sm">
-              {children}
-            </TableCell>
-          );
-        },
-        tr({ children }) {
-          return <TableRow className="bg-pink-300 dark:bg-sky-600 text-black dark:text-white">{children}</TableRow>;
-        },
-        h2: ({ children }) => (
-          <h2 className="mt-5 mb-3 text-lg sm:text-2xl font-bold tracking-tight border-b pb-2">
-            {children}
-          </h2>
-        ),
-        ul: ({ children }) => (
-          <ul className="my-4 ml-6 space-y-2 list-disc">
-            {children}
-          </ul>
-        ),
-        li: ({ children }) => (
-          <li className="leading-relaxed">
-            {children}
-          </li>
-        ),
-        
-      }}>
-      {preprocessLatex(Part.text)}
+    <ReactMarkdown 
+      key={`${message.id}-streaming-${index}`} 
+      remarkPlugins={staticRemarkPlugins}
+      rehypePlugins={rehypePlugins}
+      components={markdownComponents}
+    >
+      {formattedContent}
     </ReactMarkdown>
-  )
+  );
 }, (prevProps, nextProps) => {
-  return prevProps.Part.text === nextProps.Part.text && prevProps.message.id === nextProps.message.id;
-})
-
+  return (
+    prevProps.Part.text === nextProps.Part.text && 
+    prevProps.message.id === nextProps.message.id &&
+    prevProps.isStreaming === nextProps.isStreaming
+  );
+});
 
 const ChatbotUI = () => {
   const [inputValue, setInputValue] = useState('');
@@ -1089,7 +1199,7 @@ const ChatbotUI = () => {
                                     Sử dụng công cụ {' '}
                                     {TOOL_NAME_VI_MAP[part.type.replace('tool-', '').toUpperCase() as keyof typeof TOOL_NAME_VI_MAP]?.toLowerCase() ||
                                       part.type}
-                                    <pre className="mt-1 overflow-x-auto text-xs bg-card text-foreground border-2 border-border rounded-md p-2">{/* @ts-expect-error "This work btw" */
+                                    <pre className="mt-1 overflow-x-auto max-h-60 overflow-y-auto text-xs bg-card text-foreground border-2 border-border rounded-md p-2">{/* @ts-expect-error "This work btw" */
                                     JSON.stringify(part.output, null, 2)}</pre>
                                   </div>
                                 )}
@@ -1118,7 +1228,7 @@ const ChatbotUI = () => {
                     <div className={`text-sm sm:text-base leading-relaxed break-words ${message.role === 'user' ? 'text-black' : 'text-foreground'}`}>
                       {message.parts.map((Part, index) =>
                         Part.type === "text" ? (
-                          <Message key={index} message={message} index={index} Part={Part} />
+                          <Message key={index} message={message} index={index} Part={Part} isStreaming={isGenerating && message.role === 'assistant' && message.id === messages[messages.length - 1]?.id} />
                         ) : null
                       )}
                     </div>
