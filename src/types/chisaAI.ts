@@ -22,6 +22,7 @@ export interface IchisaAIChatList {
 interface ChatListInterface {
     chatId: string;
     chatUUID: string;
+    title?: string;
     createdAt: string; // ISO string
     updatedAt: string; // ISO string
     messageCount: number;

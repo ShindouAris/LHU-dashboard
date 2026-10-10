@@ -381,7 +381,9 @@ export const QRScanner: React.FC = () => {
           <div className="flex items-center gap-3">
             <QrCode className="w-6 h-6" strokeWidth={2.5} />
             <h1 className="text-xl font-display font-bold">Quét mã điểm danh</h1>
-            <FaRegQuestionCircle size={25} className="ml-auto cursor-pointer opacity-70 hover:opacity-100" onClick={handleDialog} />
+            <button type="button" aria-label="Hướng dẫn quét mã" className="ml-auto shrink-0 p-2 rounded-sm focus-ring opacity-70 hover:opacity-100" onClick={handleDialog}>
+              <FaRegQuestionCircle size={25} />
+            </button>
           </div>
         </div>
       </div>

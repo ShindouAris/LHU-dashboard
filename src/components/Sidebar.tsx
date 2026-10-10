@@ -306,7 +306,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           if (open !== isOpen) onToggle?.();
         }}
       >
-        <SheetContent side="left" className="flex w-80 max-w-[85vw] flex-col gap-0 overflow-hidden border-r-2 border-border bg-card p-0 lg:hidden">
+        <SheetContent side="left" onCloseAutoFocus={(event) => {
+          event.preventDefault();
+          document.querySelector<HTMLButtonElement>('button[aria-label="Mở menu"]')?.focus();
+        }} className="flex w-80 max-w-[85vw] flex-col gap-0 overflow-hidden border-r-2 border-border bg-card p-0 lg:hidden">
           <SheetHeader className="border-b-2 border-border p-4 pr-14 text-left">
             <SheetTitle className="sr-only">Menu điều hướng</SheetTitle>
             <SheetDescription className="sr-only">

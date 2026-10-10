@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '@/services/authService';
 import { AuthStorage } from '@/types/user';
 import { toast } from 'react-hot-toast';
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 </Button>
               </form>
               <div className="mt-4 text-center text-sm text-muted-foreground">
-                  Quay lại <a onClick={() => navigate('/')} className="text-foreground font-bold underline cursor-pointer">Trang chủ</a>
+                  Quay lại <Link to="/" className="text-foreground font-bold underline focus-ring">Trang chủ</Link>
               </div>
             </CardContent>
           </Card>

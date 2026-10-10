@@ -102,7 +102,7 @@ export default function ToolsLocket() {
 
                 {/* Content */}
                 <div className="flex-1 bg-card border-2 border-border rounded-md shadow-brutal overflow-hidden flex flex-col h-[calc(100vh-16rem)] md:h-[calc(100vh-12rem)]">
-                    <div className="h-full overflow-hidden">
+                    <div className="h-full overflow-y-auto">
                         {toolsList.find((t) => t.key === activeTab)?.content || (
                             <div className="flex items-center justify-center h-full text-muted-foreground">🔍 Không tìm thấy nội dung</div>
                         )}

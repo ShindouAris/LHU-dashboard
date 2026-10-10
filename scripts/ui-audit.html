@@ -1,0 +1,15 @@
+<!doctype html><html lang="vi"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body><div id="root"></div><script type="module">
+import React from '/node_modules/.vite/deps/react.js';
+import ReactDOM from '/node_modules/.vite/deps/react-dom_client.js';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '/src/components/ui/dialog.tsx';
+import { LoadingScreen } from '/src/components/LHU_UI/LoadingScreen.tsx';
+import '/src/index.css';
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(React.Fragment, null,
+ React.createElement(LoadingScreen, {loading:true}),
+ React.createElement(Dialog, {open:true}, React.createElement(DialogContent, null,
+ React.createElement(DialogTitle,null,'Kiểm tra hộp thoại dài'),
+ React.createElement(DialogDescription,null,'Fixture UI, không gọi API.'),
+ React.createElement('div', {style:{height:1200}}, 'Nội dung dài'), React.createElement('button',null,'Xác nhận')))));
+window.checkDialogUI = () => { const d=document.querySelector('[role=dialog]'); const r=d.getBoundingClientRect(); if(r.top<0 || r.bottom>innerHeight) throw new Error('Dialog actions extend beyond viewport'); if(getComputedStyle(d).overflowY!=='auto') throw new Error('Long dialog cannot scroll'); return true; };
+window.checkLoaderUI = () => { if(!document.querySelector('[role=status]')) throw new Error('Loader missing live status'); return true; };
+</script></body></html>

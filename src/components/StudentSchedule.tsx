@@ -174,6 +174,7 @@ export const StudentSchedule: React.FC = () => {
       return;
     }
     
+    setCurrentStudentId(studentId);
     try {
       // Check cache first. Expired entries return null and are only used below
       // as an offline fallback if the real request fails.
@@ -395,6 +396,19 @@ export const StudentSchedule: React.FC = () => {
       <div className="min-h-screen py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <ErrorMessage message={error} onRetry={handleRetry} />
+          <form className="mt-6 flex flex-wrap items-end gap-3" onSubmit={async (event) => {
+            event.preventDefault();
+            const id = String(new FormData(event.currentTarget).get('studentId') || '');
+            if (!/^\d{9}$/.test(id)) return;
+            await fetchSchedule(id, false);
+            await fetchPrivateExam(id);
+          }}>
+            <label className="flex flex-col gap-2">
+              Mã sinh viên
+              <input name="studentId" defaultValue={currentStudentId} inputMode="numeric" pattern="[0-9]{9}" required disabled={loading} className="rounded-md border-2 border-border bg-card px-3 py-2 text-foreground" />
+            </label>
+            <Button type="submit" disabled={loading}>Tra cứu lại</Button>
+          </form>
         </div>
       </div>
     );
@@ -635,11 +649,6 @@ export const StudentSchedule: React.FC = () => {
           </CardFooter>
         </Card>
 
-        {/* Schedule Display */}
-        {!hasUpcomingClasses && !showFullSchedule ? (
-          <EmptySchedule onViewFullSchedule={() => navigate('/schedule')} />
-        ) : (
-          <>
             {/* Exam section */}
             <div className={`mb-6 ${exams?.length !== undefined && exams?.length <= 0 && ("hidden")}`}>
               <div className="flex items-center justify-between mb-3">
@@ -664,6 +673,11 @@ export const StudentSchedule: React.FC = () => {
                 <p className="text-sm text-muted-foreground">Không có lịch thi riêng.</p>
               )}
             </div>
+        {/* Schedule Display */}
+        {!hasUpcomingClasses && !showFullSchedule ? (
+          <EmptySchedule onViewFullSchedule={() => navigate('/schedule')} />
+        ) : (
+          <>
             {/* Toggle View Button */}
             <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-3 sm:gap-4 flex-wrap sm:flex-nowrap min-w-0">
               <div>

@@ -75,7 +75,7 @@ export const StudentIdInput: React.FC<StudentIdInputProps> = ({ onSubmit, loadin
             <FieldLabel htmlFor="student-id" className="sr-only">
               Mã sinh viên
             </FieldLabel>
-            <div className="relative overflow-hidden rounded-md border-2 border-border bg-card shadow-brutal">
+            <div className="relative overflow-hidden rounded-md border-2 border-border bg-card shadow-brutal focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background">
               <div className="flex flex-col items-center gap-2 p-2 sm:flex-row">
                 <div className="relative w-full flex-1">
                   <Input

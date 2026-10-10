@@ -158,16 +158,18 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
         } else {
           iso = d;
         }
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(iso) || (t && !/^([01]\d|2[0-3]):[0-5]\d$/.test(t))) return null;
         const startStr = t ? `${iso}T${t}:00` : `${iso}T08:00:00`;
         const date = new Date(startStr);
-        return isNaN(date.getTime()) ? null : date;
+        return isNaN(date.getTime()) || format(date, 'yyyy-MM-dd') !== iso ? null : date;
       } catch {
         return null;
       }
     };
 
-    const examEvents: CalendarEvent[] = (exams || []).map((exam, idx) => {
-      const startDate = parseExamStart(exam) || new Date();
+    const examEvents: CalendarEvent[] = (exams || []).flatMap((exam, idx) => {
+      const startDate = parseExamStart(exam);
+      if (!startDate) return [];
       const endDate = new Date(startDate.getTime() + examDurationMinutes * 60 * 1000);
       return {
         id: 1000000 + idx, // tránh trùng với ID lịch học
@@ -180,6 +182,13 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
     return [...subjectEvents, ...examEvents];
   }, [schedules, exams, examDurationMinutes, includeCancelled]);
+
+  const omittedExamCount = exams.length - events.filter(event => '__isExam' in event.resource).length;
+  const examDateWarning = omittedExamCount > 0 ? (
+    <p role="status" className="text-sm text-muted-foreground">
+      Đã bỏ qua {omittedExamCount} lịch thi có ngày/giờ không hợp lệ. Vui lòng kiểm tra lại lịch thi.
+    </p>
+  ) : null;
 
   // Phát hiện lịch trùng để hiển thị cảnh báo
   const duplicates = useMemo(() => {
@@ -461,14 +470,15 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
     return colorMap[colorKey] ?? ['#ddd6fe', '#2e1065'];
   };
 
-  if (schedules.length === 0) {
+  if (events.length === 0) {
     return (
       <Card className="text-center py-8 sm:py-16 border-2 border-border shadow-brutal bg-card">
         <CardContent>
           <div className="w-12 h-12 sm:w-16 sm:h-16 bg-muted border-2 border-border rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-xl sm:text-2xl">📅</span>
           </div>
-          <p className="text-muted-foreground text-base sm:text-lg">Không có lịch học nào để hiển thị</p>
+          <p className="text-muted-foreground text-base sm:text-lg">Không có lịch học hoặc lịch thi nào để hiển thị</p>
+          {examDateWarning}
         </CardContent>
       </Card>
     );
@@ -476,6 +486,7 @@ export const Timetable: React.FC<TimetableProps> = memo(({ schedules, studentNam
 
   return (
     <div className="space-y-3 sm:space-y-6">
+      {examDateWarning}
       {/* Cảnh báo lịch trùng */}
       {duplicates.length > 0 && (
         <DuplicateScheduleWarning duplicates={duplicates} />

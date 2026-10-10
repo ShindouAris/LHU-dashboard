@@ -10,6 +10,7 @@ import { ApiResponse, ExamInfo } from '@/types/schedule';
 import { AuthStorage } from '@/types/user';
 import { GraduationCap } from 'lucide-react';
 import GradientText from './ui/GradientText';
+import { Button } from '@/components/ui/button';
 
 const CACHE_RECHECK_INTERVAL = 60 * 1000;
 
@@ -35,6 +36,7 @@ export const TimetablePage: React.FC = () => {
       return;
     }
 
+    setCurrentStudentId(studentId);
     try {
       if (useCache) {
         const cachedData = await cacheService.get(studentId);
@@ -186,6 +188,19 @@ export const TimetablePage: React.FC = () => {
       <div className="min-h-screen py-8 px-4">
         <div className="max-w-6xl mx-auto">
           <ErrorMessage message={error} onRetry={handleRetry} />
+          <form className="mt-6 flex flex-wrap items-end gap-3" onSubmit={async (event) => {
+            event.preventDefault();
+            const id = String(new FormData(event.currentTarget).get('studentId') || '');
+            if (!/^\d{9}$/.test(id)) return;
+            await fetchSchedule(id, false);
+            await fetchPrivateExam(id);
+          }}>
+            <label className="flex flex-col gap-2">
+              Mã sinh viên
+              <input name="studentId" defaultValue={currentStudentId} inputMode="numeric" pattern="[0-9]{9}" required disabled={loading} className="rounded-md border-2 border-border bg-card px-3 py-2 text-foreground" />
+            </label>
+            <Button type="submit" disabled={loading}>Tra cứu lại</Button>
+          </form>
         </div>
       </div>
     );

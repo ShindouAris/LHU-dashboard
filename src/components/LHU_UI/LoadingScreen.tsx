@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 
 export const LoadingScreen: React.FC<{ loading: boolean }> = ( { loading }) => {
+  const reducedMotion = useReducedMotion();
   return (
     <AnimatePresence>
       {loading && (
@@ -10,19 +11,22 @@ export const LoadingScreen: React.FC<{ loading: boolean }> = ( { loading }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="relative items-center justify-center min-h-screen"
+          role="status"
+          aria-live="polite"
+          className="relative flex min-h-[40vh] flex-col items-center justify-center p-6"
         >
           <motion.img
             src="https://media.tenor.com/dIPinX-49CsAAAAi/anime-vtuber.gif"
-            alt="Loading..."
+            alt=""
             className="relative mx-auto mb-4 w-20 h-20"
-            animate={{ y: [0, -10, 0] }}
+            animate={{ y: reducedMotion ? 0 : [0, -10, 0] }}
             transition={{
               duration: 0.8,
               repeat: Infinity,
               ease: "easeInOut",
             }}
           />
+          <p className="text-sm text-muted-foreground">Đang tải nội dung...</p>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Lock, Check, Calendar, Clock, ChevronDownIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Button } from '../ui/button';
@@ -49,7 +49,8 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
     const [endTime, setEndTime] = React.useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false);
     const [acceptDialog, setAcceptDialog] = useState(false);
-    const [isAccepted, setIsAccepted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     useEffect(() => {
         let cancelled = false;
@@ -78,19 +79,17 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
     }, [date, startTime, endTime])
 
     const isStartTimeInPast = () => {
-        if (!startTime) return false
-
-        const now = dayjs()
-        const start = dayjs(startTime, "HH:mm")
-
-        // gắn giờ start vào ngày hôm nay
-        const startToday = now
-            .hour(start.hour())
-            .minute(start.minute())
-            .second(0)
-
-        return startToday.isBefore(now)
+        return !!startTime && timeOnDate(startTime).isBefore(dayjs())
      }
+
+    const timeOnDate = (time: string) => {
+        if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(time)) return dayjs(new Date(NaN));
+        const [hour, minute] = time.split(':').map(Number);
+        return dayjs(date).hour(hour).minute(minute).second(0).millisecond(0);
+    };
+
+    const hasValidTimes = !!startTime && !!endTime && timeOnDate(startTime).isValid()
+        && timeOnDate(endTime).isValid() && timeOnDate(endTime).isAfter(timeOnDate(startTime));
 
     const handleRoomSelect = (roomId: number, isBusy: number) => {
         if (isBusy === 1) return; // Không cho phép chọn phòng bận
@@ -172,27 +171,29 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
     }
 
     const StartTImePicker = () => {
-        const min = dayjs('07:00', 'HH:mm')
+        const min = timeOnDate('07:00')
         const max = endTime
-            ? dayjs(endTime, 'HH:mm')
-            : dayjs('19:30', 'HH:mm')
+            ? timeOnDate(endTime)
+            : timeOnDate('19:30')
 
 
         return (
             <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <TimePicker 
-                    value={startTime ? dayjs(startTime, 'HH:mm') : null}
+                    value={startTime ? timeOnDate(startTime) : null}
                     ampm={false}
                     minTime={endTime
-                    ? dayjs(endTime, 'HH:mm').subtract(4, 'hour')
+                    ? timeOnDate(endTime).subtract(4, 'hour')
                     : min}
                     maxTime={max}
                     onChange={(newValue) => {
-                        if (newValue) {
+                        if (!newValue || !newValue.isValid()) {
+                            setStartTime(null);
+                        } else {
                             const safe = clampTime(
-                                newValue,
+                                timeOnDate(newValue.format('HH:mm')),
                                 endTime
-                                ? dayjs(endTime, 'HH:mm').subtract(4, 'hour')
+                                ? timeOnDate(endTime).subtract(4, 'hour')
                                 : min,
                                 max
                             )
@@ -207,25 +208,28 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
 
     const EndTimePicker = () => {
     const min = startTime
-    ? dayjs(startTime, 'HH:mm')
-    : dayjs('07:00', 'HH:mm')
+    ? timeOnDate(startTime)
+    : timeOnDate('07:00')
 
     const max = startTime
-        ? dayjs(startTime, 'HH:mm').add(4, 'hour').isAfter(dayjs('19:30', 'HH:mm'))
-        ? dayjs('19:30', 'HH:mm')
-        : dayjs(startTime, 'HH:mm').add(4, 'hour')
-        : dayjs('19:30', 'HH:mm')
+        ? timeOnDate(startTime).add(4, 'hour').isAfter(timeOnDate('19:30'))
+        ? timeOnDate('19:30')
+        : timeOnDate(startTime).add(4, 'hour')
+        : timeOnDate('19:30')
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
             <TimePicker 
-                value={endTime ? dayjs(endTime, 'HH:mm') : null}
+                value={endTime ? timeOnDate(endTime) : null}
                 ampm={false}
                 minTime={min}
                 maxTime={max}
                 onChange={(newValue) => {
-                    if (!newValue) return
-                    const safe = clampTime(newValue, min, max)
+                    if (!newValue || !newValue.isValid()) {
+                        setEndTime(null);
+                        return;
+                    }
+                    const safe = clampTime(timeOnDate(newValue.format('HH:mm')), min, max)
                     setEndTime(safe.format('HH:mm'))
                 }}
             />
@@ -235,12 +239,22 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
     }
 
     const submit = () => {
+        if (submittingRef.current || !selectedRoomId || !hasValidTimes || isStartTimeInPast()) return;
         setAcceptDialog(true);
     }
 
     const handleSubmit = async () => {
-        console.log('Submitting booking...');
-        if (!selectedRoomId || !thietBiAvailable) return;
+        if (submittingRef.current) return;
+        if (!selectedRoomId || !thietBiAvailable || loading || !hasValidTimes || isStartTimeInPast()
+            || !roomsState?.data.some(room => room.PhongID === selectedRoomId && room.isBusy !== 1)
+            || thietBiMuonMuon.some(tool => !Number.isInteger(tool.SoLuongDKMuon) || tool.SoLuongDKMuon <= 0
+                || !thietBiAvailable.data.some(available => available.ThietBiID === tool.ThietBiID
+                    && tool.SoLuongDKMuon <= available.SoLuong - available.SoLuongDaMuon))) {
+            toast.error('Vui lòng kiểm tra lại phòng, thời gian và thiết bị đã chọn.');
+            return;
+        }
+        submittingRef.current = true;
+        setSubmitting(true);
 
         const bookingPayload: DangKyPayload = {
             DangKyID: '',
@@ -252,13 +266,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
         }
 
         try {
-
-            if (!isAccepted) {
-                toast.error('Vui lòng đồng ý với quy định trước khi đăng ký phòng học nhóm.');
-                return
-            }
             // Call API
-            console.log('Booking payload:', JSON.stringify(bookingPayload, null, 2));
             const result = await ELIB_SERVICE.dang_ky_phong_hoc_nhom(bookingPayload);
             if (result.success) {
                 toast.success(`Đăng ký phòng học nhóm thành công!`);
@@ -266,15 +274,16 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 if (onBookingSuccess && result.madatcho) {
                     onBookingSuccess(result.madatcho);
                 }
+                setAcceptDialog(false);
+                handleCancel();
             } else {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.error('Error submitting booking:', error);
             toast.error(error instanceof Error ? error.message : 'Lỗi khi đăng ký phòng học nhóm.');
         } finally {
-            setAcceptDialog(false);
-            handleCancel(); // reset form
+            submittingRef.current = false;
+            setSubmitting(false);
         }
     };
 
@@ -307,8 +316,8 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 {/* Header */}
                 <div className="bg-section text-section-foreground border-b-2 border-border px-6 py-4">
                 <h1 className="text-2xl font-display font-black">Đăng Ký Phòng Học Nhóm
-                <Button className='inline items-end float-right p-1 rounded-md hover:bg-destructive hover:text-destructive-foreground' variant={'ghost'}>
-                    <MdClose size={20} onClick={onClose} />
+                <Button aria-label="Đóng đăng ký phòng" onClick={onClose} disabled={submitting} className='inline items-end float-right p-1 rounded-md hover:bg-destructive hover:text-destructive-foreground' variant={'ghost'}>
+                    <MdClose size={20} />
                 </Button>
                 </h1>
 
@@ -366,11 +375,14 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                         const isSelected = selectedRoomId === room.PhongID;
 
                         return (
-                            <div
+                            <button
                                 key={room.PhongID}
+                                type="button"
+                                aria-pressed={isSelected}
+                                disabled={isBusy || !hasValidTimes || submitting}
                                 onClick={() => handleRoomSelect(room.PhongID, room.isBusy)}
                                 className={`
-                                border-2 border-border rounded-md p-4 transition-all
+                                text-left border-2 border-border rounded-md p-4 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                                 ${isBusy || !endTime || !startTime
                                     ? 'bg-muted opacity-60 cursor-not-allowed'
                                     : isSelected
@@ -405,7 +417,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                                     )}
                                 </div>
                                 </div>
-                            </div>
+                            </button>
                         );
                     })}
                     </div>
@@ -506,6 +518,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 <div className="bg-muted px-6 py-4 flex justify-end gap-3 border-t-2 border-border">
                     <Button
                         onClick={handleCancel}
+                        disabled={submitting}
                         className="px-6 py-2 rounded-md"
                         variant={'outline'}
                     >
@@ -513,10 +526,10 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                     </Button>
                     <Button
                         onClick={submit}
-                        disabled={!selectedRoomId || !isStartTimeInPast()}
+                        disabled={submitting || !selectedRoomId || !hasValidTimes || isStartTimeInPast()}
                         className={`
                         px-6 py-2 rounded-md font-bold transition-colors
-                        ${selectedRoomId || !isStartTimeInPast()
+                        ${selectedRoomId && hasValidTimes && !isStartTimeInPast()
                             ? 'bg-primary text-primary-foreground border-2 border-border shadow-brutal hover:bg-primary/90'
                             : 'bg-muted text-muted-foreground cursor-not-allowed'
                         }
@@ -527,7 +540,7 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                 </div>
             </div>
 
-            <Dialog open={acceptDialog} onOpenChange={setAcceptDialog}>
+            <Dialog open={acceptDialog} onOpenChange={(open) => { if (!submittingRef.current) setAcceptDialog(open); }}>
                 <DialogContent className='max-w-lg w-[90vw]'>
                     <DialogHeader>
                         <DialogTitle>Xác Nhận Đăng Ký Phòng Học Nhóm</DialogTitle>
@@ -535,11 +548,14 @@ const RoomBookingForm: React.FC<{ onBookingSuccess: (madatcho: string) => void, 
                     <DialogDescription>
                         Bạn có chắc chắn muốn đăng ký phòng học nhóm với các thông tin đã chọn không? Vui lòng kiểm tra kỹ trước khi xác nhận.<br/>
                         <span className='font-bold text-destructive'>Lưu ý: Đọc kỹ các quy định về việc sử dụng phòng học nhóm trong thư viện ở trang trước đó.</span>
-                        <PowerOffSlide
-                            label='Tôi dong tinh'
-                            onPowerOff={() =>{ setIsAccepted(true); handleSubmit();}}
-                        />
                     </DialogDescription>
+                    <PowerOffSlide
+                        label='Tôi đồng ý'
+                        onPowerOff={handleSubmit}
+                    />
+                    <Button onClick={handleSubmit} disabled={submitting} aria-busy={submitting}>
+                        Tôi đồng ý và xác nhận đăng ký
+                    </Button>
                 </DialogContent>
             </Dialog>
 

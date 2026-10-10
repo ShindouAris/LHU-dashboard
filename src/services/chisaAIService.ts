@@ -73,6 +73,21 @@ export const chisaAIService = {
         if (typeof data?.exists !== "boolean") throw new Error("Phản hồi kiểm tra người dùng không hợp lệ");
         return data.exists;
     },
+        deleteChat: async (access_token: string, chatId: string): Promise<boolean> => {
+        const res = await fetch(`${API_ENDPOINT}/chisaAI/v2/${chatId}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                accessToken: access_token,
+            }),
+        });
+        if (!res.ok) {
+            throw new Error(`Lỗi khi xóa phiên chat: ${res.status} ${res.statusText}`);
+        }
+        return true;
+    },
     createUserV3: async (access_token: string): Promise<boolean> => {
         const res = await fetch(`${API_ENDPOINT}/chisaAI/v3/user/create`, {
             method: "POST",

@@ -321,12 +321,8 @@ const SettingsPage: React.FC = () => {
         await examCacheService.clearCache();
       }
       
-      // Clear localStorage (except theme and auth)
-      const theme = localStorage.getItem('theme');
-      const accessToken = localStorage.getItem('access_token');
-      localStorage.clear();
-      if (theme) localStorage.setItem('theme', theme);
-      if (accessToken) localStorage.setItem('access_token', accessToken);
+      // Search history is disposable; authentication and preferences are not cache.
+      localStorage.removeItem('student_id_history');
       
       await checkCacheSize();
       toast.success('Đã xóa bộ nhớ đệm thành công');
@@ -423,7 +419,7 @@ const SettingsPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <GoBook className="h-5 w-5" />
-                Điểu chỉnh chế độ hiển thị điểm
+                Điều chỉnh chế độ hiển thị điểm
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -830,16 +826,16 @@ const SettingsPage: React.FC = () => {
                 </div>
               </div>
               <Separator />
-              <div className="flex items-center justify-between py-4 overflow-hidden">
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
+              <div className="flex items-center justify-between py-4">
+                <div className="flex min-w-0 items-center gap-4 flex-1">
+                  <div className="shrink-0 p-2 border-2 border-border bg-[hsl(258_90%_66%)] rounded-md">
                     <GitHub />
                   </div>
-                  <div className="flex-1">
+                  <div className="min-w-0 flex-1">
                     <Label className="text-base font-medium">Mã nguồn trang web</Label>
-                    <p className="text-sm text-muted-foreground mt-1 cursor-pointer overflow-hidden"
-                    onClick={() => window.open('https://github.com/ShindouAris/Calendar-LHU.git', '_blank')}
-                    >https://github.com/ShindouAris/Calendar-LHU.git</p>
+                    <a className="block break-all text-sm text-muted-foreground mt-1 underline underline-offset-4 focus-ring"
+                      href="https://github.com/ShindouAris/Calendar-LHU.git" target="_blank" rel="noopener noreferrer"
+                    >https://github.com/ShindouAris/Calendar-LHU.git</a>
                   </div>
                 </div>
               </div>

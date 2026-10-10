@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+const source = readFileSync(new URL('../src/components/Setting.tsx', import.meta.url), 'utf8');
+const body = source.match(/const handleClearCache = async \(\) => \{([\s\S]*?)\n  \};/)[1];
+const values = new Map([['auth_user','test-user'],['access_token','test-token'],['userSettings','test-settings'],['theme','dark'],['student_id_history','[]']]);
+const localStorage = { getItem:k=>values.get(k), setItem:(k,v)=>values.set(k,v), removeItem:k=>values.delete(k), clear:()=>values.clear() };
+const run = new Function('localStorage','confirm','setIsClearingCache','user','checkCacheSize','toast',`return (async()=>{${body}})()`);
+await run(localStorage,()=>true,()=>{},null,async()=>{}, {success(){},error(){throw Error('Unexpected cache error')}});
+for (const k of ['auth_user','access_token','userSettings','theme']) assert.ok(values.has(k), `Cache clear removed ${k}`);
+assert.equal(values.has('student_id_history'),false);
+console.log('PASS: cache clear preserves authentication and preferences');

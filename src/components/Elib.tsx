@@ -14,6 +14,8 @@ import { ToolbarProps } from "react-big-calendar";
 import { FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import { Badge } from './ui/badge';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from './ui/dialog';
+import QRCode from 'react-qr-code';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import toast from 'react-hot-toast';
 // @ts-ignore
 import RoomBookingForm from './LHU_UI/Elib_register';
@@ -238,7 +240,6 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
   const endTime = Presenter.formatDateTime(new Date(booking.ThoiGianKT));
   const isOwner = currentUserId === booking.DocGiaDangKy;
 
-  const [showMenu, setShowMenu] = useState<boolean>(false);
 
   const actions: Action[] = [
     { id: ActionType.Invite, icon: <UserPlus className="w-4 h-4" />, label: 'Mời thành viên', show: Presenter.canPerformAction(currentUserId, booking.DocGiaDangKy, booking.TrangThai, ActionType.Invite) },
@@ -311,6 +312,7 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
         <div className="p-4 flex md:flex-col gap-2 border-t-2 md:border-t-0 md:border-l-2 border-border">
           {isOwner && booking.TrangThai === 0 && (
             <button
+              aria-label="Mời thành viên"
               onClick={() => onAction(ActionType.Invite, booking.DangKyID)}
               className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover text-sm font-semibold"
             >
@@ -319,32 +321,29 @@ const BookingCard: React.FC<BookingCardProps> = ({ booking, currentUserId, onAct
             </button>
           )}
 
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover"
-            >
-              <MoreVertical className="w-4 h-4" strokeWidth={2.5} />
-            </button>
-
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-48 bg-popover text-popover-foreground rounded-md shadow-brutal border-2 border-border z-10 overflow-hidden">
-                {actions.map(action => (
-                  <button
-                    key={action.id}
-                    onClick={() => {
-                      onAction(action.id, booking.DangKyID);
-                      setShowMenu(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 hover:bg-accent text-left text-sm text-foreground"
-                  >
-                    {action.icon}
-                    <span>{action.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Thao tác đăng ký phòng ${booking.TenPhong}`}
+                className="flex items-center gap-2 px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover"
+              >
+                <MoreVertical className="w-4 h-4" strokeWidth={2.5} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 border-2 border-border shadow-brutal">
+              {actions.map(action => (
+                <DropdownMenuItem
+                  key={action.id}
+                  onSelect={() => onAction(action.id, booking.DangKyID)}
+                  className="gap-2 px-4 py-2 text-foreground"
+                >
+                  {action.icon}
+                  <span>{action.label}</span>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </div>
@@ -469,12 +468,14 @@ const Elib: React.FC = () => {
                 Hôm nay
               </button>
               <button
+                aria-label="Ngày trước"
                 onClick={() => onNavigate("PREV")}
                 className="px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold"
               >
                 <FaArrowLeft />
               </button>
               <button
+                aria-label="Ngày tiếp theo"
                 onClick={() => onNavigate("NEXT")}
                 className="px-3 py-2 bg-muted text-foreground border-2 border-border rounded-md shadow-brutal-sm brutal-hover font-semibold"
               >
@@ -835,22 +836,18 @@ const Elib: React.FC = () => {
           </DialogContent>
         </Dialog>
 
-        {showQRModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
-            <div className="bg-card text-card-foreground border-2 border-border rounded-md shadow-brutal p-6 max-w-sm w-full">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-display font-bold text-foreground">QR Check-in</h3>
-                <button
-                  onClick={() => setShowQRModal(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  ✕
-                </button>
-              </div>
+        <Dialog open={showQRModal && selectedBookingId !== null} onOpenChange={setShowQRModal}>
+          <DialogContent className="max-w-sm">
+              <DialogHeader>
+                <DialogTitle>QR Check-in</DialogTitle>
+                <DialogDescription>Quét mã để check-in phòng học nhóm.</DialogDescription>
+              </DialogHeader>
 
               <div className="bg-muted border-2 border-border p-4 rounded-md mb-4">
-                <div className="bg-card border-2 border-border p-4 rounded-md">
-                  <QrCode className="w-48 h-48 mx-auto text-foreground" />
+                <div className="bg-white border-2 border-border p-4 rounded-md">
+                  {selectedBookingId !== null && (
+                    <QRCode value={`LIB-${selectedBookingId}`} size={192} title="Mã QR Check-in" className="mx-auto h-auto max-w-full" />
+                  )}
                 </div>
                 <p className="text-center text-sm text-muted-foreground mt-2">
                   Mã: LIB-{selectedBookingId}
@@ -864,9 +861,8 @@ const Elib: React.FC = () => {
                 <Copy className="w-4 h-4" strokeWidth={2.5} />
                 Sao chép mã
               </button>
-            </div>
-          </div>
-        )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

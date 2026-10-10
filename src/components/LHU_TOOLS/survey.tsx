@@ -239,7 +239,7 @@ export const SurveyAutomationTool = () => {
           </div>
 
           {/* Action Buttons - moved to header */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleFetchSurveys}
               disabled={loading || processing}
