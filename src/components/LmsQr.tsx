@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import QrScanner from "qr-scanner";
+import { nextAutoZoom, startQrAssist, type ZoomRange } from "@/services/qrAssist";
 import { AnimatePresence, motion } from "framer-motion";
 import { Card, CardContent, /* CardHeader */ } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,7 @@ export const QRScanner: React.FC = () => {
   const [dialogTutorialOpen, setDialogTutorialOpen] = useState<boolean>(false)
   const [dialogExpiredQROpen, setDialogExpiredQROpen] = useState<boolean>(false)
   const [monHocDaDiemDanh, setMonHocDaDiemDanh] = useState<string | null>(null)
-  const [zoomRange, setZoomRange] = useState<{min: number, max: number} | null>(null);
+  const [zoomRange, setZoomRange] = useState<ZoomRange | null>(null);
   const nav = useNavigate()
   const isReactNativeWebView = typeof window !== 'undefined' && !!window.ReactNativeWebView?.postMessage;
 
@@ -86,119 +87,99 @@ export const QRScanner: React.FC = () => {
     )
   }, [isReactNativeWebView])
 
-  const getCamera = useCallback(async () => {
-    // Try React Native camera first, then attempt web camera regardless of React Native response.
-    // This provides a graceful fallback if React Native camera is unavailable or fails.
-    if (isReactNativeWebView) {
-      openReactNativeCamera();
-    }
+  const acceptedRef = useRef(false);
+  const sessionRef = useRef(0);
+  const processedRef = useRef<string | null>(null);
+  const invalidateSession = useCallback(() => { sessionRef.current++; }, []);
+  const manualZoomRef = useRef(false);
+  const zoomRef = useRef(1);
+  const zoomBusyRef = useRef(false);
+  const zoomPendingRef = useRef<number | null>(null);
+  const lastAutoZoomRef = useRef(0);
+  const zoomRangeRef = useRef<ZoomRange | null>(null);
+  const acceptCode = useCallback((code: string) => {
+    if (!code.trim() || acceptedRef.current) return;
+    acceptedRef.current = true;
+    setScanned(code);
+  }, []);
 
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: {facingMode: "environment"}, audio: false});
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-        const track = stream.getVideoTracks()[0];
-        trackRef.current = track;
-        const capabilities = track.getCapabilities?.();
-        // @ts-expect-error Zoom can be unavailable on some devices
-        if (capabilities?.zoom) {
-          setZoomRange({
-            // @ts-expect-error Zoom can be unavailable on some devices
-            min: capabilities.zoom.min,
-            // @ts-expect-error Zoom can be unavailable on some devices
-            max: capabilities.zoom.max,
+  const refreshTrack = useCallback(() => {
+    const stream = videoRef.current?.srcObject;
+    const track = stream instanceof MediaStream ? stream.getVideoTracks()[0] : undefined;
+    if (!track || track === trackRef.current) return;
+    trackRef.current = track;
+    const capabilities = track.getCapabilities?.() as (MediaTrackCapabilities & { zoom?: ZoomRange }) | undefined;
+    const range = capabilities?.zoom ?? null;
+    zoomRangeRef.current = range;
+    setZoomRange(range);
+    const current = (track.getSettings() as MediaTrackSettings & { zoom?: number }).zoom ?? range?.min ?? 1;
+    zoomRef.current = current;
+    setScale(current);
+  }, []);
+
+  const applyZoom = useCallback(async (value: number) => {
+    zoomPendingRef.current = value;
+    if (zoomBusyRef.current) return;
+    zoomBusyRef.current = true;
+    try {
+      while (zoomPendingRef.current !== null) {
+        const requested = zoomPendingRef.current;
+        zoomPendingRef.current = null;
+        refreshTrack();
+        const track = trackRef.current, range = zoomRangeRef.current;
+        if (!track || !range) continue;
+        const step = range.step || 0.1;
+        const value = Math.min(range.max, Math.max(range.min, range.min + Math.round((requested - range.min) / step) * step));
+        const constraints = track.getConstraints();
+        try {
+          const advanced = (constraints.advanced ?? []).map(constraint => {
+            const preserved = { ...constraint } as MediaTrackConstraintSet & { zoom?: number };
+            delete preserved.zoom;
+            return preserved;
           });
-        }
-      } catch (err) {
-        console.error("Lỗi khi truy cập camera:", err);
+          await track.applyConstraints({ ...constraints, advanced: [...advanced, { zoom: value } as MediaTrackConstraintSet] });
+          if (track === trackRef.current) { zoomRef.current = value; setScale(value); }
+        } catch { /* Unsupported/rejected zoom must not interrupt scanning. */ }
       }
-  }, [isReactNativeWebView, openReactNativeCamera]);
-
+    } finally { zoomBusyRef.current = false; }
+  }, [refreshTrack]);
 
   useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
     let cancelled = false;
-    
-    const handleZoom = async () => {
-      const track = trackRef.current;
-      if (!track) return;
-      
-      const capabilities = track.getCapabilities?.();
-    // @ts-expect-error Zoom can be unavailable on some devices
-      if (!capabilities?.zoom) {
-        console.warn('Zoom not supported');
-        return;
-      }
-      
-      // Clamp scale to camera's min/max zoom capabilities
-    // @ts-expect-error Zoom can be unavailable on some devices
-      const { min, max } = capabilities.zoom;
-      const clampedScale = Math.min(Math.max(scale, min), max);
-      
-      if (clampedScale !== scale) {
-        console.warn(`Scale ${scale} out of range [${min}, ${max}], clamped to ${clampedScale}`);
-      }
-      
-      try {
-        console.log(`Zooming to ${clampedScale} (range: ${min}-${max})`);
-        await track.applyConstraints({
-        // @ts-expect-error Zoom can be unavailable on some devices
-          advanced: [{ zoom: clampedScale }]
-        });
-        
-        if (!cancelled) {
-          console.log("Zoom applied successfully");
-        }
-      } catch (error) {
-        if (!cancelled) {
-          console.error("Failed to apply zoom:", error);
-        }
-      }
-    };
-    
-    handleZoom();
-    
+    acceptedRef.current = false;
+    if (isReactNativeWebView) openReactNativeCamera();
+    const scanner = new QrScanner(video, result => { if (!cancelled) acceptCode(result.data); }, {
+      returnDetailedScanResult: true, highlightScanRegion: true, highlightCodeOutline: true,
+      preferredCamera: 'environment',
+    });
+    setQrScanner(scanner);
+    setError(null);
+    video.addEventListener('play', refreshTrack);
+    const stopAssist = startQrAssist(video, acceptCode, fraction => {
+      refreshTrack();
+      if (acceptedRef.current || manualZoomRef.current || Date.now() - lastAutoZoomRef.current < 1200) return;
+      const next = nextAutoZoom(zoomRef.current, zoomRangeRef.current, fraction);
+      if (next !== null) { lastAutoZoomRef.current = Date.now(); void applyZoom(next); }
+    }, () => sessionRef.current);
+    void scanner.start().then(() => {
+      if (cancelled) { scanner.stop(); return; }
+      refreshTrack();
+    }).catch(error => {
+      if (!cancelled) toast.error("Mở camera thất bại: " + String(error));
+    });
     return () => {
       cancelled = true;
-    };
-  }, [scale]);
-
-
-  useEffect(() => {
-    if (!videoRef.current) return;
-
-    getCamera()
-
-    const scanner = new QrScanner(
-      videoRef.current,
-      (result) => {
-        // console.log("decoded qr code:", result);
-        setScanned(result.data);
-      },
-      {
-        returnDetailedScanResult: true,
-        highlightScanRegion: true,
-        highlightCodeOutline: true,
-      }
-    );
-    setQrScanner(scanner);
-    setError(null)
-    scanner.start().catch((error) => {
-      if (error instanceof Error) {
-        toast.error("Mở camera thất bại: " + error.message)
-      }
-      console.error ("Mở camera thất bại: " + error)
-    });
-
-    return () => {
-      scanner.stop();
+      invalidateSession();
+      acceptedRef.current = true;
+      stopAssist();
+      video.removeEventListener('play', refreshTrack);
       scanner.destroy();
-      if (trackRef.current) {
-        trackRef.current.stop()
-      }
-      
+      trackRef.current = null;
+      zoomPendingRef.current = null;
     };
-  }, [getCamera]);
+  }, [acceptCode, applyZoom, refreshTrack, isReactNativeWebView, openReactNativeCamera, invalidateSession]);
 
   useEffect(() => {
     const onMessage = (event: MessageEvent) => {
@@ -206,7 +187,7 @@ export const QRScanner: React.FC = () => {
 
       // Handle event qr scan từ React Native
       if (type === "QR_SCANNED" && typeof code === "string" && code.trim() !== "") {
-        setScanned(code);
+        acceptCode(code);
       }
     };
 
@@ -217,17 +198,19 @@ export const QRScanner: React.FC = () => {
       window.removeEventListener("message", onMessage as EventListener);
       document.removeEventListener("message", onMessage as EventListener);
     };
-  }, [extractQrFromMessage, isReactNativeWebView]);
+  }, [extractQrFromMessage, isReactNativeWebView, acceptCode]);
 
   useEffect(() => {
 
+    const session = sessionRef.current;
     const processScanned = async () => {
 
       setError(null)
       setIsExpiredQR(false)
       setDialogExpiredQROpen(false)
 
-      if (scanned === "") return
+      if (scanned === "" || processedRef.current === scanned) return;
+      processedRef.current = scanned;
 
       if (scanned.startsWith("http")) {
         window.open(scanned)
@@ -243,6 +226,7 @@ export const QRScanner: React.FC = () => {
         return
       }
 
+      acceptedRef.current = true;
       qrScanner?.pause()
       .then(() => {console.log("Tạm dừng camera vì đã tìm thấy QR phù hợp")})
       .catch((error) => {
@@ -252,7 +236,7 @@ export const QRScanner: React.FC = () => {
       if (SUBSTR === "STB") {
         try {
           const res = await ApiService.send_diem_danh(scanned, access_token);
-          if (!res) return;
+          if (session !== sessionRef.current || !res) return;
 
           if (!res.success) {
             const errorMessage = String(res.error || "Điểm danh thất bại");
@@ -273,6 +257,7 @@ export const QRScanner: React.FC = () => {
             toast.success("🎉 Điểm danh thành công!");
           }
         } catch (cause) {
+          if (session !== sessionRef.current) return;
           const message = cause instanceof Error ? cause.message : "Lỗi không xác định";
           setError(message);
           toast.error("Điểm danh thất bại: " + message);
@@ -280,7 +265,7 @@ export const QRScanner: React.FC = () => {
       } else if (SUBSTR === "LIB") {
         try {
           const res = await ApiService.elib_scanCode(scanned, access_token)
-          if (!res) return
+          if (session !== sessionRef.current || !res) return
 
           if (!res.success) {
             const errorMessage = String(res.error)
@@ -292,6 +277,7 @@ export const QRScanner: React.FC = () => {
           }
 
         } catch (error) {
+          if (session !== sessionRef.current) return;
           if (error instanceof Error) {
             if (error.message.toLowerCase() === "failed to fetch") {
               toast.error("Lỗi mạng, vui lòng kiểm tra lại kết nối")
@@ -306,17 +292,14 @@ export const QRScanner: React.FC = () => {
 
     processScanned();
 
-    return () => {
-      setScanned("");
-      setIsSuccess(false);
-      setError(null);
-      setIsExpiredQR(false);
-      setDialogExpiredQROpen(false);
-    };
 
   }, [scanned, qrScanner]);
 
   const handleReset = async () => {
+    processedRef.current = null;
+    sessionRef.current++;
+    acceptedRef.current = false;
+    manualZoomRef.current = false;
     setScanned("");
     setIsSuccess(false)
     setError(null)
@@ -324,7 +307,7 @@ export const QRScanner: React.FC = () => {
     setIsExpiredQR(false)
     setDialogExpiredQROpen(false)
     await toast.promise(
-      async () => {qrScanner?.start(); await getCamera()},
+      async () => { await qrScanner?.start(); refreshTrack(); },
       {
         loading: "Đang khởi động camera",
         success: "Khởi động camera thành công",
@@ -338,6 +321,8 @@ export const QRScanner: React.FC = () => {
   }
 
   const handleBack = () => {
+    sessionRef.current++;
+    acceptedRef.current = true;
     setScanned("")
     setMonHocDaDiemDanh(null)
     nav("/")
@@ -355,9 +340,10 @@ export const QRScanner: React.FC = () => {
       const dy = touch1.clientY - touch2.clientY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
+      manualZoomRef.current = true;
       if (lastDistance.current) {
         const zoomFactor = distance / lastDistance.current;
-        setScale((prev) => Math.min(Math.max(prev * zoomFactor, 1), zoomRange?.max || 10)); // zoom range 1x to devide's maximum zoom range (or 10x for falling back)
+        void applyZoom(Math.min(Math.max(zoomRef.current * zoomFactor, zoomRange?.min ?? 1), zoomRange?.max ?? 1));
       }
 
       lastDistance.current = distance;
@@ -398,6 +384,7 @@ export const QRScanner: React.FC = () => {
               className="relative w-full aspect-square touch-none"
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchEnd}
             >
               {videoRef.current ? (<div><img alt={"IMAGE"} src="/cibi.png"/></div>) : (<></>)}
               <video
@@ -533,7 +520,8 @@ export const QRScanner: React.FC = () => {
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           exit={{ scale: 0 }}
-          onClick={() => setScale(1)}
+          aria-label="Đặt lại độ phóng camera"
+          onClick={() => { manualZoomRef.current = true; void applyZoom(zoomRange?.min ?? 1); }}
           className="fixed bottom-8 right-8 w-14 h-14 bg-section text-section-foreground border-2 border-border rounded-full shadow-brutal hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-brutal-sm active:translate-x-[4px] active:translate-y-[4px] active:shadow-none transition-[transform,box-shadow] duration-150 flex items-center justify-center z-40"
         >
           <span className="text-sm font-bold">1x</span>

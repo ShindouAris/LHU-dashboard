@@ -15,6 +15,7 @@ export default defineConfig({
       ],
       workbox: {
         navigateFallbackDenylist: [/^\/api\//],
+        globIgnores: ['**/opencv-runtime-*.js'],
         runtimeCaching: [
           {
             urlPattern: /\.(?:woff2?|ttf|otf)$/i,
@@ -65,6 +66,7 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        assetFileNames: asset => asset.name === 'opencv.js' ? 'assets/opencv-runtime-[hash][extname]' : 'assets/[name]-[hash][extname]',
         manualChunks: {
           calendar: ['react-big-calendar', 'date-fns'],
           lucide: ['lucide-react'],
