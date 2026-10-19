@@ -38,6 +38,7 @@ export const Layout: React.FC<LayoutProps> = ({
   const loggedInUser = AuthStorage.isLoggedIn();
   const location = useLocation();
   const section = sectionForPath(location.pathname);
+  const isElectron = window && window.electron;
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -90,7 +91,7 @@ export const Layout: React.FC<LayoutProps> = ({
               Terms of Service
             </a>
             <a href="https://github.com/ShindouAris/LHU-dashboard/commit/d3160d71e3a259d15be7ef6e4b9a55bc4267b7d1" className="hover:text-primary hover:underline transition-colors">
-              Phiên bản 3.6.0
+              Phiên bản 4.0.0 {isElectron ? "- App Version 2.0.0" : "(Webapp)"}
             </a>
           </div>
         </div>
