@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://lhu-dashboard.chisadin.site/">
+  <a href="https://lhu-dashboard.chisadin.id.vn/">
     <img src="public/favicon.svg" alt="LHU Dashboard Logo" width="80" height="80" />
   </a>
 </p>
@@ -14,7 +14,7 @@
 
 LHU Dashboard giúp sinh viên Lạc Hồng tra cứu lịch học, theo dõi lịch thi và sử dụng các tiện ích thường ngày ngay trên trình duyệt. Nhập mã sinh viên để xem lịch; đăng nhập khi cần truy cập dữ liệu cá nhân.
 
-**[Mở LHU Dashboard](https://lhu-dashboard.chisadin.site/)** · [Khám phá tính năng](#có-gì-trong-lhu-dashboard) · [Chạy local](#chạy-local)
+**[Mở LHU Dashboard](https://lhu-dashboard.chisadin.id.vn/)** · [Khám phá tính năng](#có-gì-trong-lhu-dashboard) · [Chạy local](#chạy-local)
 
 ---
 
@@ -103,4 +103,4 @@ Nếu gặp lỗi hoặc có ý tưởng cải thiện, bạn có thể [tạo i
 
 ---
 
-**Lớp tiếp theo ở đâu?** [Mở dashboard để tra cứu lịch học](https://lhu-dashboard.chisadin.site/).
+**Lớp tiếp theo ở đâu?** [Mở dashboard để tra cứu lịch học](https://lhu-dashboard.chisadin.id.vn/).

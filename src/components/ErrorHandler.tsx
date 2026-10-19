@@ -44,7 +44,7 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
             </p>
             <p className="text-sm md:text-base opacity-80 mb-4 md:mb-6">
               Nếu sự cố vẫn tiếp diễn, vui lòng liên hệ bộ phận hỗ trợ kỹ thuật. {' '}
-              <a href="https://discord.chisadin.site" className="underline">https://discord.chisadin.site<MdOutlineArrowOutward className="inline-block ml-1" /></a>
+              <a href="https://discord.chisadin.id.vn" className="underline">https://discord.chisadin.id.vn<MdOutlineArrowOutward className="inline-block ml-1" /></a>
             </p>
 
             {this.state.error && (

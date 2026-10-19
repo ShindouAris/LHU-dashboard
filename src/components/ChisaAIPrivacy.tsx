@@ -296,7 +296,7 @@ const ChisaAIPrivacy = () => {
               vui lòng liên hệ với chúng tôi:
             </p>
             <div className="space-y-2 text-muted-foreground ml-4">
-              <p><strong>Discord Server:</strong> <a href='https://discord.chisadin.site' className='font-bold underline underline-offset-4 text-foreground cursor-pointer hover:opacity-70'>Chisadin chan's playfield</a></p>
+              <p><strong>Discord Server:</strong> <a href='https://discord.chisadin.id.vn' className='font-bold underline underline-offset-4 text-foreground cursor-pointer hover:opacity-70'>Chisadin chan's playfield</a></p>
             </div>
           </CardContent>
         </Card>
