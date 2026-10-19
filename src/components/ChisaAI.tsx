@@ -32,14 +32,7 @@ import { NotAvailable } from './LHU_UI/Contruction';
 import { chisaAIService } from '@/services/chisaAIService';
 import type { IModel } from '@/types/chisaAI';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
 import { VscDebugRestart } from "react-icons/vsc";
 import { Table, TableCell, TableHead, TableRow } from './ui/table';
 import GradientText from './ui/GradientText';
@@ -108,6 +101,7 @@ type EmptyStateProps = {
   onModelChange: (modelId: string) => void;
   onModelSelectorOpenChange: (open: boolean) => void;
   isGenerating: boolean;
+  disabled: boolean;
   onStop?: () => void;
 };
 
@@ -124,6 +118,7 @@ const EmptyState = memo(function EmptyState({
   onModelChange,
   onModelSelectorOpenChange,
   isGenerating,
+  disabled,
   onStop,
 }: EmptyStateProps) {
   return (
@@ -222,7 +217,7 @@ const EmptyState = memo(function EmptyState({
         ) : (
           <PromptInputSubmit
             status={status === 'streaming' ? 'streaming' : 'ready'}
-            disabled={!inputValue.trim()}
+            disabled={disabled || !inputValue.trim()}
             className="absolute right-4"
           />
         )}
@@ -404,13 +399,12 @@ const Message = memo(({
   const rehypePlugins = useMemo(() => {
     const plugins: any[] = [
       rehypeRaw,
+      [rehypeSanitize, defaultSchema],
       [rehypeKatex, { output: 'html', throwOnError: false, strict: false, errorColor: '#ef4444' }],
+      [rehypeSanitize, katexSanitizeSchema],
     ];
-    if (!isStreaming) {
-      plugins.push([rehypeSanitize, katexSanitizeSchema]);
-    }
     return plugins;
-  }, [isStreaming]);
+  }, []);
 
   return (
     <ReactMarkdown 
@@ -440,7 +434,7 @@ const ChatbotUI = () => {
   const [expandedToolCalls, setExpandedToolCalls] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [chatSwitchLoading, setChatSwitchLoading] = useState<boolean>(false);
+  const [chatSwitchLoading, setChatSwitchLoading] = useState<boolean>(true);
   const [chatSwitchLabel, setChatSwitchLabel] = useState<string>('Đang tạo phiên chat...');
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
@@ -468,7 +462,28 @@ const ChatbotUI = () => {
   const [chatHistoryNextToken, setChatHistoryNextToken] = useState<string | null>(null);
   const [isLoadingMore, setIsLoadingMore] = useState<boolean>(false);
 
-  const didHydrateRef = useRef(false);
+  const localChatsRef = useRef(new Set(initialHashRef.current ? [] : [chatId]));
+  const activeChatRef = useRef(chatId);
+  const switchVersionRef = useRef(0);
+  const [hydratedChat, setHydratedChat] = useState<string | null>(null);
+  const [hydrateAttempt, setHydrateAttempt] = useState(0);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
+  const [listAttempt, setListAttempt] = useState(0);
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const [listLoadingMore, setListLoadingMore] = useState(false);
+  const listBusyRef = useRef(false);
+  const messageBusyRef = useRef(false);
+  const listVersionRef = useRef(0);
+  const listPagedRef = useRef(false);
+  const deletedChatsRef = useRef(new Set<string>());
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const deleteBusyRef = useRef(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [copyError, setCopyError] = useState<string | null>(null);
+  const [modelError, setModelError] = useState<string | null>(null);
+  const [modelAttempt, setModelAttempt] = useState(0);
   const persistTimerRef = useRef<number | null>(null);
 
   const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
@@ -504,6 +519,7 @@ const ChatbotUI = () => {
   });
 
   const isGenerating = status === 'submitted' || status === 'streaming';
+  const canSend = access && hydratedChat === id && !chatSwitchLoading && !deleting && !isGenerating && !isLoadingMore && !modelsLoading && models.some(m => m.safeName === selectedModel);
 
   const handleCopyMessage = async (msg: any) => {
     const cleanText = msg.parts
@@ -511,38 +527,65 @@ const ChatbotUI = () => {
       ?.map((p: any) => p.text)
       ?.join('\n\n') || '';
     if (!cleanText) return;
-    await navigator.clipboard.writeText(cleanText);
-    setCopiedMessageId(msg.id);
-    setTimeout(() => setCopiedMessageId(null), 1500);
+    try {
+      await navigator.clipboard.writeText(cleanText);
+      setCopyError(null);
+      setCopiedMessageId(msg.id);
+      setTimeout(() => setCopiedMessageId(null), 1500);
+    } catch { setCopyError('Không thể sao chép. Vui lòng chọn và sao chép nội dung thủ công.'); }
   };
 
   const handleRegenerate = (targetMessageId?: string) => {
-    if (isGenerating) return;
+    if (!canSend) return;
+    const last = messages.at(-1);
+    if (!last || last.role !== 'assistant' || targetMessageId !== last.id) return;
     setError(null);
     clearError();
-    regenerate({
+    void regenerate({
       messageId: targetMessageId,
       body: {
         model: selectedModel,
         access_token: AuthStorage.getUserToken() || '',
         user_id: user?.UserID || '',
       },
-    });
+    }).catch(err => setError(err.message));
   };
 
-  const handleDeleteChat = async (e: React.MouseEvent, targetChatId: string) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const retryMessage = () => {
+    if (!canSend) return;
+    const last = messages.at(-1);
+    if (!last) return;
+    if (last.role === 'assistant') { handleRegenerate(last.id); return; }
+    if (last.role !== 'user') return;
+    setError(null);
+    clearError();
+    // Backend regeneration does not save the user; retry a failed submit as a submit.
+    void sendMessage({ ...last, messageId: last.id }).catch(err => setError(err.message));
+  };
+
+  const handleDeleteChat = async () => {
+    const targetChatId = deleteTarget;
+    if (!targetChatId || deleteBusyRef.current) return;
     const token = AuthStorage.getUserToken();
     if (!token) return;
+    deleteBusyRef.current = true;
+    setDeleting(true);
+    setDeleteError(null);
+    const version = switchVersionRef.current;
     try {
+      if (activeChatRef.current === targetChatId) await stop();
       await chisaAIService.deleteChat(token, targetChatId);
+      deletedChatsRef.current.add(targetChatId);
       setChatSummaries(prev => prev.filter(c => c.chatId !== targetChatId && c.chatUUID !== targetChatId));
-      if (id === targetChatId) {
+      setDeleteTarget(null);
+      if (activeChatRef.current === targetChatId && switchVersionRef.current === version) {
         startNewChat();
       }
     } catch (err) {
-      console.error('Failed to delete chat:', err);
+      setDeleteError(err instanceof Error ? err.message : 'Không thể xóa đoạn chat.');
+    } finally {
+      deleteBusyRef.current = false;
+      setDeleting(false);
     }
   };
 
@@ -558,84 +601,94 @@ const ChatbotUI = () => {
   useEffect(() => {
     const onHashChange = () => {
       const next = window.location.hash.replace('#', '').trim();
-      if (!next) return;
-      if (next !== chatId) {
-        setChatId(next);
+      if (next !== activeChatRef.current) {
+        if (next) openChat(next);
+        else startNewChat();
       }
     };
 
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
-  }, [chatId]);
+  });
+
+  const mergeSummaries = (previous: ChisaAIChatSummary[], incoming: ChisaAIChatSummary[]) =>
+    [...new Map([...previous, ...incoming].filter(c => !deletedChatsRef.current.has(c.chatId)).map(c => [c.chatId, c])).values()]
+      .sort((a, b) => b.updatedAt - a.updatedAt);
 
   useEffect(() => {
-    // Ensure switching chats re-hydrates from IndexedDB.
-    didHydrateRef.current = false;
-  }, [id, user?.UserID]);
-
-  useEffect(() => {
+    let cancelled = false;
+    const version = ++listVersionRef.current;
     const refreshHistory = async () => {
       const userId = user?.UserID;
       const token = AuthStorage.getUserToken();
       if (!userId || !token) return;
       setHistoryLoading(true);
+      setListError(null);
       try {
         const response = await chisaAIService.getChatList(token, null);
+        if (cancelled || version !== listVersionRef.current) return;
         // Convert API response to ChisaAIChatSummary format
         const summaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
           chatId: chat.chatUUID,
+          title: chat.title,
           userId: userId,
           timestamp: new Date(chat.updatedAt).getTime(),
           updatedAt: new Date(chat.updatedAt).getTime(),
           messageCount: chat.messageCount
         }));
-        setChatSummaries(summaries);
-        setChatListNextToken(response.next_token);
+        setChatSummaries(prev => mergeSummaries(prev, summaries));
+        if (!listPagedRef.current) setChatListNextToken(response.next_token);
       } catch (error) {
-        console.error('Failed to load chat list:', error);
+        if (!cancelled) setListError(error instanceof Error ? error.message : 'Không thể tải danh sách chat.');
       } finally {
-        setHistoryLoading(false);
+        if (!cancelled) setHistoryLoading(false);
       }
     };
 
     refreshHistory();
-  }, [user?.UserID]);
+    return () => { cancelled = true; };
+  }, [user?.UserID, listAttempt]);
 
   useEffect(() => {
+    let cancelled = false;
+    const version = switchVersionRef.current;
     const hydrate = async () => {
-      if (didHydrateRef.current) return;
-      const userId = user?.UserID;
       const token = AuthStorage.getUserToken();
-      if (!userId || !id || !token) return;
-
+      if (!access || !user?.UserID || !id || !token) return;
+      setHistoryError(null);
+      if (localChatsRef.current.has(id)) {
+        setHydratedChat(id);
+        setChatSwitchLoading(false);
+        return;
+      }
+      setChatSwitchLoading(true);
+      setHydratedChat(null);
       try {
         const history = await chisaAIService.getChatHistory(token, id, null);
-        if (history?.messages && Array.isArray(history.messages) && history.messages.length > 0) {
-          // @ts-ignore runtime shape matches the UI messages from useChat
-          setMessages(history.messages);
-          setChatHistoryNextToken(history.next_token);
-        }
-        else {
-          setChatHistoryNextToken(null)
-        }
+        if (cancelled || version !== switchVersionRef.current || activeChatRef.current !== id) return;
+        // @ts-ignore runtime shape matches UI messages
+        setMessages(history.messages);
+        setChatHistoryNextToken(history.next_token);
+        setHydratedChat(id);
       } catch (error) {
-        console.error('Failed to load chat history:', error);
-        // If chat doesn't exist on server yet, that's okay - it's a new chat
+        if (!cancelled && version === switchVersionRef.current) setHistoryError(error instanceof Error ? error.message : 'Không thể tải lịch sử chat.');
+      } finally {
+        if (!cancelled && version === switchVersionRef.current) setChatSwitchLoading(false);
       }
-      didHydrateRef.current = true;
-      setChatSwitchLoading(false);
     };
-
-    hydrate();
-  }, [user?.UserID, id, setMessages]);
+    void hydrate();
+    return () => { cancelled = true; };
+  }, [access, user?.UserID, id, setMessages, hydrateAttempt]);
 
   useEffect(() => {
     const userId = user?.UserID;
     const token = AuthStorage.getUserToken();
     if (!userId || !id || !token) return;
+    let cancelled = false;
+    const version = listVersionRef.current;
 
     // Do not refresh for empty chats.
-    if (!messages || messages.length === 0) {
+    if (!messages || messages.length === 0 || isGenerating) {
       return;
     }
 
@@ -648,28 +701,31 @@ const ChatbotUI = () => {
       (async () => {
         try {
           const response = await chisaAIService.getChatList(token, null);
+          if (cancelled || version !== listVersionRef.current) return;
           const summaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
             chatId: chat.chatUUID,
+          title: chat.title,
             userId: userId,
             timestamp: new Date(chat.updatedAt).getTime(),
             updatedAt: new Date(chat.updatedAt).getTime(),
             messageCount: chat.messageCount
           }));
-          setChatSummaries(summaries);
-          setChatListNextToken(response.next_token);
+          setChatSummaries(prev => mergeSummaries(prev, summaries));
+          if (!listPagedRef.current) setChatListNextToken(response.next_token);
         } catch (error) {
-          console.error('Failed to refresh chat list:', error);
+          if (!cancelled) setListError(error instanceof Error ? error.message : 'Không thể cập nhật danh sách chat.');
         }
       })();
     }, 2000);
 
     return () => {
+      cancelled = true;
       if (persistTimerRef.current) {
         window.clearTimeout(persistTimerRef.current);
         persistTimerRef.current = null;
       }
     };
-  }, [messages, user?.UserID, id]);
+  }, [messages, user?.UserID, id, isGenerating]);
 
   const formatTime = (ts: number) =>
     new Date(ts).toLocaleString('vi-VN', {
@@ -682,55 +738,78 @@ const ChatbotUI = () => {
     });
 
   const loadMoreChats = async () => {
-    if (!chatListNextToken || isLoadingMore) return;
+    if (!chatListNextToken || listBusyRef.current || historyLoading) return;
     
     const token = AuthStorage.getUserToken();
     const userId = user?.UserID;
     if (!token || !userId) return;
 
-    setIsLoadingMore(true);
+    listBusyRef.current = true;
+    listPagedRef.current = true;
+    setListLoadingMore(true);
+    setListError(null);
+    const version = listVersionRef.current;
     try {
       const response = await chisaAIService.getChatList(token, chatListNextToken);
+      if (version !== listVersionRef.current) return;
       const newSummaries: ChisaAIChatSummary[] = response.chats.map(chat => ({
         chatId: chat.chatUUID,
+          title: chat.title,
         userId: userId,
         timestamp: new Date(chat.updatedAt).getTime(),
         updatedAt: new Date(chat.updatedAt).getTime(),
         messageCount: chat.messageCount
       }));
-      setChatSummaries(prev => [...prev, ...newSummaries]);
+      setChatSummaries(prev => mergeSummaries(prev, newSummaries));
       setChatListNextToken(response.next_token);
     } catch (error) {
-      console.error('Failed to load more chats:', error);
+      setListError(error instanceof Error ? error.message : 'Không thể tải thêm chat.');
     } finally {
-      setIsLoadingMore(false);
+      listBusyRef.current = false;
+      setListLoadingMore(false);
     }
   };
 
   const loadMoreMessages = async () => {
-    if (!chatHistoryNextToken || isLoadingMore || !id) return;
+    if (!chatHistoryNextToken || messageBusyRef.current || !id || isGenerating || hydratedChat !== id) return;
     
     const token = AuthStorage.getUserToken();
     if (!token) return;
 
+    const version = switchVersionRef.current;
+    messageBusyRef.current = true;
     setIsLoadingMore(true);
+    setHistoryError(null);
     try {
       const history = await chisaAIService.getChatHistory(token, id, chatHistoryNextToken);
+      if (version !== switchVersionRef.current || activeChatRef.current !== id) return;
       if (history?.messages && Array.isArray(history.messages) && history.messages.length > 0) {
         // @ts-ignore
-        setMessages(prev => [...history.messages, ...prev]);
+        setMessages(prev => [...new Map([...history.messages, ...prev].map(m => [m.id, m])).values()]);
         setChatHistoryNextToken(history.next_token);
       } else {
         setChatHistoryNextToken(null)
       }
     } catch (error) {
-      console.error('Failed to load more messages:', error);
+      if (version === switchVersionRef.current) setHistoryError(error instanceof Error ? error.message : 'Không thể tải tin nhắn cũ.');
     } finally {
-      setIsLoadingMore(false);
+      if (version === switchVersionRef.current) {
+        messageBusyRef.current = false;
+        setIsLoadingMore(false);
+      }
     }
   };
 
   const beginChatSwitch = (label: string) => {
+    void stop();
+    ++switchVersionRef.current;
+    messageBusyRef.current = false;
+    setIsLoadingMore(false);
+    setHydratedChat(null);
+    setHistoryError(null);
+    setError(null);
+    clearError();
+    setHistoryOpen(false);
     setChatSwitchLabel(label);
     setChatSwitchLoading(true);
     setExpandedReasoning({});
@@ -740,19 +819,25 @@ const ChatbotUI = () => {
     // Clear current messages immediately so the UI doesn't flash old chat content.
     // @ts-ignore runtime shape matches the UI messages from useChat
     setMessages([]);
-    didHydrateRef.current = false;
+
   };
 
   const startNewChat = () => {
     beginChatSwitch('Đang tạo phiên chat...');
     const newId = crypto.randomUUID().toString();
+    localChatsRef.current.add(newId);
+    activeChatRef.current = newId;
     setChatId(newId);
     window.location.hash = newId;
   };
 
   const openChat = (targetChatId: string) => {
     if (!targetChatId) return;
+    setHistoryOpen(false);
+    if (targetChatId === activeChatRef.current) return;
+    localChatsRef.current.delete(targetChatId);
     beginChatSwitch('Đang mở phiên chat...');
+    activeChatRef.current = targetChatId;
     setChatId(targetChatId);
     window.location.hash = targetChatId;
   };
@@ -808,8 +893,10 @@ const ChatbotUI = () => {
   useEffect(() => {
     const fetchModels = async () => {
       setModelsLoading(true);
+      setModelError(null);
       try {
         const response = await chisaAIService.getModels();
+        if (!response.models.length) throw new Error('Không có model khả dụng.');
         setModels(response.models);
         // Set default model
         const defaultModel = response.models.find(m => m.isDefault);
@@ -819,34 +906,18 @@ const ChatbotUI = () => {
           setSelectedModel(response.models[0].safeName);
         }
       } catch (error) {
-        console.error('Failed to fetch models:', error);
-        // Set fallback model
-        setModels([{
-          safeName: 'ChisaAI Mini',
-          modelId: 'openai/gpt-4o-mini',
-          isDefault: true
-        }]);
-        setSelectedModel('ChisaAI Mini');
+        setModels([]);
+        setSelectedModel('');
+        setModelError(error instanceof Error ? error.message : 'Không thể tải models.');
       } finally {
         setModelsLoading(false);
       }
     };
 
     fetchModels();
-  }, [])
+  }, [modelAttempt])
 
-  useEffect(() => {
-    const load = async () => {
-      const user = AuthStorage.getTokenWithAuth();
-      if (!user) {
-        setError("Phiên đã hết hạn, vui lòng đăng nhập lại");
-      }
-      setTimeout(() => {
-        setLoading(false);
-      })
-    }
-    load();
-  }, []);
+  useEffect(() => { setLoading(false); }, []);
 
   useEffect(() => {
     const el = scrollContainerRef.current;
@@ -862,7 +933,7 @@ const ChatbotUI = () => {
     el.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
     return () => el.removeEventListener('scroll', onScroll);
-  }, []);
+  }, [loading, access, userExists]);
 
   useEffect(() => {
     if (pendingScrollRafRef.current) return;
@@ -921,8 +992,10 @@ const ChatbotUI = () => {
 } as const;
 
   const handleSend = () => {
-    if (status !== 'ready') return;
-    if (!inputValue.trim()) return;
+    if (!canSend || !inputValue.trim()) return;
+    setError(null);
+    clearError();
+    localChatsRef.current.delete(id);
 
     startedRef.current = true;
     // If user didn't start with a hash, create it only when they send the first message.
@@ -935,7 +1008,7 @@ const ChatbotUI = () => {
       role: 'user',
       text: inputValue
     };
-    sendMessage(userMsg);
+    void sendMessage(userMsg).catch(err => setError(err.message));
     setInputValue('');
   };
 
@@ -1094,87 +1167,48 @@ const ChatbotUI = () => {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={startNewChat} disabled={chatSwitchLoading || isGenerating}>
+            <Button variant="outline" size="sm" onClick={startNewChat} disabled={deleting}>
               Chat mới
             </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" disabled={historyLoading || chatSwitchLoading || isGenerating}>
-                  {historyLoading ? 'Đang tải…' : 'Lịch sử'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[min(24rem,calc(100vw-2rem))] max-h-[60vh] overflow-auto">
-                <DropdownMenuLabel>Đoạn chat trước</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-
-                {chatSummaries.length === 0 ? (
-                  <div className="px-2 py-2 text-sm text-muted-foreground">
-                    Chưa có lịch sử.
-                  </div>
-                ) : (
-                  <>
-                    {chatSummaries.map((c) => (
-                      <DropdownMenuItem
-                        key={c.chatId}
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          openChat(c.chatId);
-                        }}
-                        className={`group ${c.chatId === id ? 'bg-accent text-accent-foreground cursor-not-allowed' : ''}`}
-                        disabled={c.chatId === id}
-                      >
-                        <div className="flex items-center justify-between w-full min-w-0">
-                          <div className="flex flex-col gap-0.5 min-w-0 pr-2">
-                            <div className="text-sm font-medium truncate max-w-[220px]">
-                              {c.title || c.chatId.slice(0, 12)}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              {c.messageCount} tin • {formatTime(c.updatedAt)}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={(e) => handleDeleteChat(e, c.chatId)}
-                            className="opacity-0 group-hover:opacity-100 hover:text-destructive p-1 rounded transition-opacity"
-                            title="Xóa đoạn chat"
-                          >
-                            <Trash2 className="w-3.5 h-3.5 text-muted-foreground hover:text-destructive" />
-                          </button>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                    {chatListNextToken && (
-                      <DropdownMenuItem
-                        onSelect={(e) => {
-                          e.preventDefault();
-                          loadMoreChats();
-                        }}
-                        disabled={isLoadingMore}
-                        className="justify-center text-sm text-secondary-foreground font-bold"
-                      >
-                        {isLoadingMore ? 'Đang tải...' : 'Tải thêm chat'}
-                      </DropdownMenuItem>
-                    )}
-                  </>
-                )}
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem
-                  onSelect={(e) => {
-                    e.preventDefault();
-                    startNewChat();
-                  }}
-                >
-                  Tạo chat mới
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Drawer direction="bottom" open={historyOpen} onOpenChange={setHistoryOpen}>
+              <DrawerTrigger asChild><Button variant="outline" size="sm">Lịch sử</Button></DrawerTrigger>
+              <DrawerContent className="mx-auto h-[85dvh] max-h-[85dvh] w-full max-w-2xl">
+                <DrawerHeader><DrawerTitle>Lịch sử trò chuyện</DrawerTitle><DrawerDescription>Chọn đoạn chat để tiếp tục trò chuyện.</DrawerDescription></DrawerHeader>
+                <div className="min-h-0 flex-1 overflow-y-auto space-y-2 px-4" aria-busy={historyLoading || listLoadingMore}>
+                  {historyLoading && <p role="status">Đang tải lịch sử…</p>}
+                  {listError && <div role="alert" className="text-destructive">{listError}<Button disabled={historyLoading || listLoadingMore} onClick={() => setListAttempt(n => n + 1)}>Thử tải lại danh sách</Button></div>}
+                  {!historyLoading && !listError && !chatSummaries.length && <p>Chưa có lịch sử.</p>}
+                  {chatSummaries.map(c => <div key={c.chatId} className={`flex items-center rounded border ${c.chatId === id ? 'bg-accent border-primary' : 'border-border'}`}>
+                    <button type="button" aria-current={c.chatId === id ? 'true' : undefined} onClick={() => openChat(c.chatId)} className="min-w-0 flex-1 p-3 text-left rounded focus-visible:ring-2 focus-visible:ring-ring">
+                      <span className="block truncate font-medium">{c.title || c.chatId.slice(0, 12)}</span>
+                      <span className="block text-xs text-muted-foreground">{c.messageCount} tin • {formatTime(c.updatedAt)}{c.chatId === id ? ' • Đang chọn' : ''}</span>
+                    </button>
+                    <Button variant="ghost" size="icon" aria-label={`Xóa đoạn chat ${c.title || c.chatId}`} disabled={deleting} onClick={() => { setDeleteError(null); setDeleteTarget(c.chatId); }}><Trash2 className="h-4 w-4" /></Button>
+                  </div>)}
+                  {chatListNextToken && <Button variant="outline" className="w-full" disabled={historyLoading || listLoadingMore} onClick={loadMoreChats}>{listLoadingMore ? 'Đang tải...' : 'Tải thêm chat'}</Button>}
+                </div>
+                <DrawerFooter className="pb-[max(1rem,env(safe-area-inset-bottom))]">
+                  <Button onClick={startNewChat}>Tạo chat mới</Button>
+                  <DrawerClose asChild><Button variant="outline">Đóng</Button></DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
       </div>
 
       {/* Messages Container */}
+      <Dialog open={!!deleteTarget} onOpenChange={open => { if (!open && !deleting) setDeleteTarget(null); }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Xóa đoạn chat?</DialogTitle><DialogDescription>Thao tác này không thể hoàn tác.</DialogDescription></DialogHeader>
+          {deleteError && <p role="alert" className="text-destructive">{deleteError}</p>}
+          <DialogFooter><Button variant="outline" disabled={deleting} onClick={() => setDeleteTarget(null)}>Hủy</Button><Button variant="destructive" disabled={deleting} onClick={handleDeleteChat}>{deleting ? 'Đang xóa...' : 'Xóa đoạn chat'}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {historyError && <div role="alert" className="px-4 text-sm text-destructive">{historyError}<Button variant="outline" onClick={() => hydratedChat === id ? loadMoreMessages() : setHydrateAttempt(n => n + 1)} disabled={chatSwitchLoading || isLoadingMore}>Thử tải lại lịch sử</Button></div>}
+      {modelError && <div role="alert" className="px-4 text-sm text-destructive">{modelError}<Button variant="outline" onClick={() => setModelAttempt(n => n + 1)} disabled={modelsLoading}>Thử tải lại models</Button></div>}
+      {copyError && <p role="alert" className="px-4 text-sm text-destructive">{copyError}</p>}
       <div ref={scrollContainerRef} className="relative flex-1 min-h-0 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {chatSwitchLoading && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/90">
@@ -1200,6 +1234,7 @@ const ChatbotUI = () => {
             onModelChange={setSelectedModel}
             onModelSelectorOpenChange={setIsModelSelectorOpen}
             isGenerating={isGenerating}
+            disabled={!canSend}
             onStop={stop}
           />
         ) : (
@@ -1210,7 +1245,7 @@ const ChatbotUI = () => {
                   variant="outline" 
                   size="sm" 
                   onClick={loadMoreMessages}
-                  disabled={isLoadingMore}
+                  disabled={isLoadingMore || isGenerating}
                   className="text-xs sm:text-sm"
                 >
                   {isLoadingMore ? 'Đang tải...' : 'Tải tin nhắn cũ hơn'}
@@ -1338,7 +1373,7 @@ const ChatbotUI = () => {
                           <Copy className="w-3.5 h-3.5" />
                         )}
                       </Button>
-                      {message.id === messages.slice().reverse().find(m => m.role === 'assistant')?.id && !isGenerating && (
+                      {message.id === messages.at(-1)?.id && canSend && (
                         <Button
                           variant="ghost"
                           size="icon"
@@ -1362,17 +1397,15 @@ const ChatbotUI = () => {
             ))}
 
             {error && (
-              <div className="flex items-center justify-between p-3 my-2 border-2 border-destructive bg-destructive/10 rounded-md text-destructive text-sm">
-                <span className="truncate pr-2">⚠ {error}</span>
+              <div role="alert" className="flex items-center justify-between p-3 my-2 border-2 border-destructive bg-destructive/10 rounded-md text-destructive text-sm">
+                <span className="break-words pr-2">{error}</span>
                 <div className="flex items-center gap-2 shrink-0">
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-7 text-xs border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                    onClick={() => {
-                      const lastAssistant = messages.slice().reverse().find(m => m.role === 'assistant');
-                      handleRegenerate(lastAssistant?.id);
-                    }}
+                    onClick={retryMessage}
+                    disabled={!canSend}
                   >
                     Thử lại
                   </Button>
@@ -1500,7 +1533,7 @@ const ChatbotUI = () => {
                 ) : (
                   <PromptInputSubmit
                     status={status}
-                    disabled={!inputValue.trim()}
+                    disabled={!canSend || !inputValue.trim()}
                     className='absolute right-4'
                   />
                 )}

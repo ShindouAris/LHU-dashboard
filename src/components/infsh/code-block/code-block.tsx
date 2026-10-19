@@ -105,7 +105,7 @@ export const CodeBlock = memo(function CodeBlock({
       {/* Header bar */}
       {showHeader && (
         <div className="flex-none flex items-center justify-between px-4 py-2 border-b border-white/5 bg-zinc-900/50">
-          <span className="text-xs text-zinc-500 font-mono">
+          <span className="text-xs text-zinc-400 font-mono">
             {language || 'code'}
           </span>
           {showCopyButton && (
@@ -132,7 +132,7 @@ export const CodeBlock = memo(function CodeBlock({
 
       {/* Code content */}
       <pre className="flex-1 min-h-0 overflow-auto p-4">
-        <code className={cn('grid font-mono', textSize || 'text-sm')}>
+        <code className={cn('grid font-mono text-zinc-100', textSize || 'text-sm')}>
           {lines.map((line, i) => (
             <span
               key={i}
@@ -142,7 +142,7 @@ export const CodeBlock = memo(function CodeBlock({
               )}
             >
               {showLineNumbers && (
-                <span className="text-zinc-600 select-none text-right min-w-[2ch] text-xs leading-6">
+                <span className="text-zinc-400 select-none text-right min-w-[2ch] text-xs leading-6">
                   {i + 1}
                 </span>
               )}

@@ -45,15 +45,7 @@ export const chisaAIService = {
             }
         })
         if (!res.ok) {
-            return {
-                models: [
-                    {
-                        "safeName": "ChisaAI Mini",
-                        "modelId": "openai/gpt-4o-mini",
-                        "isDefault": true
-                    },
-                ]
-            }
+            throw new Error(`Lỗi khi lấy models: ${res.status} ${res.statusText}`)
         }
         return await res.json();
     },
