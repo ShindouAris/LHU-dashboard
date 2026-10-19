@@ -8,7 +8,7 @@ export const HostnameBanner: React.FC = () => {
 
   useEffect(() => {
     const hostname = window.location.hostname;
-    if (hostname === 'lhu-dashboard.chisadin.id.vn') {
+    if (hostname === 'lhu-dashboard.chisadin.site') {
       const dismissed = localStorage.getItem('hostname-banner-dismissed');
       if (!dismissed) {
         setShow(true);
