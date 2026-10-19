@@ -3,8 +3,8 @@
     <img src="public/favicon.svg" alt="LHU Dashboard Logo" width="80" height="80" />
   </a>
 </p>
-
-# LHU Dashboard
+<h1 align="center">LHU Dashboard
+</h1>
 
 ### Lịch học hôm nay. Tiện ích cho cả học kỳ.
 
