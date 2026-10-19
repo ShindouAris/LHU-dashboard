@@ -3,7 +3,6 @@ import {
   Home, 
   Calendar, 
   Sun,
-  GraduationCap,
   ChevronRight,
   ChevronDown,
   QrCode,
@@ -276,7 +275,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const renderBrandMark = () => (
     <div className="flex items-center gap-3">
       <div className="flex h-10 w-10 items-center justify-center rounded-md border-2 border-border bg-section text-section-foreground shadow-brutal-sm">
-        <GraduationCap className="h-5 w-5" />
+        <img src="/favicon.svg" alt="LHU Dashboard Logo" className="h-6 w-6" />
       </div>
       <div className="min-w-0">
         <div className="truncate font-display text-lg font-black text-foreground">

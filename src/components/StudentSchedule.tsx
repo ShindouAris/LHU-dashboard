@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { ExamCard } from './LHU_UI/ExamCard';
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
-import { CalendarDays, User, GraduationCap, BookOpen, MapPin, Download, TestTubes, School, QrCode, CloudSun, Car, Award, Library, Wrench, ClipboardList } from 'lucide-react';
+import { CalendarDays, User, BookOpen, MapPin, Download, TestTubes, School, QrCode, CloudSun, Car, Award, Library, Wrench, ClipboardList } from 'lucide-react';
 import GradientText from './ui/GradientText';
 
 const CACHE_RECHECK_INTERVAL = 60 * 1000;
@@ -420,7 +420,7 @@ export const StudentSchedule: React.FC = () => {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-10 sm:mb-12">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-section border-2 border-border rounded-md mb-6 shadow-brutal">
-              <GraduationCap className="h-10 w-10 text-section-foreground" strokeWidth={2.5} />
+              <img src="/favicon.svg" alt="LHU Dashboard" className="h-10 w-10 object-contain" />
             </div>
             <h1 className="text-3xl sm:text-5xl font-display font-black text-foreground mb-3 sm:mb-4">
               <GradientText
