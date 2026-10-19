@@ -1,5 +1,6 @@
 
 import { IchatHistory, IchisaAIChatList, IModelsResponse } from "@/types/chisaAI"
+import { getChisaAISession } from "./chisaAISession"
 const API_ENDPOINT = import.meta.env.VITE_API_URL
 
 export const chisaAIService = {
@@ -10,7 +11,7 @@ export const chisaAIService = {
                 "Content-Type": "application/json",
             }, 
             body: JSON.stringify({
-                accessToken: access_token,
+                accessToken: await getChisaAISession(access_token),
                 next_token: next_token
             })
         })
@@ -26,7 +27,7 @@ export const chisaAIService = {
                 "Content-Type": "application/json",
             }, 
             body: JSON.stringify({
-                accessToken: access_token,
+                accessToken: await getChisaAISession(access_token),
                 next_token: next_token
             })
         })
@@ -56,7 +57,7 @@ export const chisaAIService = {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                accessToken: access_token
+                accessToken: await getChisaAISession(access_token)
             })
         })
         if (res.status === 404) return false;
@@ -72,7 +73,7 @@ export const chisaAIService = {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
-                accessToken: access_token,
+                accessToken: await getChisaAISession(access_token),
             }),
         });
         if (!res.ok) {
@@ -87,7 +88,7 @@ export const chisaAIService = {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                accessToken: access_token
+                accessToken: await getChisaAISession(access_token)
             })
         })
         if (!res.ok) {

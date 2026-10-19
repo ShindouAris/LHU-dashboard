@@ -16,6 +16,9 @@ window.HTMLElement.prototype.scrollIntoView = () => {};
 window.matchMedia = () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} });
 const requests = [];
 let rejectHistory = true;
+globalThis.schoolToken = 'fixture';
+const sessionTokens = [];
+globalThis.sessionFixture = async token => { sessionTokens.push(token); assert.equal(token, globalThis.schoolToken); return 'fixture.jwt.internal'; };
 globalThis.fixture = {
   getChatList: async (_token,page) => ({ chats: [{chatUUID:'existing',title:'Tên đã lưu',updatedAt:'2026-01-01',messageCount:2},...(page?[{chatUUID:'older',title:'Chat cũ hơn',updatedAt:'2025-01-01',messageCount:4}]:[])], next_token:page?null:'page2' }),
   getChatHistory: async () => { if (rejectHistory) throw new Error('History 404 access denied'); return {messages:[{id:'u0',role:'user',parts:[{type:'text',text:'old'}]},{id:'a0',role:'assistant',parts:[{type:'text',text:'old answer'}]}],next_token:null}; },
@@ -24,9 +27,15 @@ globalThis.fixture = {
 };
 let failChat = true;
 let partialChat = false;
+let persistenceData;
+const persistenceWarning = 'Không thể lưu lịch sử trò chuyện';
+const warning = () => [...document.querySelectorAll('[role="alert"]')].find(el => el.textContent.includes(persistenceWarning));
 let releaseStream;
 globalThis.fetch = async (_url, options) => {
-  requests.push(JSON.parse(options.body));
+  const body = JSON.parse(options.body);
+  assert.equal(body.access_token, 'fixture.jwt.internal', 'SDK chat body uses internal JWT');
+  assert(!JSON.stringify(body).includes('fixture-school-rotated'), 'school token never reaches chat');
+  requests.push(body);
   if (failChat) return new Response('Offline', {status:503});
   if (partialChat) return new Response(new ReadableStream({start(controller) {
     const encoder=new TextEncoder();
@@ -34,9 +43,10 @@ globalThis.fetch = async (_url, options) => {
     releaseStream=()=>{controller.enqueue(encoder.encode(`data: ${JSON.stringify({type:'error',errorText:'stream failed'})}\n\n`));controller.close();};
   }}),{headers:{'content-type':'text/event-stream','x-vercel-ai-ui-message-stream':'v1'}});
   const chunks = [{type:'start',messageId:`a-new-${requests.length}`},{type:'text-start',id:'txt'},{type:'text-delta',id:'txt',delta:'<iframe src="https://evil.invalid"></iframe>safe'},{type:'text-end',id:'txt'},{type:'finish'}];
+  if (persistenceData !== undefined) chunks.push({type:'data-persistence-error',data:persistenceData,transient:true});
   return new Response(chunks.map(c => `data: ${JSON.stringify(c)}\n\n`).join('')+'data: [DONE]\n\n', {headers:{'content-type':'text/event-stream','x-vercel-ai-ui-message-stream':'v1'}});
 };
-const result = await build({stdin:{contents:`import React from 'react';import {createRoot} from 'react-dom/client';import App from './src/components/ChisaAI';export const root=createRoot(document.getElementById('root'));root.render(React.createElement(App));`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,format:'esm',platform:'browser',jsx:'automatic',define:{'import.meta.env.VITE_API_URL':'"https://test.invalid"'},loader:{'.css':'empty'},plugins:[{name:'test-seams',setup(b){b.onResolve({filter:/services\/chisaAIService|types\/user|infsh\/code-block|ui\/GradientText/},args=>({path:args.path,namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},args=>({loader:'tsx',contents:args.path.includes('chisaAIService')?'export const chisaAIService=globalThis.fixture;':args.path.includes('types/user')?`export const AuthStorage={getUser:()=>({UserID:'test',FullName:'Test'}),getUserToken:()=> 'fixture',getTokenWithAuth:async()=> 'fixture'};`:`export default function Stub({children}){return children};export const CodeBlock=Stub;`}));}}]});
+const result = await build({stdin:{contents:`import React from 'react';import {createRoot} from 'react-dom/client';import App from './src/components/ChisaAI';export const root=createRoot(document.getElementById('root'));root.render(React.createElement(App));`,resolveDir:process.cwd(),loader:'tsx'},bundle:true,write:false,format:'esm',platform:'browser',jsx:'automatic',define:{'import.meta.env.VITE_API_URL':'"https://test.invalid"'},loader:{'.css':'empty'},plugins:[{name:'test-seams',setup(b){b.onResolve({filter:/services\/chisaAIService|services\/chisaAISession|types\/user|infsh\/code-block|ui\/GradientText/},args=>({path:args.path,namespace:'fixture'}));b.onLoad({filter:/.*/,namespace:'fixture'},args=>({loader:'tsx',contents:args.path.includes('chisaAIService')?'export const chisaAIService=globalThis.fixture;':args.path.includes('chisaAISession')?'export const getChisaAISession=globalThis.sessionFixture;':args.path.includes('types/user')?`export const AuthStorage={getUser:()=>({UserID:'test',FullName:'Test'}),getUserToken:()=> globalThis.schoolToken,getTokenWithAuth:async()=> globalThis.schoolToken};`:`export default function Stub({children}){return children};export const CodeBlock=Stub;`}));}}]});
 const dir = await mkdtemp(`${scratch}/bundle-`);
 await writeFile(`${dir}/app.mjs`, result.outputFiles[0].text);
 const app = await import(pathToFileURL(`${dir}/app.mjs`));
@@ -61,14 +71,37 @@ try {
   await send('after error');
   assert.equal(requests.length,3,'send allowed after error');
   assert.equal(document.querySelectorAll('iframe').length,0,'streamed HTML sanitized');
+  persistenceData = {message:persistenceWarning};
+  await send('save failure');
+  assert.ok(warning(), 'post-finish persistence failure must be visible');
+  assert.match(warning().textContent, /sao chép/i);
+  assert.match(document.body.textContent, /safe/, 'normal response remains visible');
+  assert.equal(warning().querySelectorAll('button').length, 0, 'save warning has no regeneration action');
+  assert.equal(button('Thử lại'), undefined, 'save failure is not a generation error');
+  const persistedRequestCount = requests.length;
+  await wait();
+  assert.equal(requests.length, persistedRequestCount, 'save warning never auto-regenerates');
+  persistenceData = undefined;
+  await send('normal follow-up');
+  assert.ok(warning(), 'normal submission must not hide unsaved history warning');
   partialChat=true;
   await send('partial turn');
   for (let attempt = 0; attempt < 30 && !document.body.textContent.includes('PARTIAL'); attempt++) await wait();
   assert.match(document.body.textContent,/PARTIAL/);
   assert.equal(document.querySelectorAll('iframe').length,0,'HTML sanitized while SDK still streaming');
   releaseStream();await wait();partialChat=false;
+  globalThis.schoolToken = 'fixture-school-rotated';
   button('Thử lại').click();await wait();
+  assert.equal(sessionTokens.at(-1), 'fixture-school-rotated', 'regeneration reads current school token');
   assert.equal(requests.at(-1).trigger,'regenerate-message');
+  globalThis.schoolToken = null;
+  const requestCount = requests.length;
+  const sessionCount = sessionTokens.length;
+  await send('missing school session');
+  assert.equal(requests.length, requestCount, 'missing token blocks SDK fetch');
+  assert.equal(sessionTokens.length, sessionCount, 'missing token fails before helper');
+  assert.match(document.body.textContent, /School session is required/);
+  globalThis.schoolToken = 'fixture';
   assert.equal(requests.at(-1).messageId,'partial','partial retry targets current assistant only');
   button('Lịch sử').click();await wait();
   assert.ok(document.querySelector('[role="dialog"]'),'history is a drawer dialog');
@@ -94,6 +127,16 @@ try {
   button('Chat mới').click();await wait();
   oldPage.resolve({messages:[{id:'old',role:'user',parts:[{type:'text',text:'STALE PAGE'}]}],next_token:null});await wait();
   assert.doesNotMatch(document.body.textContent,/STALE PAGE/,'late page ignored after switch');
+  assert.equal(warning(), undefined, 'save warning is scoped to affected chat');
+  for (const data of [null, 'database secret', {}, {message:42}, {message:'SQL connection database secret'}]) {
+    persistenceData = data;
+    const before = requests.length;
+    await send('untrusted persistence chunk');
+    assert.equal(requests.length, before + 1, 'untrusted chunk exercised through actual SDK request');
+    assert.equal(warning(), undefined, 'malformed or non-contract persistence data ignored');
+    assert.doesNotMatch(document.body.textContent, /database secret/, 'raw persistence errors never rendered');
+  }
+  persistenceData = undefined;
   let deleteResolve;let deletes=0;
   fixture.deleteChat=async()=>{deletes++;return new Promise(r=>deleteResolve=r);};
   button('Lịch sử').click();await wait();

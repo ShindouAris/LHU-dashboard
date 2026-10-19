@@ -30,6 +30,7 @@ import {
 } from './ai-elements/model-selector';
 import { NotAvailable } from './LHU_UI/Contruction';
 import { chisaAIService } from '@/services/chisaAIService';
+import { getChisaAISession } from '@/services/chisaAISession';
 import type { IModel } from '@/types/chisaAI';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerTrigger, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
@@ -482,6 +483,7 @@ const ChatbotUI = () => {
   const deleteBusyRef = useRef(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [copyError, setCopyError] = useState<string | null>(null);
+  const [unsavedChatId, setUnsavedChatId] = useState<string | null>(null);
   const [modelError, setModelError] = useState<string | null>(null);
   const [modelAttempt, setModelAttempt] = useState(0);
   const persistTimerRef = useRef<number | null>(null);
@@ -495,7 +497,10 @@ const ChatbotUI = () => {
     generateId: () => crypto.randomUUID().toString(),
     transport: new DefaultChatTransport({
       api: `${API}/chisaAI/v2/chat`,
-      prepareSendMessagesRequest: ({ api, id, messages, body, headers, credentials, trigger, messageId }) => {
+      prepareSendMessagesRequest: async ({ api, id, messages, body, headers, credentials, trigger, messageId }) => {
+        const schoolToken = AuthStorage.getUserToken();
+        if (!schoolToken) throw new Error('School session is required');
+        const token = await getChisaAISession(schoolToken);
         return {
           api,
           headers,
@@ -506,13 +511,18 @@ const ChatbotUI = () => {
             messages,
             trigger,
             messageId,
-            access_token: AuthStorage.getUserToken() || '',
+            access_token: token,
             user_id: user?.UserID || '',
             model: selectedModel,
           },
         };
       },
     }),
+    onData: (part) => {
+      if (part.type !== 'data-persistence-error' || !part.data || typeof part.data !== 'object' ||
+          !('message' in part.data) || part.data.message !== 'Không thể lưu lịch sử trò chuyện') return;
+      setUnsavedChatId(chatId);
+    },
     onError: (err) => {
       setError(err.message || 'Đã có lỗi xảy ra trong quá trình kết nối đến máy chủ.');
     },
@@ -545,7 +555,6 @@ const ChatbotUI = () => {
       messageId: targetMessageId,
       body: {
         model: selectedModel,
-        access_token: AuthStorage.getUserToken() || '',
         user_id: user?.UserID || '',
       },
     }).catch(err => setError(err.message));
@@ -1208,6 +1217,7 @@ const ChatbotUI = () => {
       </Dialog>
       {historyError && <div role="alert" className="px-4 text-sm text-destructive">{historyError}<Button variant="outline" onClick={() => hydratedChat === id ? loadMoreMessages() : setHydrateAttempt(n => n + 1)} disabled={chatSwitchLoading || isLoadingMore}>Thử tải lại lịch sử</Button></div>}
       {modelError && <div role="alert" className="px-4 text-sm text-destructive">{modelError}<Button variant="outline" onClick={() => setModelAttempt(n => n + 1)} disabled={modelsLoading}>Thử tải lại models</Button></div>}
+      {unsavedChatId === chatId && <p role="alert" className="px-4 py-2 text-sm text-amber-700 dark:text-amber-400">Không thể lưu lịch sử trò chuyện. Câu trả lời vẫn hiển thị nhưng chưa được lưu vào lịch sử. Vui lòng sao chép nội dung để tránh mất khi rời cuộc trò chuyện.</p>}
       {copyError && <p role="alert" className="px-4 text-sm text-destructive">{copyError}</p>}
       <div ref={scrollContainerRef} className="relative flex-1 min-h-0 overflow-y-auto px-4 py-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {chatSwitchLoading && (
