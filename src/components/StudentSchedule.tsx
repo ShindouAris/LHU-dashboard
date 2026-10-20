@@ -9,10 +9,10 @@ import { ErrorMessage } from './LHU_UI/ErrorMessage';
 // Interfaces & Helpers
 import { ApiService } from '@/services/apiService';
 import { cacheService } from '@/services/cacheService';
-import { ApiResponse, ExamInfo } from '@/types/schedule';
+import { ApiResponse } from '@/types/schedule';
 import { formatDate, getNextClass, hasClassesInNext7Days, isWithinNext7Days, getRealtimeStatus } from '@/utils/dateUtils';
 import type { WeatherCurrentAPIResponse } from '@/types/weather';
-import { examCacheService } from '@/services/examCacheService';
+
 import { authService } from '@/services/authService';
 import { AuthStorage } from '@/types/user';
 // Shadcn UI Components
@@ -20,7 +20,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ExamCard } from './LHU_UI/ExamCard';
+
 // Icons
 import { PiExamDuotone } from 'react-icons/pi';
 import { CalendarDays, User, BookOpen, MapPin, Download, TestTubes, School, QrCode, CloudSun, Car, Award, Library, Wrench, ClipboardList } from 'lucide-react';
@@ -42,10 +42,7 @@ export const StudentSchedule: React.FC = () => {
   const scheduleRefreshInFlight = useRef(false);
   const user = AuthStorage.getUser();
 
-  // Exam state
-  const [exams, setExams] = useState<ExamInfo[] | null>(null);
-  const [loadingExam, setLoadingExam] = useState(false);
-  const [examError, setExamError] = useState<string | null>(null);
+
 
   // Determine if we should show full schedule based on route
   useEffect(() => {
@@ -330,64 +327,16 @@ export const StudentSchedule: React.FC = () => {
     return () => observer.disconnect();
   }, [visibleCount, displaySchedules.length]);
 
-  const fetchPrivateExam = useCallback(async (studentId: string) => {
-    setLoadingExam(true);
-    setExamError(null);
-    try {
-        // TEST NET FIRST
-      const hasnet = await ApiService.testnet()
-      // Try cache first
-      const cached = await examCacheService.get(studentId, hasnet);
-      if (cached) {
-        setExams(cached);
-        setLoadingExam(false);
-        return;
-      }
-
-      const numericId = Number(studentId);
-      if (!Number.isFinite(numericId)) {
-        setExams(null);
-        setLoadingExam(false);
-        return;
-      }
-
-      const res = await ApiService.getPrivateExam(numericId);
-      if (res && res.length > 0) {
-        const list = Array.isArray(res) ? res : [res as unknown as ExamInfo];
-        await examCacheService.set(studentId, list).catch(error => console.warn('Không thể lưu cache lịch thi:', error));
-        setExams(list);
-      } else {
-        // no exams
-        setExams([]);
-      }
-    } catch {
-      try {
-        const stale = await examCacheService.getStale(studentId);
-        if (stale) {
-          setExams(stale);
-          toast.error('Không thể tải lịch thi. Đang dùng dữ liệu thi đã lưu.');
-        } else {
-          setExamError('Không thể tải lịch thi');
-        }
-      } catch {
-        setExamError('Không thể tải lịch thi');
-      }
-    } finally {
-      setLoadingExam(false);
-    }
-  }, []);
 
   useEffect(() => {
     const userId = AuthStorage.isLoggedIn() ? AuthStorage.getUser()?.UserID : null;
     if (!userId) return;
     void fetchSchedule(String(userId));
-    void fetchPrivateExam(String(userId));
-  }, [fetchSchedule, fetchPrivateExam]);
+  }, [fetchSchedule]);
 
   const handleRetry = () => {
     if (currentStudentId) {
       fetchSchedule(currentStudentId, false);
-      fetchPrivateExam(currentStudentId);
     }
   };
 
@@ -401,7 +350,6 @@ export const StudentSchedule: React.FC = () => {
             const id = String(new FormData(event.currentTarget).get('studentId') || '');
             if (!/^\d{9}$/.test(id)) return;
             await fetchSchedule(id, false);
-            await fetchPrivateExam(id);
           }}>
             <label className="flex flex-col gap-2">
               Mã sinh viên
@@ -445,7 +393,6 @@ export const StudentSchedule: React.FC = () => {
               <StudentIdInput 
                 onSubmit={async (id) => { 
                   await fetchSchedule(id); 
-                  await fetchPrivateExam(id); 
                 }} 
                 loading={loading} 
               />
@@ -649,30 +596,7 @@ export const StudentSchedule: React.FC = () => {
           </CardFooter>
         </Card>
 
-            {/* Exam section */}
-            <div className={`mb-6 ${exams?.length !== undefined && exams?.length <= 0 && ("hidden")}`}>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-xl sm:text-2xl font-display font-bold text-foreground">Lịch thi riêng</h3>
-                <Button variant="outline" size="sm" onClick={() => currentStudentId && fetchPrivateExam(currentStudentId)} disabled={loadingExam}>
-                  Tải lại
-                </Button>
-              </div>
-              {loadingExam ? (
-                <div className="flex justify-center mb-4">
-                  <div className="text-muted-foreground">Đang tải...</div>
-                </div>
-              ) : examError ? (
-                <ErrorMessage message={examError} onRetry={() => currentStudentId && fetchPrivateExam(currentStudentId)} />
-              ) : exams && exams.length > 0 ? (
-                <div className="space-y-3 sm:space-y-4">
-                  {exams.map((ex, idx) => (
-                    <ExamCard key={idx} exam={ex} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">Không có lịch thi riêng.</p>
-              )}
-            </div>
+
         {/* Schedule Display */}
         {!hasUpcomingClasses && !showFullSchedule ? (
           <EmptySchedule onViewFullSchedule={() => navigate('/schedule')} />
