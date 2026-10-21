@@ -24,6 +24,7 @@ const sectionForPath = (path: string): string => {
   if (path.startsWith('/diemrenluyen')) return 'diemrenluyen';
   if (path.startsWith('/diemdanh')) return 'diemdanh';
   if (path.startsWith('/thuvien')) return 'thuvien';
+  if (path.startsWith('/download')) return 'download';
   if (path.startsWith('/qrscan')) return 'qrscan';
   if (path.startsWith('/parking')) return 'parking';
   if (path.startsWith('/settings')) return 'settings';

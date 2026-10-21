@@ -20,7 +20,8 @@ import {
   Home,
   Calendar,
   QrCode,
-  Settings
+  Settings,
+  MonitorSmartphone
 } from 'lucide-react';
 import { GoBook } from "react-icons/go";
 import { toast } from 'react-hot-toast';
@@ -269,6 +270,12 @@ const SettingsPage: React.FC = () => {
         icon: ChisaAI,
         description: "Trợ lý AI của LHU-dashboard",
         authrequired: true,
+      },
+      {
+        id: "download",
+        label: "Tải ứng dụng",
+        icon: MonitorSmartphone,
+        description: "Tải app cho Android, Windows, macOS, Linux"
       },
       {
         id: "settings",

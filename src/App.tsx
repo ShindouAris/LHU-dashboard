@@ -10,6 +10,7 @@ const ParkingLHUPage = lazy(() => import('./components/ParkingLHU'));
 const SettingsPage = lazy(() => import('./components/Setting'));
 const DiemRL = lazy(() => import('./components/DiemRL'));
 const Elib = lazy(() => import('./components/Elib'));
+const DownloadApp = lazy(() => import('./components/DownloadApp'));
 const ToolLHU = lazy(() => import('./components/ToolLHU'));
 const ChisaAI = lazy(() => import('./components/ChisaAI'));
 const ChisaAIPrivacy = lazy(() => import('./components/ChisaAIPrivacy'));
@@ -70,6 +71,7 @@ const pageTitles: Record<string, string> = {
   '/settings': 'Cài đặt',
   '/diemrenluyen': 'Điểm rèn luyện',
   '/thuvien': 'Quản lý thư viện',
+  '/download': 'Tải ứng dụng',
   '/toollhu': 'Công cụ LHU',
   '/chisaAI': 'Chisa AI',
   '/chisaAI/privacy': 'Chính sách Bảo mật - ChisaAI',
@@ -179,6 +181,13 @@ function App() {
           <Suspense fallback={<LoadingScreen loading={true} />}>
             <div className="min-h-screen py-8 px-4">
               <Elib />
+            </div>
+          </Suspense>
+        } />
+        <Route path="/download" element={
+          <Suspense fallback={<LoadingScreen loading={true} />}>
+            <div className="min-h-screen py-8 px-4">
+              <DownloadApp />
             </div>
           </Suspense>
         } />

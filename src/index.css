@@ -76,6 +76,7 @@
   [data-section='chisaAI'] { --section: 258 90% 60%; --section-foreground: 0 0% 100%; }
   [data-section='parking'],
   [data-section='toollhu'] { --section: 27 96% 61%; --section-foreground: 0 0% 4%; }
+  [data-section='download'] { --section: 142 71% 45%; --section-foreground: 0 0% 4%; }
   [data-section='settings'] { --section: 215 14% 47%; --section-foreground: 0 0% 100%; }
 }
 

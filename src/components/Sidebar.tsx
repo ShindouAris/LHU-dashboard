@@ -6,7 +6,8 @@ import {
   ChevronRight,
   ChevronDown,
   QrCode,
-  Settings
+  Settings,
+  MonitorSmartphone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PiExamDuotone } from "react-icons/pi";
@@ -161,6 +162,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       authrequired: true,
       isBetaItem: true,
       path: '/chisaAI'
+    },
+    {
+      id: "download",
+      label: "Tải ứng dụng",
+      icon: MonitorSmartphone,
+      description: "Tải app cho Android, Windows, macOS, Linux",
+      path: '/download'
     },
     {
       id: "settings",
